@@ -19,15 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AlignedStackAllocator.cpp" />
+    <ClCompile Include="StackAllocator.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="MemoryAllocator.cpp" />
-    <ClCompile Include="StackAllocator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AlignedStackAllocator.h" />
-    <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="StackAllocator.h" />
+    <ClInclude Include="MemoryAllocator.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

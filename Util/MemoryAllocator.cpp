@@ -63,7 +63,7 @@ void MemoryAllocator::release(MemoryAllocator::Marker marker) {
 }
 
 void MemoryAllocator::reset(void) {
-	// Offset by HEADER_SIZE from start of allocated memory.
+	// We now have just one header, so subtract one header worth of bytes from the allocator.
 	m_free = reinterpret_cast<FreeBlock*>(m_start);
 	m_free->size = m_size_bytes - HEADER_SIZE;
 	m_free->next = nullptr;
@@ -123,3 +123,12 @@ void MemoryAllocator::defragment(uint32_t maxDepth) {
 		block = block->next;
 	}
 }
+
+/* TODO:
+	- Move stack allocation functionality into MemoryAllocator
+		-- Implement StackMarker. Inherits from Marker, contains all stack-related sub-allocation methods
+		-- Implement AlignedStackMarker. Inherits from Marker, contains all aligned-stack-related sub-allocation methods
+
+
+
+*/

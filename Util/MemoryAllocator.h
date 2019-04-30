@@ -4,6 +4,10 @@
 
 class FERROUS_ALLOCATOR_API MemoryAllocator {
 public:
+	class Stack {
+
+	};
+
 	struct FreeBlock {
 		uint64_t size;
 		FreeBlock* next;
