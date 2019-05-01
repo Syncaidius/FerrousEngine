@@ -1,10 +1,10 @@
 #include "stdafx.h";
-#include "MemoryAllocator.h";
+#include "memory_allocator.h";
 
-MemoryAllocator::MemoryAllocator(uint64_t size_bytes) {
-	assert(size_bytes > sizeof(MemoryAllocator::FreeBlock));
+MemoryAllocator::MemoryAllocator(const uint64_t size_bytes) {
+	assert(size_bytes > MemoryAllocator::HEADER_SIZE);
 
-	m_size_bytes = size_bytes;
+	m_page_size = size_bytes;
 	m_start = malloc(size_bytes);
 	reset();
 }
@@ -13,7 +13,7 @@ MemoryAllocator::~MemoryAllocator(void) {
 	free(m_start);
 }
 
-MemoryAllocator::Marker MemoryAllocator::alloc(uint64_t size_bytes) {
+void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 	// Find a free block which is big enough. If it's too big, downsize it accordingly.
 	// This is not as fast as a specialized allocator (e.g. stack).
 	FreeBlock* block = m_free;
@@ -54,9 +54,9 @@ MemoryAllocator::Marker MemoryAllocator::alloc(uint64_t size_bytes) {
 	return p;
 }
 
-void MemoryAllocator::release(MemoryAllocator::Marker marker) {
-	// Header is located behind the marker's address.
-	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)marker - HEADER_SIZE);
+void MemoryAllocator::release(void* p) {
+	// Header is located behind the pointer's address.
+	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)p - HEADER_SIZE);
 	m_allocated -= block_to_free->size;
 	block_to_free->next = m_free;
 	m_free = block_to_free;
@@ -65,23 +65,13 @@ void MemoryAllocator::release(MemoryAllocator::Marker marker) {
 void MemoryAllocator::reset(void) {
 	// We now have just one header, so subtract one header worth of bytes from the allocator.
 	m_free = reinterpret_cast<FreeBlock*>(m_start);
-	m_free->size = m_size_bytes - HEADER_SIZE;
+	m_free->size = m_page_size - HEADER_SIZE;
 	m_free->next = nullptr;
 	m_overhead = HEADER_SIZE;
 	m_allocated = HEADER_SIZE;
 }
 
-MemoryAllocator::FreeBlock* MemoryAllocator::getFreeList() {
-	return m_free;
-}
-
-uint64_t MemoryAllocator::getAllocated() { return m_allocated; }
-
-uint64_t MemoryAllocator::getOverhead() { return m_overhead; }
-
-uint64_t MemoryAllocator::getSize() { return m_size_bytes; }
-
-void MemoryAllocator::defragment(uint32_t maxDepth) {
+void MemoryAllocator::defragment(const uint32_t maxDepth) {
 	FreeBlock* block = m_free;
 	FreeBlock* other = nullptr;
 	FreeBlock* prev_other = nullptr;
@@ -125,10 +115,8 @@ void MemoryAllocator::defragment(uint32_t maxDepth) {
 }
 
 /* TODO:
-	- Move stack allocation functionality into MemoryAllocator
-		-- Implement StackMarker. Inherits from Marker, contains all stack-related sub-allocation methods
-		-- Implement AlignedStackMarker. Inherits from Marker, contains all aligned-stack-related sub-allocation methods
-
-
-
+	-- Will we ever need more than 2GB in a single allocated block?
+		- Overhead could be reduced by 25% by changing FreeBlock->size to uint32_t instead of uint64_t. 12 bytes header size instead of 16.
+	-- Ability to directly allocate memory stacks by moving StackAllocator functionlity into a nested type of MemoryAllocator.
+		- Currently they have to be instantiated/initialized by passing a MemoryAllocator to their constructor.
 */

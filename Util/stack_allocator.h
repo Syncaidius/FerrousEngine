@@ -1,10 +1,10 @@
 #pragma once
 #include "stdafx.h";
-#include "MemoryAllocator.h";
-#include "Util.h";
+#include "memory_allocator.h";
+#include "util_export.h";
 
 // Allocates an aligned chunk of memory in a stack.
-class FERROUS_ALLOCATOR_API StackAllocator {
+class FERROUS_UTIL_API StackAllocator {
 public:
 	typedef void* Marker;
 

@@ -1,4 +1,4 @@
-#include "StackAllocator.h";
+#include "stack_allocator.h";
 
 StackAllocator::StackAllocator(MemoryAllocator* parent_alloc, uint64_t size_bytes, uint64_t alignment) {
 	assert(parent_alloc != nullptr);

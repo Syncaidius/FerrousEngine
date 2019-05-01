@@ -19,15 +19,19 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="StackAllocator.cpp" />
+    <ClCompile Include="logging.cpp" />
+    <ClCompile Include="logging_console.cpp" />
+    <ClCompile Include="stack_allocator.cpp" />
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="MemoryAllocator.cpp" />
+    <ClCompile Include="memory_allocator.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="StackAllocator.h" />
-    <ClInclude Include="MemoryAllocator.h" />
+    <ClInclude Include="logging.h" />
+    <ClInclude Include="stack_allocator.h" />
+    <ClInclude Include="memory_allocator.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Util.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="util_export.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -89,7 +93,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>UNICODE;FERROUS_UTIL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
