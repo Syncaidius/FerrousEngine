@@ -1,18 +1,16 @@
 #include "stack_allocator.h";
 
-StackAllocator::StackAllocator(MemoryAllocator* parent_alloc, uint64_t size_bytes, uint64_t alignment) {
-	assert(parent_alloc != nullptr);
+StackAllocator::StackAllocator(uint64_t size_bytes, uint64_t alignment) {
 	assert(alignment >= 1);
 	assert(alignment <= 128);
 	assert((alignment & (alignment - 1)) == 0);
 
 	m_alignment = alignment;
-	m_parent_alloc = parent_alloc;
 	m_size_bytes = size_bytes;
 
 	uint64_t expanded_bytes = size_bytes + alignment;
-	m_start = m_parent_alloc->alloc(expanded_bytes);
-	uint64_t raw_start = reinterpret_cast<uint64_t>(&m_start);
+	_start = MemoryAllocator::get()->alloc(expanded_bytes);
+	uint64_t raw_start = reinterpret_cast<uint64_t>(&_start);
 
 	//Calc adjustment by masking off the lower bits of address, to determine how "misaligned" it is.
 	uint64_t mask = (alignment - 1);
@@ -24,7 +22,7 @@ StackAllocator::StackAllocator(MemoryAllocator* parent_alloc, uint64_t size_byte
 }
 
 StackAllocator::~StackAllocator(void) {
-	m_parent_alloc->release(m_start);
+	MemoryAllocator::get()->release(_start);
 }
 
 StackAllocator::Marker StackAllocator::alloc(uint64_t bytes) {
@@ -44,5 +42,5 @@ void StackAllocator::releaseToMarker(StackAllocator::Marker marker) {
 }
 
 void StackAllocator::reset() {
-	m_pos = (void*)((char*)m_start + m_adjustment);
+	m_pos = (void*)((char*)_start + m_adjustment);
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "util_export.h";
+#include "util.h";
 
 class FERROUS_UTIL_API MemoryAllocator {
 public:
@@ -12,9 +12,7 @@ public:
 	};
 
 	const static int HEADER_SIZE = sizeof(FreeBlock);
-
-	MemoryAllocator(const uint64_t size_bytes);
-	~MemoryAllocator();
+	const static int PAGE_SIZE = 16384;
 
 	void* alloc(const uint64_t size_bytes);
 
@@ -46,19 +44,22 @@ public:
 	void defragment(const uint32_t maxDepth);
 
 	MemoryAllocator::FreeBlock* getFreeList() {
-		return m_free;
+		return _free;
 	}
 
-	uint64_t getAllocated() { return m_allocated; }
+	uint64_t getAllocated() { return _allocated; }
 
-	uint64_t getOverhead() { return m_overhead; }
+	uint64_t getOverhead() { return _overhead; }
 
-	uint64_t getPageSize() { return m_page_size; }
+	static MemoryAllocator* get() { return _allocator; }
 
 private:
-	uint64_t m_page_size;
-	void* m_start;
-	FreeBlock* m_free;
-	uint64_t m_allocated;
-	uint64_t m_overhead;
+	static MemoryAllocator* _allocator;
+	MemoryAllocator();
+	~MemoryAllocator();
+
+	void* _start;
+	FreeBlock* _free;
+	uint64_t _allocated;
+	uint64_t _overhead;
 };

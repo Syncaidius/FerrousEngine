@@ -31,7 +31,6 @@
     <ClInclude Include="memory_allocator.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util.h" />
-    <ClInclude Include="util_export.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

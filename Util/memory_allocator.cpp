@@ -1,22 +1,24 @@
 #include "stdafx.h";
 #include "memory_allocator.h";
 
-MemoryAllocator::MemoryAllocator(const uint64_t size_bytes) {
-	assert(size_bytes > MemoryAllocator::HEADER_SIZE);
+// Static
+MemoryAllocator* MemoryAllocator::_allocator = new MemoryAllocator();
 
-	m_page_size = size_bytes;
-	m_start = malloc(size_bytes);
+MemoryAllocator::MemoryAllocator() {
+	assert(PAGE_SIZE > HEADER_SIZE);
+
+	_start = malloc(PAGE_SIZE);
 	reset();
 }
 
 MemoryAllocator::~MemoryAllocator(void) {
-	free(m_start);
+	free(_start);
 }
 
 void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 	// Find a free block which is big enough. If it's too big, downsize it accordingly.
 	// This is not as fast as a specialized allocator (e.g. stack).
-	FreeBlock* block = m_free;
+	FreeBlock* block = _free;
 	void* p = nullptr;
 
 	while (block != nullptr) {
@@ -31,53 +33,54 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 		// Throw leftover memory into a new block if the current block was larger than needed.
 		if (remaining > HEADER_SIZE) {
 			// Set new block header for remaining bytes
-			m_free = (FreeBlock*)((char*)block + HEADER_SIZE + size_bytes);
-			m_free->size = remaining - HEADER_SIZE;
-			m_free->next = block->next;
+			_free = (FreeBlock*)((char*)block + HEADER_SIZE + size_bytes);
+			_free->size = remaining - HEADER_SIZE;
+			_free->next = block->next;
 
 			// Update size of allocated block
 			block->size = size_bytes;
 
 			// We've just allocated a new header and the requested bytes.
-			m_allocated += size_bytes + HEADER_SIZE;
-			m_overhead += HEADER_SIZE;
+			_allocated += size_bytes + HEADER_SIZE;
+			_overhead += HEADER_SIZE;
 		}
 		else { // TODO if the remaining size is > 0 but less-than-or-equal-to HEADER_SIZE, can we throw it into the block after it (if exists)?
-			m_allocated += m_free->size;
-			m_free = block->next;
+			_allocated += _free->size;
+			_free = block->next;
 		}
 
 		break;
 	}
 
 	assert(p != nullptr);
+	memset(p, 0, size_bytes);
 	return p;
 }
 
 void MemoryAllocator::release(void* p) {
 	// Header is located behind the pointer's address.
 	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)p - HEADER_SIZE);
-	m_allocated -= block_to_free->size;
-	block_to_free->next = m_free;
-	m_free = block_to_free;
+	_allocated -= block_to_free->size;
+	block_to_free->next = _free;
+	_free = block_to_free;
 }
 
 void MemoryAllocator::reset(void) {
 	// We now have just one header, so subtract one header worth of bytes from the allocator.
-	m_free = reinterpret_cast<FreeBlock*>(m_start);
-	m_free->size = m_page_size - HEADER_SIZE;
-	m_free->next = nullptr;
-	m_overhead = HEADER_SIZE;
-	m_allocated = HEADER_SIZE;
+	_free = reinterpret_cast<FreeBlock*>(_start);
+	_free->size = PAGE_SIZE - HEADER_SIZE;
+	_free->next = nullptr;
+	_overhead = HEADER_SIZE;
+	_allocated = HEADER_SIZE;
 }
 
 void MemoryAllocator::defragment(const uint32_t maxDepth) {
-	FreeBlock* block = m_free;
+	FreeBlock* block = _free;
 	FreeBlock* other = nullptr;
 	FreeBlock* prev_other = nullptr;
 
 	while(block != nullptr) {
-		other = m_free;
+		other = _free;
 		prev_other = nullptr;
 
 		while (other != nullptr) {
@@ -86,8 +89,8 @@ void MemoryAllocator::defragment(const uint32_t maxDepth) {
 				uint64_t start = reinterpret_cast<uint64_t>(other);
 
 				if (start == ending) {
-					m_overhead -= HEADER_SIZE;
-					m_allocated -= HEADER_SIZE;
+					_overhead -= HEADER_SIZE;
+					_allocated -= HEADER_SIZE;
 
 					if (block->next == other) {
 						block->next = other->next;
@@ -98,8 +101,8 @@ void MemoryAllocator::defragment(const uint32_t maxDepth) {
 					}
 
 					block->size += other->size + HEADER_SIZE; // Include header of 'other' too
-					if (other == m_free) {
-						m_free = block;
+					if (other == _free) {
+						_free = block;
 					}
 				}
 				else {

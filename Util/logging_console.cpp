@@ -3,8 +3,8 @@
 #include <iostream>
 
 LogConsoleOutput::LogConsoleOutput() {
-	RedirectToConsole();
-	m_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	redirectToConsole();
+	_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 }
 
 LogConsoleOutput::~LogConsoleOutput() {
@@ -27,7 +27,7 @@ void LogConsoleOutput::close() {
 
 }
 
-void LogConsoleOutput::RedirectToConsole() {
+void LogConsoleOutput::redirectToConsole() {
 	int hConHandle;
 	long lStdHandle;
 	CONSOLE_SCREEN_BUFFER_INFO coninfo;

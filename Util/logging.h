@@ -6,9 +6,7 @@ class FERROUS_UTIL_API LogOutputBase {
 public:
 	virtual void write(const wchar_t* msg) = 0;
 	virtual void writeLine(const wchar_t* msg) = 0;
-
 	virtual void clear() = 0;
-
 	virtual void close() = 0;
 };
 
@@ -17,13 +15,16 @@ public:
 	LogConsoleOutput();
 	~LogConsoleOutput();
 
+protected:
+	friend class Logger;
+
 	void write(const wchar_t* msg);
 	void writeLine(const wchar_t* msg);
 	void clear();
 	void close();
 private:
-	void RedirectToConsole(void);
-	void* m_console_handle;
+	void redirectToConsole(void);
+	void* _console_handle;
 };
 
 class FERROUS_UTIL_API Logger {
@@ -31,7 +32,7 @@ public:
 	struct LogOutputHandle {
 		LogOutputBase* output;
 	};
-	Logger(MemoryAllocator* alloc, uint16_t initial_slot_count = 1);
+	Logger(uint16_t initial_slot_count = 1);
 	~Logger();
 
 	void addOutput(LogOutputBase* output);
@@ -43,7 +44,6 @@ public:
 	void clear();
 
 private:
-	LogOutputHandle* m_outputs;
-	MemoryAllocator* m_allocator;
-	uint16_t m_output_slot_count;
+	LogOutputHandle* _outputs;
+	uint16_t _output_slot_count;
 };

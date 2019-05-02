@@ -1,15 +1,15 @@
 #pragma once
 #include "stdafx.h";
 #include "memory_allocator.h";
-#include "util_export.h";
+#include "util.h";
 
 // Allocates an aligned chunk of memory in a stack.
 class FERROUS_UTIL_API StackAllocator {
 public:
 	typedef void* Marker;
 
-	explicit StackAllocator(MemoryAllocator* parent_alloc, uint64_t size_bytes) : StackAllocator(parent_alloc, size_bytes, 1) {}
-	explicit StackAllocator(MemoryAllocator* parent_alloc, uint64_t size_bytes, uint64_t alignment);
+	explicit StackAllocator(uint64_t size_bytes) : StackAllocator(size_bytes, 1) {}
+	explicit StackAllocator(uint64_t size_bytes, uint64_t alignment);
 
 	~StackAllocator(void);
 
@@ -26,11 +26,10 @@ public:
 	void reset();
 
 private:
-	MemoryAllocator* m_parent_alloc;
 	uint64_t m_size_bytes;
 	uint64_t m_adjustment;
 	uint64_t m_alignment;
-	Marker m_start;
+	Marker _start;
 	Marker m_end;
 	Marker m_pos;
 };

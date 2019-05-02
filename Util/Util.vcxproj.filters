@@ -47,8 +47,5 @@
     <ClInclude Include="memory_allocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="util_export.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
