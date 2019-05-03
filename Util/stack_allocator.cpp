@@ -22,7 +22,7 @@ StackAllocator::StackAllocator(uint64_t size_bytes, uint64_t alignment) {
 }
 
 StackAllocator::~StackAllocator(void) {
-	MemoryAllocator::get()->release(_start);
+	MemoryAllocator::get()->dealloc(_start);
 }
 
 StackAllocator::Marker StackAllocator::alloc(uint64_t bytes) {

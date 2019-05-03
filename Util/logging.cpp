@@ -32,10 +32,7 @@ void Logger::addOutput(LogOutputBase* output) {
 	// If we've reached here, no slots were found. Expand!
 	// TODO use vector?
 	uint64_t next = _output_slot_count++;
-	LogOutputHandle* replacement = new LogOutputHandle[_output_slot_count];
-	memcpy(replacement, _outputs, sizeof(LogOutputHandle) * next);
-	delete [] _outputs;
-	_outputs = replacement;
+	MemoryAllocator::get()->resizeArray(_outputs, next, _output_slot_count);
 
 	// Jump straight to the slot we just added.
 	i = _outputs;
@@ -69,6 +66,7 @@ void Logger::writeLine(const wchar_t* msg) {
 	localtime_s(&tstruct , &now);
 	wcsftime(buf, sizeof(buf), L"%X", &tstruct);
 
+	MemoryAllocator* test = MemoryAllocator::get();
 	const size_t msglen = wcslen(msg);
 	const size_t strlen = msglen + wcslen(buf) + 4; // 4 extra chars for the [], space and null termination.
 	wchar_t* cc = MemoryAllocator::get()->allocArray<wchar_t>(strlen);
@@ -83,6 +81,8 @@ void Logger::writeLine(const wchar_t* msg) {
 		if (i != nullptr)
 			i->output->writeLine(cc);
 	}
+
+	MemoryAllocator::get()->dealloc(cc);
 
 	// TODO implement stream-based writing
 	// See: https://stackoverflow.com/questions/14086417/how-to-write-custom-input-stream-in-c

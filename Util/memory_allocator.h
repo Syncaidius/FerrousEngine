@@ -12,13 +12,13 @@ public:
 	};
 
 	const static int HEADER_SIZE = sizeof(FreeBlock);
-	const static int PAGE_SIZE = 16384;
+	const static int PAGE_SIZE = 1024;
 
 	void* alloc(const uint64_t size_bytes);
 
 	/*Allocates a new block of memory capable of fitting num_elements of type T. */
 	template<typename T> T* allocArray(const uint64_t num_elements) {
-		void* mem = alloc(sizeof(T) * num_elements);
+ 		void* mem = alloc(sizeof(T) * num_elements);
 		memset(mem, 0, sizeof(T));
 		return reinterpret_cast<T*>(mem);
 	}
@@ -31,13 +31,13 @@ public:
 		T* replacement = reinterpret_cast<T*>(mem);
 		memset(replacement, 0, sizeof(T) * num_elements);
 		memcpy(replacement, oldArray, sizeof(T) * old_num_elements);
-		release(oldArray);
+		dealloc(oldArray);
 		oldArray = replacement;
 
 		// TODO this can be sped up a lot if the end of oldArray is followed by a free block capable of fitting the extra capacity. We would reduce fragmentation from allocating and releasing.
 	}
 
-	void release(void* p);
+	void dealloc(void* p);
 
 	void reset(void);
 

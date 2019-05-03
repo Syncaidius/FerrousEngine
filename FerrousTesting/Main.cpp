@@ -38,7 +38,7 @@ void CreateTestObject() {
 	std::map<string, int> test_map;
 }
 
-const int NUM_ALLOCATIONS = 30;
+const int NUM_ALLOCATIONS = 10;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Logger log(1);
@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t rand_release = (((uint64_t)rand() % 4000) + 1);
 		if (rand_release < 2500) {
-			MemoryAllocator::get()->release(markers[i]);
+			MemoryAllocator::get()->dealloc(markers[i]);
 			cout << "Released block " << reinterpret_cast<uintptr_t>(markers[i]) << " via allocator" << endl;
 			markers[i] = nullptr;
 		}

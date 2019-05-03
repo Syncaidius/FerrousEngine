@@ -19,10 +19,12 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 	// Find a free block which is big enough. If it's too big, downsize it accordingly.
 	// This is not as fast as a specialized allocator (e.g. stack).
 	FreeBlock* block = _free;
+	FreeBlock* prev = nullptr;
 	void* p = nullptr;
 
 	while (block != nullptr) {
 		if (block->size < size_bytes) {
+			prev = block;
 			block = block->next;
 			continue;
 		}
@@ -32,21 +34,29 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 
 		// Throw leftover memory into a new block if the current block was larger than needed.
 		if (remaining > HEADER_SIZE) {
-			// Set new block header for remaining bytes
-			_free = (FreeBlock*)((char*)block + HEADER_SIZE + size_bytes);
-			_free->size = remaining - HEADER_SIZE;
-			_free->next = block->next;
+			FreeBlock* remainBlock = (FreeBlock*)((char*)block + HEADER_SIZE + size_bytes);
+			remainBlock->size = remaining - HEADER_SIZE;
+			remainBlock->next = block->next;
 
+			if (block == _free) {
+				_free = remainBlock;
+			}
+			else {
+				if (prev != nullptr)
+					prev->next = remainBlock;
+			}
 			// Update size of allocated block
 			block->size = size_bytes;
 
-			// We've just allocated a new header and the requested bytes.
+			// We've just allocated a new header and the requested # of bytes.
 			_allocated += size_bytes + HEADER_SIZE;
 			_overhead += HEADER_SIZE;
 		}
-		else { // TODO if the remaining size is > 0 but less-than-or-equal-to HEADER_SIZE, can we throw it into the block after it (if exists)?
-			_allocated += _free->size;
-			_free = block->next;
+		else { // TODO if the remaining size is > 0 but less-than-or-equal-to HEADER_SIZE, can we throw it into the block after it (if exists)
+			_allocated += block->size;
+
+			if(block == _free)
+				_free = block->next;
 		}
 
 		break;
@@ -57,7 +67,7 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 	return p;
 }
 
-void MemoryAllocator::release(void* p) {
+void MemoryAllocator::dealloc(void* p) {
 	// Header is located behind the pointer's address.
 	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)p - HEADER_SIZE);
 	_allocated -= block_to_free->size;
