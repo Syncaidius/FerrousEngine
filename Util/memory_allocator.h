@@ -12,7 +12,7 @@ public:
 	};
 
 	const static int HEADER_SIZE = sizeof(FreeBlock);
-	const static int PAGE_SIZE = 1024;
+	const static int PAGE_SIZE = 8912;
 
 	void* alloc(const uint64_t size_bytes);
 
@@ -41,7 +41,7 @@ public:
 
 	void reset(void);
 
-	void defragment(const uint32_t maxDepth);
+	void defragment(void);
 
 	MemoryAllocator::FreeBlock* getFreeList() {
 		return _free;
@@ -57,6 +57,8 @@ private:
 	static MemoryAllocator* _allocator;
 	MemoryAllocator();
 	~MemoryAllocator();
+
+	void sortFree(void);
 
 	void* _start;
 	FreeBlock* _free;

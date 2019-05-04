@@ -26,6 +26,7 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 		if (block->size < size_bytes) {
 			prev = block;
 			block = block->next;
+			assert(block != block->next);
 			continue;
 		}
 
@@ -55,12 +56,19 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 		else { // TODO if the remaining size is > 0 but less-than-or-equal-to HEADER_SIZE, can we throw it into the block after it (if exists)
 			_allocated += block->size;
 
-			if(block == _free)
+			if (block == _free) {
 				_free = block->next;
+			}
+			else {
+				if (prev != nullptr)
+					prev->next = block->next;
+			}
 		}
 
 		break;
 	}
+
+	assert(block != _free);
 
 	assert(p != nullptr);
 	memset(p, 0, size_bytes);
@@ -70,6 +78,8 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 void MemoryAllocator::dealloc(void* p) {
 	// Header is located behind the pointer's address.
 	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)p - HEADER_SIZE);
+
+	assert(block_to_free != _free);
 	_allocated -= block_to_free->size;
 	block_to_free->next = _free;
 	_free = block_to_free;
@@ -84,46 +94,53 @@ void MemoryAllocator::reset(void) {
 	_allocated = HEADER_SIZE;
 }
 
-void MemoryAllocator::defragment(const uint32_t maxDepth) {
-	FreeBlock* block = _free;
-	FreeBlock* other = nullptr;
-	FreeBlock* prev_other = nullptr;
+void MemoryAllocator::defragment(void) {
+	sortFree();
+	FreeBlock* prev = _free;
+	FreeBlock* cur = _free->next;
 
-	while(block != nullptr) {
-		other = _free;
-		prev_other = nullptr;
+	while (cur != nullptr) {
+		uint64_t ending = reinterpret_cast<uint64_t>(prev) + HEADER_SIZE + prev->size;
+		uint64_t start = reinterpret_cast<uint64_t>(cur);
 
-		while (other != nullptr) {
-			if (other != block) {
-				uint64_t ending = reinterpret_cast<uint64_t>(block) + HEADER_SIZE + block->size;
-				uint64_t start = reinterpret_cast<uint64_t>(other);
-
-				if (start == ending) {
-					_overhead -= HEADER_SIZE;
-					_allocated -= HEADER_SIZE;
-
-					if (block->next == other) {
-						block->next = other->next;
-					}else{
-						// If the previous 'other' was not 'block', we've broken the link of a block between 'block' and 'other. Fix it.
-						if(prev_other != nullptr)
-							prev_other->next = other->next;
-					}
-
-					block->size += other->size + HEADER_SIZE; // Include header of 'other' too
-					if (other == _free) {
-						_free = block;
-					}
-				}
-				else {
-					prev_other = other;
-				}
-			}
-
-			other = other->next;
+		if (start == ending) {
+			_overhead -= HEADER_SIZE;
+			_allocated -= HEADER_SIZE;
+			prev->size += cur->size + HEADER_SIZE; // Include header of 'other' too
+			prev->next = cur->next; // Detach cur
+			cur = prev;
+		}
+		else {
+			// cur was not absorbed, so that becomes the previous block.
+			prev = cur;
 		}
 
-		block = block->next;
+		cur = cur->next;
+	}
+}
+
+void MemoryAllocator::sortFree(void) {
+	FreeBlock* prev = _free;
+	FreeBlock* cur = _free->next;
+
+	while (cur != nullptr) {
+		// If curr is smaller than prev, move to head.
+		if (reinterpret_cast<uint64_t>(cur) < reinterpret_cast<uint64_t>(prev)) {
+			// Detach cur
+			prev->next = cur->next;
+
+			// Move current block to start
+			cur->next = _free;
+			_free = cur;
+
+			cur = prev;
+		}
+		else {
+			// Does not need moving
+			prev = cur;
+		}
+
+		cur = cur->next;
 	}
 }
 

@@ -11,10 +11,14 @@ static const WORD MAX_CONSOLE_LINES = 500;
 void OutputFreeList(Logger* log) {
 	MemoryAllocator* mem = MemoryAllocator::get();
 	uint64_t overhead = mem->getOverhead();
+	uint64_t allocated = mem->getAllocated();
+	uint64_t total = allocated;
+	uint64_t num_free = 0;
+
 	uint64_t size = MemoryAllocator::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
 	double overhead_percent = ((double)overhead / (double)size) * 100.0;
 
-	cout << "   Allocated: " << mem->getAllocated() << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
+	cout << "   Allocated: " << allocated  << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
 
 	MemoryAllocator::FreeBlock* freeList = mem->getFreeList();
 	while (freeList != nullptr) {
@@ -22,6 +26,7 @@ void OutputFreeList(Logger* log) {
 		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->next);
 		uint64_t p_end = reinterpret_cast<uint64_t>(freeList) + MemoryAllocator::HEADER_SIZE + freeList->size;
 		cout << "   ptr: " << p << " -- end: " << p_end << " -- size: " << freeList->size << " -- Next ptr: " << p_next << endl;
+		total += freeList->size;
 
 		if (freeList->next != nullptr) {
 			if (p_next >= p)
@@ -30,7 +35,12 @@ void OutputFreeList(Logger* log) {
 				cout << "      diff to next: -" << (p - p_next) << " bytes" << endl;
 		}
 		freeList = freeList->next;
+		num_free++;
 	}
+
+	cout << "Total: " << total << "/" << size << " -- Free blocks: " << num_free << endl;
+	if (total < size)
+		cout << "LEAK DETECTED: " << (size - total) << " bytes" << endl;
 }
 
 void CreateTestObject() {
@@ -38,7 +48,7 @@ void CreateTestObject() {
 	std::map<string, int> test_map;
 }
 
-const int NUM_ALLOCATIONS = 10;
+const int NUM_ALLOCATIONS = 40;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Logger log(1);
@@ -60,7 +70,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t alloc_size = ((uint64_t)rand() % 64) + 1;
 		markers[i] = MemoryAllocator::get()->alloc(alloc_size);
-		if(markers[i] != nullptr)
+		if(markers[i] != nullptr) 
 			cout << "Allocated block of " << alloc_size << " bytes at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 	}
 
@@ -85,7 +95,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	OutputFreeList(&log);
 
 	uint32_t defrag_iterations = 1;
-	MemoryAllocator::get()->defragment(defrag_iterations);
+	MemoryAllocator::get()->defragment();
 	cout << endl;
 	cout << "AFTER " << defrag_iterations << " DEFRAGMENTATION ITERATIONS" << endl;
 	OutputFreeList(&log);
