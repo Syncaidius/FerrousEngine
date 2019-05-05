@@ -95,7 +95,7 @@ void MemoryAllocator::reset(void) {
 }
 
 void MemoryAllocator::defragment(void) {
-	sortFree();
+	mergeSort(&_free);
 	FreeBlock* prev = _free;
 	FreeBlock* cur = _free->next;
 
@@ -119,34 +119,63 @@ void MemoryAllocator::defragment(void) {
 	}
 }
 
-void MemoryAllocator::sortFree(void) {
-	FreeBlock* prev = _free;
-	FreeBlock* cur = _free->next;
+void MemoryAllocator::mergeSort(FreeBlock** headRef) {
+	FreeBlock* head = *headRef;
+	FreeBlock* a;
+	FreeBlock* b;
 
-	while (cur != nullptr) {
-		// If curr is smaller than prev, move to head.
-		if (reinterpret_cast<uint64_t>(cur) < reinterpret_cast<uint64_t>(prev)) {
-			// Detach cur
-			prev->next = cur->next;
+	/* Base case -- length 0 or 1 */
+	if ((head == nullptr) || (head->next == nullptr))
+		return;
 
-			// Move current block to start
-			cur->next = _free;
-			_free = cur;
+	frontBackSplit(head, &a, &b);
 
-			cur = prev;
-		}
-		else {
-			// Does not need moving
-			prev = cur;
-		}
+	//Recursive sort on sublists
+	mergeSort(&a);
+	mergeSort(&b);
 
-		cur = cur->next;
-	}
+	*headRef = sortedMerge(a, b);
 }
 
-/* TODO:
-	-- Will we ever need more than 2GB in a single allocated block?
-		- Overhead could be reduced by 25% by changing FreeBlock->size to uint32_t instead of uint64_t. 12 bytes header size instead of 16.
-	-- Ability to directly allocate memory stacks by moving StackAllocator functionlity into a nested type of MemoryAllocator.
-		- Currently they have to be instantiated/initialized by passing a MemoryAllocator to their constructor.
-*/
+MemoryAllocator::FreeBlock* MemoryAllocator::sortedMerge(FreeBlock* a, FreeBlock* b) {
+	FreeBlock* result = nullptr;
+
+	/* base cases*/
+	if (a == nullptr)
+		return b;
+	else if (b == nullptr)
+		return a;
+
+	/* Pick either a or b, recursive*/
+	if (reinterpret_cast<uint64_t>(a) <= reinterpret_cast<uint64_t>(b)) {
+		result = a;
+		result->next = sortedMerge(a->next, b);
+	}
+	else {
+		result = b;
+		result->next = sortedMerge(a, b->next);
+	}
+
+	return result;
+}
+
+void MemoryAllocator::frontBackSplit(FreeBlock* source, FreeBlock** frontRef, FreeBlock** backRef) {
+	FreeBlock* fast;
+	FreeBlock* slow;
+	slow = source;
+	fast = source->next;
+
+	/*Advance fast by 2 nodes, slow by 1.*/
+	while (fast != nullptr) {
+		fast = fast->next;
+		if (fast != nullptr) {
+			slow = slow->next;
+			fast = fast->next;
+		}
+	}
+
+	/* slow is before the midpoint in the list, split in two */
+	*frontRef = source;
+	*backRef = slow->next;
+	slow->next = nullptr;
+}

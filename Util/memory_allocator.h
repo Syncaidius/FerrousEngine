@@ -59,6 +59,9 @@ private:
 	~MemoryAllocator();
 
 	void sortFree(void);
+	void mergeSort(FreeBlock** headRef);
+	FreeBlock* sortedMerge(FreeBlock* a, FreeBlock* b);
+	void frontBackSplit(FreeBlock* source, FreeBlock** frontRef, FreeBlock** backRef);
 
 	void* _start;
 	FreeBlock* _free;
