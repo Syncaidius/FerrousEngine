@@ -4,9 +4,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <iostream>
-#include <Util/memory_allocator.h>
+#include <Util/memory.h>
 
-MemoryAllocator* mem_allocator = MemoryAllocator::get();
+Memory* mem_allocator = Memory::get();
 void* operator new(std::size_t n) throw(std::bad_alloc)
 {
 #if _DEBUG

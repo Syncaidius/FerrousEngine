@@ -1,25 +1,25 @@
 #include "stdafx.h";
-#include "memory_allocator.h";
+#include "memory.h";
 
 // Static
-MemoryAllocator* MemoryAllocator::_allocator = new MemoryAllocator();
+Memory* Memory::_allocator = new Memory();
 
-MemoryAllocator::MemoryAllocator() {
+Memory::Memory() {
 	assert(PAGE_SIZE > HEADER_SIZE);
 
 	_start = malloc(PAGE_SIZE);
 	reset();
 }
 
-MemoryAllocator::~MemoryAllocator(void) {
+Memory::~Memory(void) {
 	free(_start);
 }
 
-void* MemoryAllocator::alloc(const uint64_t size_bytes) {
+void* Memory::alloc(const size_t size_bytes) {
 	// Find a free block which is big enough. If it's too big, downsize it accordingly.
 	// This is not as fast as a specialized allocator (e.g. stack).
-	FreeBlock* block = _free;
-	FreeBlock* prev = nullptr;
+	Block* block = _free;
+	Block* prev = nullptr;
 	void* p = nullptr;
 
 	while (block != nullptr) {
@@ -30,12 +30,13 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 			continue;
 		}
 
+		block->adjustment = 0;
 		p = (void*)((char*)block + HEADER_SIZE);
 		uint64_t remaining = block->size - size_bytes;
 
 		// Throw leftover memory into a new block if the current block was larger than needed.
 		if (remaining > HEADER_SIZE) {
-			FreeBlock* remainBlock = (FreeBlock*)((char*)block + HEADER_SIZE + size_bytes);
+			Block* remainBlock = (Block*)((char*)block + HEADER_SIZE + size_bytes);
 			remainBlock->size = remaining - HEADER_SIZE;
 			remainBlock->next = block->next;
 
@@ -68,16 +69,46 @@ void* MemoryAllocator::alloc(const uint64_t size_bytes) {
 		break;
 	}
 
-	assert(block != _free);
-
 	assert(p != nullptr);
 	memset(p, 0, size_bytes);
 	return p;
 }
 
-void MemoryAllocator::dealloc(void* p) {
-	// Header is located behind the pointer's address.
-	FreeBlock* block_to_free = reinterpret_cast<FreeBlock*>((char*)p - HEADER_SIZE);
+void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
+	assert(alignment >= 1);
+	assert(alignment <= 128);
+	assert((alignment & (alignment - 1)) == 0);;
+
+	size_t expanded_bytes = size_bytes + alignment;
+	void* p = alloc(expanded_bytes);
+	return align(p, alignment, 0);
+}
+
+/* Allocates a memory stack with with the specified number of bytes, in a single contiguous block.*/
+Memory::Stack* Memory::allocStack(const size_t size_bytes, const uint8_t alignment = 1) {
+	size_t stack_header = sizeof(Stack);
+	size_t total_bytes = size_bytes + stack_header + alignment;
+	void* p = alloc(total_bytes);
+	void* aligned = align(p, alignment, stack_header);
+	return new (p) Stack(this, aligned);
+}
+
+void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
+	uintptr_t raw_start = reinterpret_cast<uintptr_t>(p) + start_offset;
+
+	/* Calc adjustment by masking off the lower bits of address, to determine how "misaligned" it is.*/
+	size_t mask = (alignment - 1);
+	size_t misalignment = (raw_start & mask);
+	size_t adjustment = alignment - misalignment;
+	uintptr_t alignedAddr = raw_start + alignment;
+
+	Block * block = reinterpret_cast<Block*>((char*)p - HEADER_SIZE);
+	block->adjustment = alignment + start_offset;
+	return reinterpret_cast<void*>(alignedAddr);
+}
+
+void Memory::dealloc(void* p) {
+	Block* block_to_free = getHeader(p);
 
 	assert(block_to_free != _free);
 	_allocated -= block_to_free->size;
@@ -85,23 +116,23 @@ void MemoryAllocator::dealloc(void* p) {
 	_free = block_to_free;
 }
 
-void MemoryAllocator::reset(void) {
+void Memory::reset(void) {
 	// We now have just one header, so subtract one header worth of bytes from the allocator.
-	_free = reinterpret_cast<FreeBlock*>(_start);
+	_free = reinterpret_cast<Block*>(_start);
 	_free->size = PAGE_SIZE - HEADER_SIZE;
 	_free->next = nullptr;
 	_overhead = HEADER_SIZE;
 	_allocated = HEADER_SIZE;
 }
 
-void MemoryAllocator::defragment(void) {
+void Memory::defragment(void) {
 	mergeSort(&_free);
-	FreeBlock* prev = _free;
-	FreeBlock* cur = _free->next;
+	Block* prev = _free;
+	Block* cur = _free->next;
 
 	while (cur != nullptr) {
-		uint64_t ending = reinterpret_cast<uint64_t>(prev) + HEADER_SIZE + prev->size;
-		uint64_t start = reinterpret_cast<uint64_t>(cur);
+		uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + HEADER_SIZE + prev->size;
+		uintptr_t start = reinterpret_cast<uintptr_t>(cur);
 
 		if (start == ending) {
 			_overhead -= HEADER_SIZE;
@@ -119,10 +150,10 @@ void MemoryAllocator::defragment(void) {
 	}
 }
 
-void MemoryAllocator::mergeSort(FreeBlock** headRef) {
-	FreeBlock* head = *headRef;
-	FreeBlock* a;
-	FreeBlock* b;
+void Memory::mergeSort(Block** headRef) {
+	Block* head = *headRef;
+	Block* a;
+	Block* b;
 
 	/* Base case -- length 0 or 1 */
 	if ((head == nullptr) || (head->next == nullptr))
@@ -137,8 +168,8 @@ void MemoryAllocator::mergeSort(FreeBlock** headRef) {
 	*headRef = sortedMerge(a, b);
 }
 
-MemoryAllocator::FreeBlock* MemoryAllocator::sortedMerge(FreeBlock* a, FreeBlock* b) {
-	FreeBlock* result = nullptr;
+Memory::Block* Memory::sortedMerge(Block* a, Block* b) {
+	Block* result = nullptr;
 
 	/* base cases*/
 	if (a == nullptr)
@@ -147,7 +178,7 @@ MemoryAllocator::FreeBlock* MemoryAllocator::sortedMerge(FreeBlock* a, FreeBlock
 		return a;
 
 	/* Pick either a or b, recursive*/
-	if (reinterpret_cast<uint64_t>(a) <= reinterpret_cast<uint64_t>(b)) {
+	if (reinterpret_cast<uintptr_t>(a) <= reinterpret_cast<uintptr_t>(b)) {
 		result = a;
 		result->next = sortedMerge(a->next, b);
 	}
@@ -159,9 +190,9 @@ MemoryAllocator::FreeBlock* MemoryAllocator::sortedMerge(FreeBlock* a, FreeBlock
 	return result;
 }
 
-void MemoryAllocator::frontBackSplit(FreeBlock* source, FreeBlock** frontRef, FreeBlock** backRef) {
-	FreeBlock* fast;
-	FreeBlock* slow;
+void Memory::frontBackSplit(Block* source, Block** frontRef, Block** backRef) {
+	Block* fast;
+	Block* slow;
 	slow = source;
 	fast = source->next;
 

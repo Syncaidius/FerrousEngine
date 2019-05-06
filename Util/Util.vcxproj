@@ -21,14 +21,13 @@
   <ItemGroup>
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="logging_console.cpp" />
-    <ClCompile Include="stack_allocator.cpp" />
+    <ClCompile Include="memory_stack.cpp" />
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="memory_allocator.cpp" />
+    <ClCompile Include="memory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="logging.h" />
-    <ClInclude Include="stack_allocator.h" />
-    <ClInclude Include="memory_allocator.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>

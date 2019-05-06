@@ -5,26 +5,24 @@
 #include <Windows.h>
 
 using namespace std;
-static const WORD MAX_CONSOLE_LINES = 500;
-
 
 void OutputFreeList(Logger* log) {
-	MemoryAllocator* mem = MemoryAllocator::get();
-	uint64_t overhead = mem->getOverhead();
-	uint64_t allocated = mem->getAllocated();
-	uint64_t total = allocated;
-	uint64_t num_free = 0;
+	Memory* mem = Memory::get();
+	size_t overhead = mem->getOverhead();
+	size_t allocated = mem->getAllocated();
+	size_t total = allocated;
+	size_t num_free = 0;
 
-	uint64_t size = MemoryAllocator::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
+	size_t size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
 	double overhead_percent = ((double)overhead / (double)size) * 100.0;
 
 	cout << "   Allocated: " << allocated  << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
 
-	MemoryAllocator::FreeBlock* freeList = mem->getFreeList();
+	Memory::Block* freeList = mem->getFreeList();
 	while (freeList != nullptr) {
 		uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
 		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->next);
-		uint64_t p_end = reinterpret_cast<uint64_t>(freeList) + MemoryAllocator::HEADER_SIZE + freeList->size;
+		uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::HEADER_SIZE + freeList->size;
 		cout << "   ptr: " << p << " -- end: " << p_end << " -- size: " << freeList->size << " -- Next ptr: " << p_next << endl;
 		total += freeList->size;
 
@@ -57,7 +55,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	log.writeLine(L"Memory allocator test");
 	log.writeLine(L"=====================");
-	cout << "Created allocator with page size: " << MemoryAllocator::PAGE_SIZE << " bytes" << endl;
+	cout << "Created allocator with page size: " << Memory::PAGE_SIZE << " bytes" << endl;
 	CreateTestObject();
 	OutputFreeList(&log);
 	cout << endl;
@@ -69,7 +67,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN);
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t alloc_size = ((uint64_t)rand() % 64) + 1;
-		markers[i] = MemoryAllocator::get()->alloc(alloc_size);
+		markers[i] = Memory::get()->alloc(alloc_size);
 		if(markers[i] != nullptr) 
 			cout << "Allocated block of " << alloc_size << " bytes at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 	}
@@ -79,7 +77,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t rand_release = (((uint64_t)rand() % 4000) + 1);
 		if (rand_release < 2500) {
-			MemoryAllocator::get()->dealloc(markers[i]);
+			Memory::get()->dealloc(markers[i]);
 			cout << "Released block " << reinterpret_cast<uintptr_t>(markers[i]) << " via allocator" << endl;
 			markers[i] = nullptr;
 		}
@@ -95,7 +93,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	OutputFreeList(&log);
 
 	uint32_t defrag_iterations = 1;
-	MemoryAllocator::get()->defragment();
+	Memory::get()->defragment();
 	cout << endl;
 	cout << "AFTER " << defrag_iterations << " DEFRAGMENTATION ITERATIONS" << endl;
 	OutputFreeList(&log);

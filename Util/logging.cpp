@@ -4,7 +4,7 @@
 
 Logger::Logger(uint16_t initial_slot_count) {
 	_output_slot_count = initial_slot_count;
-	_outputs = MemoryAllocator::get()->allocArray<LogOutputHandle>(_output_slot_count);
+	_outputs = Memory::get()->allocArray<LogOutputHandle>(_output_slot_count);
 }
 
 Logger::~Logger() {
@@ -32,7 +32,7 @@ void Logger::addOutput(LogOutputBase* output) {
 	// If we've reached here, no slots were found. Expand!
 	// TODO use vector?
 	uint64_t next = _output_slot_count++;
-	MemoryAllocator::get()->resizeArray(_outputs, next, _output_slot_count);
+	Memory::get()->resizeArray(_outputs, next, _output_slot_count);
 
 	// Jump straight to the slot we just added.
 	i = _outputs;
@@ -66,10 +66,10 @@ void Logger::writeLine(const wchar_t* msg) {
 	localtime_s(&tstruct , &now);
 	wcsftime(buf, sizeof(buf), L"%X", &tstruct);
 
-	MemoryAllocator* test = MemoryAllocator::get();
+	Memory* test = Memory::get();
 	const size_t msglen = wcslen(msg);
 	const size_t strlen = msglen + wcslen(buf) + 4; // 4 extra chars for the [], space and null termination.
-	wchar_t* cc = MemoryAllocator::get()->allocArray<wchar_t>(strlen);
+	wchar_t* cc = Memory::get()->allocArray<wchar_t>(strlen); // TODO perhaps allocate a reusable buffer, then only resize it if a message is larger than it's capacity.
 	wcscat_s(cc, strlen, L"[");
 	wcscat_s(cc, strlen, buf);
 	wcscat_s(cc, strlen, L"] ");
@@ -82,7 +82,7 @@ void Logger::writeLine(const wchar_t* msg) {
 			i->output->writeLine(cc);
 	}
 
-	MemoryAllocator::get()->dealloc(cc);
+	Memory::get()->dealloc(cc);
 
 	// TODO implement stream-based writing
 	// See: https://stackoverflow.com/questions/14086417/how-to-write-custom-input-stream-in-c
