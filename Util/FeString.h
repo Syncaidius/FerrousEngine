@@ -5,37 +5,36 @@
 
 class FERROUS_UTIL_API FeString {
 public:
-	static FeString* concat(const FeString* a, const FeString* b);
-	static FeString* format(const FeString* str, ...);
+	static FeString concat(const FeString& a, const FeString& b);
+	static FeString format(const FeString& str, ...);
 
 	FeString();
 	FeString(const char* c_data);
 	FeString(const wchar_t* c_data);
 	~FeString();
 
-	/* Creates an exact copy as a new FeString object.*/
-	FeString* clone();
+	FeString substr(const uint32_t startIndex);
+	FeString substr(const uint32_t startIndex, const uint32_t count);
+	FeString replace(const char* c_data);
+	FeString replace(const char c_data);
+	FeString replace(const wchar_t* c_data);
+	FeString replace(const wchar_t c_data);
+	FeString replace(const FeString* str);
 
-	FeString* substr(const uint32_t startIndex);
-	FeString* substr(const uint32_t startIndex, const uint32_t count);
-	FeString* replace(const char* c_data);
-	FeString* replace(const wchar_t* c_data);
-	FeString* replace(const FeString* str);
-
-	bool startsWith(const FeString* str);
-	bool endsWith(const FeString* str);
-	bool contains(const FeString* str);
-	uint32_t indexOf(const char* c_data);
-	uint32_t indexOf(const wchar_t* c_data);
+	bool startsWith(const FeString* input);
+	bool endsWith(const FeString* sinputtr);
+	bool contains(const FeString* input);
+	uint32_t indexOf(const char* input);
+	uint32_t indexOf(const wchar_t* input);
 	uint32_t indexOf(const char c);
 	uint32_t indexOf(const wchar_t c);
-	uint32_t indexOf(const FeString* str);
+	uint32_t indexOf(const FeString* input);
 
-	void trim();
-	void trimStart();
-	void trimEnd();
-	void toLower();
-	void toUpper();
+	FeString trim();
+	FeString trimStart();
+	FeString trimEnd();
+	FeString toLower();
+	FeString toUpper();
 
 	/* Capitalizes the first character of the string.*/
 	void capitalize();
@@ -82,7 +81,7 @@ FeString operator "" _fe(const char* a, size_t len) {
 	char* p_start = reinterpret_cast<char*>(mem);
 	wchar_t* p_data = (wchar_t*)p_start;
 
-	for (int i = 0; i < len; i++)
+	for (size_t i = 0; i < len; i++)
 		p_data[i] = a[i];
 
 	p_data += len;

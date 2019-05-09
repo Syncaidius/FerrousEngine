@@ -50,12 +50,15 @@ void RunStringTest(Logger* log) {
 	FeString bString(L"String B");
 	FeString cString = " = String C"_fe;
 	FeString result = aString + " + " + bString + " = The result"_fe;
-	//FeString* cString = aString + bString;
+	FeString resultLower = result.toLower();
+	FeString resultUpper = result.toUpper();
 
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
 	wcout << "C string: " << cString.c_str() << endl;
 	wcout << "Result: " << result.c_str() << endl;
+	wcout << "Lower-case: " << resultLower.c_str() << endl;
+	wcout << "Upper-case: " << resultUpper.c_str() << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;
