@@ -74,6 +74,18 @@ void* Memory::alloc(const size_t size_bytes) {
 	return p;
 }
 
+void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes) {
+	void* mem = alloc(num_bytes);
+	memcpy(mem, target, old_num_bytes);
+	dealloc(target);
+	target = mem;
+
+	// TODO this can be sped up a lot if the end of target is followed by a free block capable of fitting the extra capacity. We would reduce fragmentation from allocating and releasing.
+	//	-- This would also require tracking all memory blocks (free and allocated) in a second linked list in order to immediately detect whether an adjacent block is free or not.
+	//		-- ^ would slow down defragmentation, maybe.
+	//		-- Perhaps wrap free-list entries in node containers, then have Blocks in a linked list of their own.
+}
+
 void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
 	assert(alignment >= 1);
 	assert(alignment <= 128);

@@ -30,6 +30,9 @@
     <ClCompile Include="memory_stack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FeString.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FeString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

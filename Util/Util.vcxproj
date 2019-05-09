@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FeString.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="logging_console.cpp" />
     <ClCompile Include="memory_stack.cpp" />
@@ -26,6 +27,7 @@
     <ClCompile Include="memory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FeString.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="memory.h" />
     <ClInclude Include="stdafx.h" />

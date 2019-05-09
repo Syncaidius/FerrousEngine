@@ -1,6 +1,7 @@
 #include "stdafx.h";
 #include <Util/util.h>;
 #include <Util/logging.h>
+#include <Util/FeString.h>
 #include <map>
 #include <Windows.h>
 
@@ -16,9 +17,9 @@ void OutputFreeList(Logger* log) {
 	size_t size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
 	double overhead_percent = ((double)overhead / (double)size) * 100.0;
 
-	cout << "   Allocated: " << allocated  << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
+	cout << "   Allocated: " << allocated << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
 
-	Memory::Block* freeList = mem->getFreeList();
+	Memory::Block * freeList = mem->getFreeList();
 	while (freeList != nullptr) {
 		uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
 		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->next);
@@ -41,9 +42,20 @@ void OutputFreeList(Logger* log) {
 		cout << "LEAK DETECTED: " << (size - total) << " bytes" << endl;
 }
 
-void CreateTestObject() {
-	cout << "Spawning test object" << endl;
-	std::map<string, int> test_map;
+void RunStringTest(Logger* log) {
+	log->writeLine(L"FeString Test");
+	log->writeLine(L"=============");
+
+	FeString aString("String A");
+	FeString bString(L"String B");
+	FeString cString = *" = String C"_fe;
+	FeString* result = aString + " + " + bString + *" = The result"_fe;
+	//FeString* cString = aString + bString;
+
+	wcout << "A string: " << aString.c_str() << endl;
+	wcout << "B string: " << bString.c_str() << endl;
+	wcout << "C string: " << cString.c_str() << endl;
+	wcout << "Result: " << result->c_str() << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;
@@ -56,7 +68,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLine(L"Memory allocator test");
 	log.writeLine(L"=====================");
 	cout << "Created allocator with page size: " << Memory::PAGE_SIZE << " bytes" << endl;
-	CreateTestObject();
+
 	OutputFreeList(&log);
 	cout << endl;
 
@@ -68,7 +80,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t alloc_size = ((uint64_t)rand() % 64) + 1;
 		markers[i] = Memory::get()->alloc(alloc_size);
-		if(markers[i] != nullptr) 
+		if (markers[i] != nullptr)
 			cout << "Allocated block of " << alloc_size << " bytes at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 	}
 
@@ -97,6 +109,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << endl;
 	cout << "AFTER " << defrag_iterations << " DEFRAGMENTATION ITERATIONS" << endl;
 	OutputFreeList(&log);
+
+	RunStringTest(&log);
+
 	cin.get();
 	return 0;
 }

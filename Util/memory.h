@@ -38,34 +38,25 @@ public:
 
 	void* alloc(const size_t size_bytes);
 
-	/* Allocates a block of aligned memory.*/
-	void* allocAligned(const size_t size_bytes, uint8_t alignment);
-
-	Stack* allocStack(const size_t size_bytes, const uint8_t alignment);
-
 	/*Allocates a new block of memory capable of fitting num_elements of type T. */
-	template<typename T> T* allocArray(const size_t num_elements) {
- 		void* mem = alloc(sizeof(T) * num_elements);
+	template<typename T> T* alloc(const size_t num_elements = 1) {
+		void* mem = alloc(sizeof(T) * num_elements);
 		memset(mem, 0, sizeof(T));
 		return reinterpret_cast<T*>(mem);
 	}
 
+	void realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes);
+
 	/*Allocates a new block of memory capable of fitting num_elements of type T, then copies the old one to it. Once complete, the memory of the old array is released for reuse.
 	Updates the oldArray pointer to point to the newly-resized array.*/
-	template<typename T> void resizeArray(T*& oldArray, const size_t old_num_elements, const size_t num_elements) {
-		void* mem = alloc(sizeof(T) * num_elements);
-
-		T* replacement = reinterpret_cast<T*>(mem);
-		memset(replacement, 0, sizeof(T) * num_elements);
-		memcpy(replacement, oldArray, sizeof(T) * old_num_elements);
-		dealloc(oldArray);
-		oldArray = replacement;
-
-		// TODO this can be sped up a lot if the end of oldArray is followed by a free block capable of fitting the extra capacity. We would reduce fragmentation from allocating and releasing.
-		//	-- This would also require tracking all memory blocks (free and allocated) in a second linked list in order to immediately detect whether an adjacent block is free or not.
-		//		-- ^ would slow down defragmentation, maybe.
-		//		-- Perhaps wrap free-list entries in node containers, then have Blocks in a linked list of their own.
+	template<typename T> void realloc(T*& target, const size_t old_num_elements, const size_t num_elements) {
+		realloc(target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
 	}
+
+	/* Allocates a block of aligned memory.*/
+	void* allocAligned(const size_t size_bytes, uint8_t alignment);
+
+	Stack* allocStack(const size_t size_bytes, const uint8_t alignment);
 
 	/* Gets an aligned pointer within the specified block of memory. */
 	void* align(void* p, uint8_t alignment, size_t start_offset = 0);
