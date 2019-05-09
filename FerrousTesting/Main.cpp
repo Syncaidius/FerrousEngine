@@ -48,14 +48,14 @@ void RunStringTest(Logger* log) {
 
 	FeString aString("String A");
 	FeString bString(L"String B");
-	FeString cString = *" = String C"_fe;
-	FeString* result = aString + " + " + bString + *" = The result"_fe;
+	FeString cString = " = String C"_fe;
+	FeString result = aString + " + " + bString + " = The result"_fe;
 	//FeString* cString = aString + bString;
 
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
 	wcout << "C string: " << cString.c_str() << endl;
-	wcout << "Result: " << result->c_str() << endl;
+	wcout << "Result: " << result.c_str() << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;

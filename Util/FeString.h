@@ -49,23 +49,21 @@ public:
 	/*Returns a pointer to the raw underlying character data.*/
 	wchar_t* c_str() { return _data; }
 private:
-	FeString(void* allocated, wchar_t* c_data, size_t length);
-	friend FeString* operator +(const FeString& a, const FeString& b);
-	friend FeString* operator "" _fe(const char* c_data, size_t len);
+	FeString(wchar_t* c_data, size_t length);
+	friend FeString operator +(const FeString& a, const FeString& b);
+	friend FeString operator "" _fe(const char* c_data, size_t len);
 	wchar_t* _data;
-	void* _allocated;
 	size_t _length;
 };
 
-FeString* operator +(const FeString& a, const FeString& b) {
+FeString operator +(const FeString& a, const FeString& b) {
 	size_t a_bytes = a._length * sizeof(wchar_t);
 	size_t b_bytes = b._length * sizeof(wchar_t);
 	size_t len = a._length + b._length;
-	size_t num_bytes = sizeof(FeString) + a_bytes + b_bytes + sizeof(wchar_t);
+	size_t num_bytes = a_bytes + b_bytes + sizeof(wchar_t);
 
 	void* mem = Memory::get()->alloc(num_bytes);
-	char* p_start = reinterpret_cast<char*>(mem) + sizeof(FeString);
-	char* p_data = p_start;
+	char* p_data = reinterpret_cast<char*>(mem);
 
 	memcpy_s(p_data, a_bytes + b_bytes, a._data, a_bytes);
 	p_data += a_bytes;
@@ -73,19 +71,15 @@ FeString* operator +(const FeString& a, const FeString& b) {
 	p_data += b_bytes;
 	*p_data = L'\0';
 
-	return new (mem) FeString(mem, (wchar_t*)p_start, len);
+	return FeString((wchar_t*)mem, len);
 }
 
-FeString* operator +(const FeString* a, const FeString& b) {
-	return *a + b;
-}
-
-FeString* operator "" _fe(const char* a, size_t len) {
+FeString operator "" _fe(const char* a, size_t len) {
 	size_t a_bytes = len * sizeof(wchar_t);
-	size_t num_bytes = sizeof(FeString) + a_bytes + sizeof(wchar_t);
+	size_t num_bytes = a_bytes + sizeof(wchar_t);
 
 	void* mem = Memory::get()->alloc(num_bytes);
-	char* p_start = reinterpret_cast<char*>(mem) + sizeof(FeString);
+	char* p_start = reinterpret_cast<char*>(mem);
 	wchar_t* p_data = (wchar_t*)p_start;
 
 	for (int i = 0; i < len; i++)
@@ -94,5 +88,5 @@ FeString* operator "" _fe(const char* a, size_t len) {
 	p_data += len;
 	*p_data = L'\0';
 
-	return new (mem) FeString(mem, (wchar_t*)p_start, len);
+	return FeString((wchar_t*)p_start, len);
 }
