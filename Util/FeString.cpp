@@ -35,10 +35,13 @@ FeString::~FeString() {
 }
 
 FeString FeString::toLower() {
+	if (_length == 0)
+		return FeString();
+
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
 
 	for (size_t i = 0; i < _length; i++) {
-		if (_length > 0 && _data[i] >= 'A' && _data[i] <= 'Z') 
+		if (_data[i] >= 'A' && _data[i] <= 'Z') 
 			new_data[i] += _data[i] + 32;
 		else 
 			new_data[i] = _data[i];
@@ -52,10 +55,13 @@ FeString FeString::toLower() {
 }
 
 FeString FeString::toUpper() {
+	if (_length == 0)
+		return FeString();
+
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
 
 	for (size_t i = 0; i < _length; i++) {
-		if (_length > 0 && _data[i] >= 'a' && _data[i] <= 'z')
+		if (_data[i] >= 'a' && _data[i] <= 'z')
 			new_data[i] += _data[i] - 32;
 		else
 			new_data[i] = _data[i];
