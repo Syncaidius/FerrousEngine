@@ -1,6 +1,7 @@
 #include "stdafx.h"
-#include "FeString.h"
+#include "string_fe.h"
 #include "memory.h"
+#include "localization.h"
 
 FeString::FeString() {
 	_data = Memory::get()->alloc<wchar_t>();
@@ -40,15 +41,12 @@ FeString FeString::toLower() {
 
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
 
-	for (size_t i = 0; i < _length; i++) {
-		if (_data[i] >= 'A' && _data[i] <= 'Z') 
-			new_data[i] += _data[i] + 32;
-		else 
-			new_data[i] = _data[i];
-	}
+	for (size_t i = 0; i < _length; i++)
+		new_data[i] = std::tolower(_data[i], *Localization::get()->getCurrentLocale());
 
 	// TODO use default std locale instead of assuming we're using english.
 	// TODO add overload to accept alternative locale
+	// SEE: https://en.cppreference.com/w/cpp/locale/locale
 
 	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
@@ -60,15 +58,12 @@ FeString FeString::toUpper() {
 
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
 
-	for (size_t i = 0; i < _length; i++) {
-		if (_data[i] >= 'a' && _data[i] <= 'z')
-			new_data[i] += _data[i] - 32;
-		else
-			new_data[i] = _data[i];
-	}
+	for (size_t i = 0; i < _length; i++)
+		new_data[i] = std::toupper(_data[i], *Localization::get()->getCurrentLocale());
 
 	// TODO use default std locale instead of assuming we're using english.
 	// TODO add overload to accept alternative locale
+	// SEE: https://en.cppreference.com/w/cpp/locale/locale
 
 	new_data[_length] = L'\0';
 	return FeString(new_data, _length);

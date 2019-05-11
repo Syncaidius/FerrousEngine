@@ -30,7 +30,10 @@
     <ClCompile Include="memory_stack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="FeString.cpp">
+    <ClCompile Include="string_fe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="localization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -47,7 +50,10 @@
     <ClInclude Include="memory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="FeString.h">
+    <ClInclude Include="localization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="string_fe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,10 +1,10 @@
 #include "stdafx.h";
 #include <Util/util.h>;
 #include <Util/logging.h>
-#include <Util/FeString.h>
+#include <Util/string_fe.h>
+#include <Util/localization.h>
 #include <map>
 #include <Windows.h>
-
 using namespace std;
 
 void OutputFreeList(Logger* log) {
@@ -43,6 +43,8 @@ void OutputFreeList(Logger* log) {
 }
 
 void RunStringTest(Logger* log) {
+	Localization* loc = Localization::get();
+	loc->setCurrentLocale(loc->getPreferredLocale());
 	log->writeLine(L"FeString Test");
 	log->writeLine(L"=============");
 
