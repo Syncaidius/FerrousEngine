@@ -40,13 +40,10 @@ FeString FeString::toLower() {
 		return FeString();
 
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	std::locale loc = *Localization::get()->getCurrentLocale();
 
 	for (size_t i = 0; i < _length; i++)
-		new_data[i] = std::tolower(_data[i], *Localization::get()->getCurrentLocale());
-
-	// TODO use default std locale instead of assuming we're using english.
-	// TODO add overload to accept alternative locale
-	// SEE: https://en.cppreference.com/w/cpp/locale/locale
+		new_data[i] = std::tolower(_data[i], loc);
 
 	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
@@ -57,13 +54,66 @@ FeString FeString::toUpper() {
 		return FeString();
 
 	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	std::locale loc = *Localization::get()->getCurrentLocale();
 
 	for (size_t i = 0; i < _length; i++)
-		new_data[i] = std::toupper(_data[i], *Localization::get()->getCurrentLocale());
+		new_data[i] = std::toupper(_data[i], loc);
 
-	// TODO use default std locale instead of assuming we're using english.
-	// TODO add overload to accept alternative locale
-	// SEE: https://en.cppreference.com/w/cpp/locale/locale
+	new_data[_length] = L'\0';
+	return FeString(new_data, _length);
+}
+
+FeString FeString::capitalize() {
+	if (_length == 0)
+		return FeString();
+
+	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	std::locale loc = *Localization::get()->getCurrentLocale();
+	bool capitalize = true;
+
+	for (size_t i = 0; i < _length; i++) {
+		if (std::isspace(_data[i])) {
+			capitalize = true;
+			new_data[i] = _data[i];
+		}
+		else {
+			if (capitalize) {
+				new_data[i] = std::toupper(_data[i], loc);
+				capitalize = false;
+			}
+			else {
+				new_data[i] = _data[i];
+			}
+		}
+	}
+
+	new_data[_length] = L'\0';
+	return FeString(new_data, _length);
+}
+
+FeString FeString::capitalizeFirst() {
+	if (_length == 0)
+		return FeString();
+
+	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	std::locale loc = *Localization::get()->getCurrentLocale();
+	bool capitalize = true;
+
+	/* Loop until we hit a non-whitespace character*/
+	for (size_t i = 0; i < _length; i++) {
+		if (std::isspace(_data[i])) {
+			new_data[i] = _data[i];
+		}
+		else {
+			if (capitalize) {
+				new_data[i] = std::toupper(_data[i], loc);
+				capitalize = false;
+			}
+			else {
+				new_data[i] = _data[i];
+			}
+		}
+	}
 
 	new_data[_length] = L'\0';
 	return FeString(new_data, _length);

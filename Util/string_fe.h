@@ -37,10 +37,10 @@ public:
 	FeString toUpper();
 
 	/* Capitalizes the first character of the string.*/
-	void capitalize();
+	FeString capitalizeFirst();
 
 	/* Capitalizes the first letter of every word in the string.*/
-	void capitalizeAll();
+	FeString capitalize();
 
 	/* Gets the length of the string.*/
 	uint32_t getLength() { return _length; }
