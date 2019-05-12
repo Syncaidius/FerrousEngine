@@ -67,6 +67,11 @@ void RunStringTest(Logger* log) {
 	size_t indexOfSearched = toSearch.indexOf(&"searched"_fe);
 	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);
 
+	bool startsWith = toSearch.startsWith(&"I am"_fe);
+	bool startsWithFail = toSearch.startsWith(&"I'm not"_fe);
+	bool endsWith = toSearch.endsWith(&"searched."_fe);
+	bool endsWithFail = toSearch.endsWith(&"searching!"_fe);
+
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
 	wcout << "C string: " << cString.c_str() << endl;
@@ -84,10 +89,14 @@ void RunStringTest(Logger* log) {
 	wcout << "Trimmed (end): {" << resultTrimEnd.c_str() << "}"<< endl;
 	wcout << endl;
 
-	wcout << "Index of target: " << toSearch.c_str() << endl;
+	wcout << "Target: " << toSearch.c_str() << endl;
 	wcout << "Index of \"string\": " << indexOfString << endl;
 	wcout << "Index of \"searched\": " << indexOfSearched << endl;
 	wcout << "Index of \"chicken\": " << (indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found") << endl;
+	wcout << "Starts with \"I am\": " << (startsWith ? "true" : "false") << endl;
+	wcout << "Starts with \"I'm not\": " << (startsWithFail ? "true" : "false") << endl;
+	wcout << "Ends with \"searched.\": " << (endsWith ? "true" : "false") << endl;
+	wcout << "Ends with \"searching!\": " << (endsWithFail ? "true" : "false") << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;

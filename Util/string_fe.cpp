@@ -217,22 +217,88 @@ size_t FeString::indexOf(const wchar_t c) {
 size_t FeString::indexOf(const FeString* input) {
 	assert(input != nullptr);
 
-	for (size_t i = 0; i < _length; i++) {
-		if (_data[i] == input->_data[0]) {
-			/* Already checked first char. */
-			size_t j = 1;
+	if (_length >= input->_length)
+	{
+		for (size_t i = 0; i < _length; i++) {
+			if (_data[i] == input->_data[0]) {
+				/* Already checked first char. */
+				size_t j = 1;
 
-			/* Now iterate over _data from i to see if the rest of the string matches. */
-			for (; j < input->_length; j++) {
-				if ((i + j >= _length) || (_data[i + j] != input->_data[j]))
-					break;
+				/* Now iterate over _data from i to see if the rest of the string matches. */
+				for (; j < input->_length; j++) {
+					if ((i + j >= _length) || (_data[i + j] != input->_data[j]))
+						break;
+				}
+
+				if (j == input->_length)
+					return i;
 			}
-
-			if (j == input->_length)
-				return i;
 		}
 	}
 
 	return INDEXOF_NONE;
+}
+
+bool FeString::contains(const wchar_t c) {
+	for (size_t i = 0; i < _length; i++) {
+		if (_data[i] == c)
+			return true;
+	}
+
+	return false;
+}
+
+bool FeString::contains(const FeString* input) {
+	return indexOf(input) != INDEXOF_NONE;
+}
+
+bool FeString::endsWith(const wchar_t c) {
+	return _length > 0 && _data[_length - 1] == c;
+}
+
+bool FeString::endsWith(const FeString* input) {
+	if (_length >= input->_length)
+	{
+		size_t start = _length - input->_length;
+
+		for (size_t i = start; i < _length; i++) {
+			if (_data[i] == input->_data[0]) {
+				/* Already checked first char. */
+				size_t j = 1;
+
+				/* Now iterate over _data from i to see if the rest of the string matches. */
+				for (; j < input->_length; j++) {
+					if ((i + j >= _length) || (_data[i + j] != input->_data[j]))
+						break;
+				}
+
+				if (j == input->_length)
+					return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+bool FeString::startsWith(const wchar_t c) {
+	return _length > 0 && _data[0] == c;
+}
+
+bool FeString::startsWith(const FeString* input) {
+	if (_length >= input->_length) {
+		size_t i = 0;
+
+		/* Iterate over input to see if all chars match. */
+		for (; i < input->_length; i++) {
+			if ((_data[i] != input->_data[i]))
+				break;
+		}
+
+		if (i == input->_length)
+			return true;
+	}
+
+	return false;
 }
 
