@@ -56,17 +56,38 @@ void RunStringTest(Logger* log) {
 	FeString resultUpper = result.toUpper();
 	FeString resultCapsAll = ("this is a capitalized string"_fe).capitalize();
 	FeString resultCapsFirst = ("this is a capitalized string"_fe).capitalizeFirst();
-	FeString resultTrimmed = ("		I am trimmed		"_fe).trim();
+
+	FeString toTrim = "			   I am trimmed		"_fe;
+	FeString resultTrimmed = toTrim.trim();
+	FeString resultTrimStart = toTrim.trimStart();
+	FeString resultTrimEnd = toTrim.trimEnd();
+
+	FeString toSearch = "I am a string. I can be searched.";
+	size_t indexOfString = toSearch.indexOf(&"string"_fe);
+	size_t indexOfSearched = toSearch.indexOf(&"searched"_fe);
+	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);
 
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
 	wcout << "C string: " << cString.c_str() << endl;
 	wcout << "Result: " << result.c_str() << endl;
+	wcout << endl;
+
 	wcout << "Lower-case: " << resultLower.c_str() << endl;
 	wcout << "Upper-case: " << resultUpper.c_str() << endl;
 	wcout << "Capitalized (all): " << resultCapsAll.c_str() << endl;
 	wcout << "Capitalized (1st): " << resultCapsFirst.c_str() << endl;
-	wcout << "Trimmed: " << resultTrimmed.c_str() << endl;
+	wcout << endl;
+
+	wcout << "Trimmed: {" << resultTrimmed.c_str() << "}" << endl;
+	wcout << "Trimmed (start): {" << resultTrimStart.c_str() << "}" << endl;
+	wcout << "Trimmed (end): {" << resultTrimEnd.c_str() << "}"<< endl;
+	wcout << endl;
+
+	wcout << "Index of target: " << toSearch.c_str() << endl;
+	wcout << "Index of \"string\": " << indexOfString << endl;
+	wcout << "Index of \"searched\": " << indexOfSearched << endl;
+	wcout << "Index of \"chicken\": " << (indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found") << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;

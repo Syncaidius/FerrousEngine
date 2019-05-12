@@ -205,3 +205,34 @@ FeString FeString::trimEnd() {
 	return FeString(new_data, new_len);
 }
 
+size_t FeString::indexOf(const wchar_t c) {
+	for (size_t i = 0; i < _length; i++) {
+		if (_data[i] == c)
+			return i;
+	}
+
+	return INDEXOF_NONE;
+}
+
+size_t FeString::indexOf(const FeString* input) {
+	assert(input != nullptr);
+
+	for (size_t i = 0; i < _length; i++) {
+		if (_data[i] == input->_data[0]) {
+			/* Already checked first char. */
+			size_t j = 1;
+
+			/* Now iterate over _data from i to see if the rest of the string matches. */
+			for (; j < input->_length; j++) {
+				if ((i + j >= _length) || (_data[i + j] != input->_data[j]))
+					break;
+			}
+
+			if (j == input->_length)
+				return i;
+		}
+	}
+
+	return INDEXOF_NONE;
+}
+
