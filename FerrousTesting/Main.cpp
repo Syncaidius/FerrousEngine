@@ -90,13 +90,13 @@ void RunStringTest(Logger* log) {
 	wcout << endl;
 
 	wcout << "Target: " << toSearch.c_str() << endl;
-	wcout << "Index of \"string\": " << indexOfString << endl;
-	wcout << "Index of \"searched\": " << indexOfSearched << endl;
-	wcout << "Index of \"chicken\": " << (indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found") << endl;
-	wcout << "Starts with \"I am\": " << (startsWith ? "true" : "false") << endl;
-	wcout << "Starts with \"I'm not\": " << (startsWithFail ? "true" : "false") << endl;
-	wcout << "Ends with \"searched.\": " << (endsWith ? "true" : "false") << endl;
-	wcout << "Ends with \"searching!\": " << (endsWithFail ? "true" : "false") << endl;
+	wcout << "indexOf(\"string\"): " << indexOfString << endl;
+	wcout << "indexOf(\"searched\"): " << indexOfSearched << endl;
+	wcout << "indexOf(\"chicken\"): " << (indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found") << endl;
+	wcout << "startsWith(\"I am\"): " << (startsWith ? "true" : "false") << endl;
+	wcout << "startsWith(\"I'm not\"): " << (startsWithFail ? "true" : "false") << endl;
+	wcout << "endsWith(\"searched.\"): " << (endsWith ? "true" : "false") << endl;
+	wcout << "endsWith(\"searching!\"): " << (endsWithFail ? "true" : "false") << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;
