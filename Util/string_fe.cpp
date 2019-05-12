@@ -27,7 +27,7 @@ FeString::FeString(const char* c_data) {
 FeString::FeString(const wchar_t* c_data) {
 	_length = wcslen(c_data);
 	_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
-	memcpy_s(_data, _length * sizeof(wchar_t), c_data, _length * sizeof(wchar_t));
+	memcpy(_data, c_data, _length * sizeof(wchar_t));
 	_data[_length] = L'\0';
 }
 
@@ -72,7 +72,7 @@ FeString FeString::capitalize() {
 	bool capitalize = true;
 
 	for (size_t i = 0; i < _length; i++) {
-		if (std::isspace(_data[i])) {
+		if (std::isspace(_data[i], loc)) {
 			capitalize = true;
 			new_data[i] = _data[i];
 		}
@@ -101,7 +101,7 @@ FeString FeString::capitalizeFirst() {
 
 	/* Loop until we hit a non-whitespace character*/
 	for (size_t i = 0; i < _length; i++) {
-		if (std::isspace(_data[i])) {
+		if (std::isspace(_data[i], loc)) {
 			new_data[i] = _data[i];
 		}
 		else {
@@ -117,5 +117,91 @@ FeString FeString::capitalizeFirst() {
 
 	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
+}
+
+FeString FeString::trim() {
+	if (_length == 0)
+		return FeString();
+
+	std::locale loc = *Localization::get()->getCurrentLocale();
+	size_t start = 0;
+	size_t end = 0;
+
+	for (start = 0; start < _length; start++) {
+		if (!std::isspace(_data[start], loc))
+			break;
+	}
+
+#pragma warning(push)
+#pragma warning(disable: 6295) // _length cannot be zero at this point, so will not wrap or overflow to create an infinite loop.
+	for (end = _length - 1; end >= 0; end--) {
+		if (!std::isspace(_data[end], loc)) {
+			end++;
+			break;
+		}
+	}
+#pragma warning(pop)
+
+	size_t new_len = end - start;
+	if (new_len == 0)
+		return FeString();
+
+	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* p_start = _data + start;
+	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
+
+	new_data[new_len] = L'\0';
+	return FeString(new_data, new_len);
+}
+
+FeString FeString::trimStart() {
+	if (_length == 0)
+		return FeString();
+
+	std::locale loc = *Localization::get()->getCurrentLocale();
+	size_t start = 0;
+
+	for (start = 0; start < _length; start++) {
+		if (!std::isspace(_data[start], loc))
+			break;
+	}
+
+	size_t new_len = _length - start;
+	if (new_len == 0)
+		return FeString();
+
+	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* p_start = _data + start;
+	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
+
+	new_data[new_len] = L'\0';
+	return FeString(new_data, new_len);
+}
+
+FeString FeString::trimEnd() {
+	if (_length == 0)
+		return FeString();
+
+	std::locale loc = *Localization::get()->getCurrentLocale();
+	size_t new_len = 0;
+
+#pragma warning(push)
+#pragma warning(disable: 6295) // _length cannot be zero at this point, so will not wrap or overflow to create an infinite loop.
+	for (new_len = _length - 1; new_len >= 0; new_len--) {
+		if (!std::isspace(_data[new_len], loc)) {
+			new_len++;
+			break;
+		}
+	}
+#pragma warning(pop)
+
+	if (new_len == 0)
+		return FeString();
+
+	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	memcpy(new_data, _data, new_len * sizeof(wchar_t));
+
+	new_data[new_len] = L'\0';
+	return FeString(new_data, new_len);
 }
 

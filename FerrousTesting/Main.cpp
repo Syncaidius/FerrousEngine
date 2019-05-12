@@ -56,6 +56,7 @@ void RunStringTest(Logger* log) {
 	FeString resultUpper = result.toUpper();
 	FeString resultCapsAll = ("this is a capitalized string"_fe).capitalize();
 	FeString resultCapsFirst = ("this is a capitalized string"_fe).capitalizeFirst();
+	FeString resultTrimmed = ("		I am trimmed		"_fe).trim();
 
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
@@ -65,6 +66,7 @@ void RunStringTest(Logger* log) {
 	wcout << "Upper-case: " << resultUpper.c_str() << endl;
 	wcout << "Capitalized (all): " << resultCapsAll.c_str() << endl;
 	wcout << "Capitalized (1st): " << resultCapsFirst.c_str() << endl;
+	wcout << "Trimmed: " << resultTrimmed.c_str() << endl;
 }
 
 const int NUM_ALLOCATIONS = 40;

@@ -64,9 +64,9 @@ FeString operator +(const FeString& a, const FeString& b) {
 	void* mem = Memory::get()->alloc(num_bytes);
 	char* p_data = reinterpret_cast<char*>(mem);
 
-	memcpy_s(p_data, a_bytes + b_bytes, a._data, a_bytes);
+	memcpy(p_data, a._data, a_bytes);
 	p_data += a_bytes;
-	memcpy_s(p_data, a_bytes + b_bytes, b._data, b_bytes);
+	memcpy(p_data, b._data, b_bytes);
 	p_data += b_bytes;
 	*p_data = L'\0';
 
