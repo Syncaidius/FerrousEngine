@@ -2,7 +2,7 @@
 Since the project has just been started, there is a shortage of details right now. However, I can list a few things I need/want in this engine:  
  * DirectX 12 from the ground up (and Vulkan later down the line)  - SPIR-V for shared shader code between APIs
  * XAudio2 and/or [OpenAL](https://www.openal.org/) audio, with abstraction to switch between them or another audio system (e.g. [FMOD](https://www.fmod.com/))  
- * [Bullet](https://pybullet.org/wordpress/) physics - open-source, free, cross-platform, vendor-agnostic, nice right?  
+ * [PhysX 4.x](https://github.com/NVIDIAGameWorks/PhysX) for physics - Surprise, it's open source!
  * [AssImp](http://www.assimp.org/) for model loading  
  * [Lua](https://www.lua.org/) for scripting
 

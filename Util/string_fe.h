@@ -19,8 +19,8 @@ public:
 	FeString substr(const uint32_t startIndex);
 	FeString substr(const uint32_t startIndex, const uint32_t count);
 
-	FeString replace(const wchar_t c);
-	FeString replace(const FeString* str);
+	FeString replace(const wchar_t c, const wchar_t replacement);
+	FeString replace(const FeString* str, const FeString* replacement);
 
 	bool startsWith(const wchar_t c);
 	bool startsWith(const FeString* input);
