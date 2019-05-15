@@ -67,6 +67,9 @@ void RunStringTest(Logger* log) {
 	size_t indexOfSearched = toSearch.indexOf(&"searched"_fe);
 	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);
 
+	FeString toReplace = "I am a replaced string full of replacements, which replaces things.";
+	FeString resultReplaced = toReplace.replace(&"replace"_fe, &"start"_fe);
+
 	bool startsWith = toSearch.startsWith(&"I am"_fe);
 	bool startsWithFail = toSearch.startsWith(&"I'm not"_fe);
 	bool endsWith = toSearch.endsWith(&"searched."_fe);
@@ -87,6 +90,10 @@ void RunStringTest(Logger* log) {
 	wcout << "Trimmed: {" << resultTrimmed.c_str() << "}" << endl;
 	wcout << "Trimmed (start): {" << resultTrimStart.c_str() << "}" << endl;
 	wcout << "Trimmed (end): {" << resultTrimEnd.c_str() << "}"<< endl;
+	wcout << endl;
+
+	wcout << "Replacement Target: " << toReplace.c_str() << endl;
+	wcout << "Replace \"replace\" with \"start\": {" << resultReplaced.c_str() << "}" << endl;
 	wcout << endl;
 
 	wcout << "Target: " << toSearch.c_str() << endl;

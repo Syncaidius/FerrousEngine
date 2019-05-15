@@ -2,6 +2,7 @@
 #include "string_fe.h"
 #include "memory.h"
 #include "localization.h"
+#include <vector>
 
 FeString::FeString() {
 	_data = Memory::get()->alloc<wchar_t>();
@@ -237,6 +238,95 @@ size_t FeString::indexOf(const FeString* input) {
 	}
 
 	return INDEXOF_NONE;
+}
+
+FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
+	wchar_t* mem = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	memcpy(mem, _data, (_length + 1ULL) * sizeof(wchar_t));
+
+	for (size_t i = 0; i < _length; i++) {
+		if (mem[i] == c)
+			mem[i] = replacement;
+	}
+
+	return FeString(mem, _length);
+}
+
+FeString FeString::replace(const FeString* input, const FeString* replacement) {
+	assert(input != nullptr);
+	assert(replacement != nullptr);
+
+	/* Is the string at least as big as the input*/
+	if (_length < input->_length)
+	{
+		wchar_t* cpy = Memory::get()->alloc<wchar_t>(input->_length + 1ULL);
+		memcpy(cpy, input->_data, input->_length + 1ULL);
+		return FeString(cpy, input->_length);
+	}
+
+	std::vector<size_t> indices; // TODO: Check if this allocates cleanly. i.e. not dynamically allocating/deallocating via malloc/free.
+
+	// Collect index of every match.
+	for (size_t i = 0; i < _length; i++) {
+		if (_data[i] == input->_data[0]) {
+			/* Already checked first char. */
+			size_t j = 1;
+
+			/* Now iterate over _data from i to see if the rest of the string matches. */
+			for (; j < input->_length; j++) {
+				if ((i + j >= _length) || (_data[i + j] != input->_data[j]))
+					break;
+			}
+
+			if (j == input->_length)
+				indices.push_back(i);
+		}
+	}
+
+	// Build new string
+	size_t replacement_bytes = replacement->_length * sizeof(wchar_t);
+	size_t count = indices.size();
+	size_t new_len = _length;
+
+	// TODO find a better way to handle negative input_dif, instead of branching.
+	if (replacement->_length >= input->_length) {
+		size_t input_dif = replacement->_length - input->_length;
+		new_len = _length + (input_dif * count);
+	}
+	else { // Input is smaller than the replacement
+		size_t input_dif = input->_length - replacement->_length;
+		new_len = _length - (input_dif * count);
+	}
+
+	size_t prev_replace_end = 0; /* Ending of previous replacement.*/
+
+	wchar_t* mem = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* mem_pos = mem;
+
+	for (size_t i = 0; i < count; i++) {
+		/*	Was there non-replaced data between the current and previous replacement?
+			If so, copy it. */
+		if (indices[i] != prev_replace_end) {
+			size_t dif = indices[i] - prev_replace_end;
+			memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
+			mem_pos += dif;
+		}
+
+		/* Now copy the replacement string into new string.*/
+		memcpy(mem_pos, replacement->_data, replacement_bytes);
+		mem_pos += replacement->_length;
+		prev_replace_end = indices[i] + input->_length;
+	}
+
+	assert(prev_replace_end <= _length);
+	if (prev_replace_end < _length) {
+		size_t dif = _length - prev_replace_end;
+		memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
+	}
+
+	mem[new_len] = L'\0';
+
+	return FeString(mem, new_len);
 }
 
 bool FeString::contains(const wchar_t c) {
