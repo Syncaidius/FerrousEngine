@@ -16,8 +16,8 @@ public:
 	FeString(const wchar_t* c_data);
 	~FeString();
 
-	FeString substr(const uint32_t startIndex);
-	FeString substr(const uint32_t startIndex, const uint32_t count);
+	FeString substr(const size_t startIndex);
+	FeString substr(const size_t startIndex, const size_t count);
 
 	FeString replace(const wchar_t c, const wchar_t replacement);
 	FeString replace(const FeString* str, const FeString* replacement);

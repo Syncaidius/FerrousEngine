@@ -240,6 +240,29 @@ size_t FeString::indexOf(const FeString* input) {
 	return INDEXOF_NONE;
 }
 
+FeString FeString::substr(const size_t startIndex) {
+	assert(startIndex < _length);
+
+	size_t count = _length - startIndex;
+	wchar_t* mem = Memory::get()->alloc<wchar_t>(count + 1ULL);
+	wchar_t* src_pos = _data + startIndex;
+	memcpy(mem, src_pos, count * sizeof(wchar_t));
+	mem[count] = '\0';
+
+	return FeString(mem, count);
+}
+
+FeString FeString::substr(const size_t startIndex, const size_t count) {
+	assert((startIndex + count) < _length);
+
+	wchar_t* mem = Memory::get()->alloc<wchar_t>(count + 1ULL);
+	wchar_t* src_pos = _data + startIndex;
+	memcpy(mem, src_pos, count * sizeof(wchar_t));
+	mem[count] = '\0';
+
+	return FeString(mem, count);
+}
+
 FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
 	wchar_t* mem = Memory::get()->alloc<wchar_t>(_length + 1ULL);
 	memcpy(mem, _data, (_length + 1ULL) * sizeof(wchar_t));

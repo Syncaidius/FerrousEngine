@@ -69,6 +69,7 @@ void RunStringTest(Logger* log) {
 
 	FeString toReplace = "I am a replaced string full of replacements, which replaces things.";
 	FeString resultReplaced = toReplace.replace(&"replace"_fe, &"start"_fe);
+	FeString resultSubStr = toReplace.substr(0, 190);
 
 	bool startsWith = toSearch.startsWith(&"I am"_fe);
 	bool startsWithFail = toSearch.startsWith(&"I'm not"_fe);
@@ -94,6 +95,7 @@ void RunStringTest(Logger* log) {
 
 	wcout << "Replacement Target: " << toReplace.c_str() << endl;
 	wcout << "Replace \"replace\" with \"start\": {" << resultReplaced.c_str() << "}" << endl;
+	wcout << "Substr 0 to 10: {" << resultSubStr.c_str() << "}" << endl;
 	wcout << endl;
 
 	wcout << "Target: " << toSearch.c_str() << endl;
