@@ -36,12 +36,21 @@ public:
 	const static size_t HEADER_SIZE = sizeof(Block);
 	const static size_t PAGE_SIZE = 8912;
 
+	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
 	void* alloc(const size_t size_bytes);
 
-	/*Allocates a new block of memory capable of fitting num_elements of type T. */
-	template<typename T> T* alloc(const size_t num_elements = 1) {
+	/*Allocates, but does not zero, a new block of memory capable of fitting the requested number of bytes. */
+	inline void* allocFast(const size_t size_bytes);
+
+	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
+	template<typename T> inline T* alloc(const size_t num_elements = 1) {
 		void* mem = alloc(sizeof(T) * num_elements);
 		memset(mem, 0, sizeof(T));
+		return reinterpret_cast<T*>(mem);
+	}
+
+	template<typename T> inline T* allocFast(const size_t num_elements = 1) {
+		void* mem = allocFast(sizeof(T) * num_elements);
 		return reinterpret_cast<T*>(mem);
 	}
 
@@ -51,6 +60,13 @@ public:
 	Updates the oldArray pointer to point to the newly-resized array.*/
 	template<typename T> void realloc(T*& target, const size_t old_num_elements, const size_t num_elements) {
 		realloc(target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
+	}
+
+	inline void copy(void* dest, void* src, const size_t num_bytes);
+
+	/* Copies memory from the source, to the destination. */
+	template<typename T> inline void copy(T* dest, T* src, const size_t num_elements) {
+		copy(dest, src, sizeof(T) * num_elements);
 	}
 
 	/* Allocates a block of aligned memory.*/

@@ -15,7 +15,7 @@ Memory::~Memory(void) {
 	free(_start);
 }
 
-void* Memory::alloc(const size_t size_bytes) {
+void* Memory::allocFast(const size_t size_bytes) {
 	// Find a free block which is big enough. If it's too big, downsize it accordingly.
 	// This is not as fast as a specialized allocator (e.g. stack).
 	Block* block = _free;
@@ -70,6 +70,11 @@ void* Memory::alloc(const size_t size_bytes) {
 	}
 
 	assert(p != nullptr);
+	return p;
+}
+
+void* Memory::alloc(const size_t size_bytes) {
+	void* p = allocFast(size_bytes);
 	memset(p, 0, size_bytes);
 	return p;
 }

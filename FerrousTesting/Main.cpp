@@ -69,7 +69,7 @@ void RunStringTest(Logger* log) {
 
 	FeString toReplace = "I am a replaced string full of replacements, which replaces things.";
 	FeString resultReplaced = toReplace.replace(&"replace"_fe, &"start"_fe);
-	FeString resultSubStr = toReplace.substr(0, 190);
+	FeString resultSubStr = toReplace.substr(0, 10);
 
 	bool startsWith = toSearch.startsWith(&"I am"_fe);
 	bool startsWithFail = toSearch.startsWith(&"I'm not"_fe);
@@ -151,7 +151,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	// Output a map of allocator memory.
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	log.writeLine(L" "); // TODO empty line overload.
-	log.writeLine(L"BEFORE DEFRAGMENTATION");
+	log.writeLine(L"BEFORE STRING TEST");
+	OutputFreeList(&log);
+	RunStringTest(&log);
+
+	log.writeLine(L" "); // TODO empty line overload.
+	log.writeLine(L"AFTER STRING TEST");
 	OutputFreeList(&log);
 
 	uint32_t defrag_iterations = 1;
@@ -159,8 +164,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << endl;
 	cout << "AFTER " << defrag_iterations << " DEFRAGMENTATION ITERATIONS" << endl;
 	OutputFreeList(&log);
-
-	RunStringTest(&log);
 
 	cin.get();
 	return 0;
