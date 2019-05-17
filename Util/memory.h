@@ -91,7 +91,7 @@ public:
 
 	size_t getOverhead() { return _overhead; }
 
-	static Memory* get() { return _allocator; }
+	static inline Memory* get() { return _allocator; }
 
 private:
 	static Memory* _allocator;

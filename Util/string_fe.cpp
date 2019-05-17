@@ -257,7 +257,7 @@ FeString FeString::substr(const size_t startIndex, const size_t count) {
 
 	wchar_t* mem = Memory::get()->alloc<wchar_t>(count + 1ULL);
 	wchar_t* src_pos = _data + startIndex;
-	memcpy(mem, src_pos, count * sizeof(wchar_t));
+	Memory::get()->copy(mem, src_pos, count * sizeof(wchar_t));
 	mem[count] = '\0';
 
 	return FeString(mem, count);

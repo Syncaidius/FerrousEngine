@@ -91,6 +91,11 @@ void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num
 	//		-- Perhaps wrap free-list entries in node containers, then have Blocks in a linked list of their own.
 }
 
+void Memory::copy(void* dest, void* src, const size_t num_bytes) {
+	// TODO some validation?
+	memcpy(dest, src, num_bytes);
+}
+
 void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
 	assert(alignment >= 1);
 	assert(alignment <= 128);
