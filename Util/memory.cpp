@@ -54,7 +54,7 @@ void* Memory::allocFast(const size_t size_bytes) {
 			_allocated += size_bytes + HEADER_SIZE;
 			_overhead += HEADER_SIZE;
 		}
-		else { // TODO if the remaining size is > 0 but less-than-or-equal-to HEADER_SIZE, can we throw it into the block after it (if exists)
+		else { // TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE), can we throw it into the block after it (if exists)
 			_allocated += block->size;
 
 			if (block == _free) {
@@ -66,6 +66,7 @@ void* Memory::allocFast(const size_t size_bytes) {
 			}
 		}
 
+		block->ref_count = 1;
 		break;
 	}
 
@@ -77,6 +78,18 @@ void* Memory::alloc(const size_t size_bytes) {
 	void* p = allocFast(size_bytes);
 	memset(p, 0, size_bytes);
 	return p;
+}
+
+void Memory::ref(void* p) {
+	Block* b = getHeader(p);
+	b->ref_count++;
+}
+
+void Memory::deref(void* p) {
+	Block* b = getHeader(p);
+	b->ref_count--;
+	if (b->ref_count == 0)
+		dealloc(p);
 }
 
 void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes) {
@@ -91,7 +104,7 @@ void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num
 	//		-- Perhaps wrap free-list entries in node containers, then have Blocks in a linked list of their own.
 }
 
-void Memory::copy(void* dest, void* src, const size_t num_bytes) {
+void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
 	// TODO some validation?
 	memcpy(dest, src, num_bytes);
 }
@@ -130,9 +143,10 @@ void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
 }
 
 void Memory::dealloc(void* p) {
+	assert(p != nullptr);
 	Block* block_to_free = getHeader(p);
-
 	assert(block_to_free != _free);
+
 	_allocated -= block_to_free->size;
 	block_to_free->next = _free;
 	_free = block_to_free;
@@ -231,4 +245,11 @@ void Memory::frontBackSplit(Block* source, Block** frontRef, Block** backRef) {
 	*frontRef = source;
 	*backRef = slow->next;
 	slow->next = nullptr;
+}
+
+Memory::Block* Memory::getHeader(void* p) {
+	// Header is located behind the pointer's address.#
+	size_t adjustment_loc = HEADER_SIZE - offsetof(struct Block, adjustment);
+	uint8_t* adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
+	return reinterpret_cast<Block*>((char*)p - *adjustment - HEADER_SIZE);
 }

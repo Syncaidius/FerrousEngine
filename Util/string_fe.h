@@ -12,6 +12,7 @@ public:
 	static FeString format(const FeString& str, ...);
 
 	FeString();
+	FeString(const FeString& copy);
 	FeString(const char* c_data);
 	FeString(const wchar_t* c_data);
 	~FeString();
@@ -59,14 +60,15 @@ public:
 	FeString capitalize();
 
 	/* Gets the length of the string.*/
-	uint32_t getLength() { return _length; }
+	size_t getLength() const { return _length; }
 
 	/*Returns a pointer to the raw underlying character data.*/
-	wchar_t* c_str() { return _data; }
+	wchar_t* c_str() const { return _data; }
 private:
 	FeString(wchar_t* c_data, size_t length);
 	friend FeString operator +(const FeString& a, const FeString& b);
 	friend FeString operator "" _fe(const char* c_data, size_t len);
+	friend FeString operator "" _fe(const wchar_t* c_data, size_t len);
 	wchar_t* _data;
 	size_t _length;
 };
@@ -90,18 +92,18 @@ FeString operator +(const FeString& a, const FeString& b) {
 }
 
 FeString operator "" _fe(const char* a, size_t len) {
-	size_t a_bytes = len * sizeof(wchar_t);
-	size_t num_bytes = a_bytes + sizeof(wchar_t);
-
-	void* mem = Memory::get()->alloc(num_bytes);
-	char* p_start = reinterpret_cast<char*>(mem);
-	wchar_t* p_data = (wchar_t*)p_start;
-
+	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
 	for (size_t i = 0; i < len; i++)
-		p_data[i] = a[i];
+		p[i] = p[i];
 
-	p_data += len;
-	*p_data = L'\0';
+	p[len] = L'\0';
+	return FeString(p, len);
+}
 
-	return FeString((wchar_t*)p_start, len);
+FeString operator "" _fe(const wchar_t* a, size_t len) {
+	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
+	Memory::get()->copyType<wchar_t>(p, a, len);
+
+	p[len] = L'\0';
+	return FeString(p, len);
 }

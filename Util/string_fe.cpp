@@ -5,8 +5,14 @@
 #include <vector>
 
 FeString::FeString() {
-	_data = Memory::get()->alloc<wchar_t>();
+	_data = Memory::get()->allocType<wchar_t>();
 	_length = 0;
+}
+
+FeString::FeString(const FeString& copy) {
+	_data = copy._data;
+	Memory::get()->ref(_data);
+	_length = copy._length;
 }
 
 /* Private constructor.*/
@@ -17,7 +23,7 @@ FeString::FeString(wchar_t* c_data, size_t length) {
 
 FeString::FeString(const char* c_data) {
 	_length = strlen(c_data);
-	_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 
 	for (size_t i = 0; i < _length; i++)
 		_data[i] = c_data[i];
@@ -27,20 +33,20 @@ FeString::FeString(const char* c_data) {
 
 FeString::FeString(const wchar_t* c_data) {
 	_length = wcslen(c_data);
-	_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	memcpy(_data, c_data, _length * sizeof(wchar_t));
 	_data[_length] = L'\0';
 }
 
 FeString::~FeString() {
-	Memory::get()->dealloc(_data);
+	Memory::get()->deref(_data);
 }
 
 FeString FeString::toLower() {
 	if (_length == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
 
 	for (size_t i = 0; i < _length; i++)
@@ -54,7 +60,7 @@ FeString FeString::toUpper() {
 	if (_length == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
 
 	for (size_t i = 0; i < _length; i++)
@@ -68,7 +74,7 @@ FeString FeString::capitalize() {
 	if (_length == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
 	bool capitalize = true;
 
@@ -96,7 +102,7 @@ FeString FeString::capitalizeFirst() {
 	if (_length == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
 	bool capitalize = true;
 
@@ -147,7 +153,7 @@ FeString FeString::trim() {
 	if (new_len == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
 
@@ -171,7 +177,7 @@ FeString FeString::trimStart() {
 	if (new_len == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
 
@@ -199,7 +205,7 @@ FeString FeString::trimEnd() {
 	if (new_len == 0)
 		return FeString();
 
-	wchar_t* new_data = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* new_data = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	memcpy(new_data, _data, new_len * sizeof(wchar_t));
 
 	new_data[new_len] = L'\0';
@@ -244,7 +250,7 @@ FeString FeString::substr(const size_t startIndex) {
 	assert(startIndex < _length);
 
 	size_t count = _length - startIndex;
-	wchar_t* mem = Memory::get()->alloc<wchar_t>(count + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(count + 1ULL);
 	wchar_t* src_pos = _data + startIndex;
 	memcpy(mem, src_pos, count * sizeof(wchar_t));
 	mem[count] = '\0';
@@ -255,7 +261,7 @@ FeString FeString::substr(const size_t startIndex) {
 FeString FeString::substr(const size_t startIndex, const size_t count) {
 	assert((startIndex + count) < _length);
 
-	wchar_t* mem = Memory::get()->alloc<wchar_t>(count + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(count + 1ULL);
 	wchar_t* src_pos = _data + startIndex;
 	Memory::get()->copy(mem, src_pos, count * sizeof(wchar_t));
 	mem[count] = '\0';
@@ -264,7 +270,7 @@ FeString FeString::substr(const size_t startIndex, const size_t count) {
 }
 
 FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
-	wchar_t* mem = Memory::get()->alloc<wchar_t>(_length + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(_length + 1ULL);
 	memcpy(mem, _data, (_length + 1ULL) * sizeof(wchar_t));
 
 	for (size_t i = 0; i < _length; i++) {
@@ -282,7 +288,7 @@ FeString FeString::replace(const FeString* input, const FeString* replacement) {
 	/* Is the string at least as big as the input*/
 	if (_length < input->_length)
 	{
-		wchar_t* cpy = Memory::get()->alloc<wchar_t>(input->_length + 1ULL);
+		wchar_t* cpy = Memory::get()->allocType<wchar_t>(input->_length + 1ULL);
 		memcpy(cpy, input->_data, input->_length + 1ULL);
 		return FeString(cpy, input->_length);
 	}
@@ -323,7 +329,7 @@ FeString FeString::replace(const FeString* input, const FeString* replacement) {
 
 	size_t prev_replace_end = 0; /* Ending of previous replacement.*/
 
-	wchar_t* mem = Memory::get()->alloc<wchar_t>(new_len + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	wchar_t* mem_pos = mem;
 
 	for (size_t i = 0; i < count; i++) {

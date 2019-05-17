@@ -7,7 +7,8 @@ public:
 	struct Block {
 		size_t size;
 		Block* next;
-		uint8_t adjustment; /* Adjustment must always be last member.*/
+		uint16_t ref_count;
+		uint8_t adjustment;
 
 		/* Block data follows the last member of Block. */
 	};
@@ -43,29 +44,35 @@ public:
 	inline void* allocFast(const size_t size_bytes);
 
 	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
-	template<typename T> inline T* alloc(const size_t num_elements = 1) {
+	template<typename T> T* allocType(const size_t num_elements = 1) {
 		void* mem = alloc(sizeof(T) * num_elements);
 		memset(mem, 0, sizeof(T));
 		return reinterpret_cast<T*>(mem);
 	}
 
-	template<typename T> inline T* allocFast(const size_t num_elements = 1) {
+	template<typename T> inline T* allocTypeFast(const size_t num_elements = 1) {
 		void* mem = allocFast(sizeof(T) * num_elements);
 		return reinterpret_cast<T*>(mem);
 	}
+
+	/* Increments the reference count of a block of memory. If the reference count hits 0, it will automatically be deallocated. */
+	void ref(void* p);
+
+	/* Dereferences a block of memory. If the reference count hits 0, it will automatically be deallocated. */
+	void deref(void* p);
 
 	void realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes);
 
 	/*Allocates a new block of memory capable of fitting num_elements of type T, then copies the old one to it. Once complete, the memory of the old array is released for reuse.
 	Updates the oldArray pointer to point to the newly-resized array.*/
-	template<typename T> void realloc(T*& target, const size_t old_num_elements, const size_t num_elements) {
-		realloc(target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
+	template<typename T> void reallocType(T*& target, const size_t old_num_elements, const size_t num_elements) {
+		realloc((void*&)target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
 	}
 
-	inline void copy(void* dest, void* src, const size_t num_bytes);
+	void copy(void* dest, const void* src, const size_t num_bytes);
 
 	/* Copies memory from the source, to the destination. */
-	template<typename T> inline void copy(T* dest, T* src, const size_t num_elements) {
+	template<typename T> inline void copyType(T* dest, const T* src, const size_t num_elements) {
 		copy(dest, src, sizeof(T) * num_elements);
 	}
 
@@ -75,7 +82,7 @@ public:
 	Stack* allocStack(const size_t size_bytes, const uint8_t alignment);
 
 	/* Gets an aligned pointer within the specified block of memory. */
-	void* align(void* p, uint8_t alignment, size_t start_offset = 0);
+	inline void* align(void* p, uint8_t alignment, size_t start_offset = 0);
 
 	void dealloc(void* p);
 
@@ -87,9 +94,9 @@ public:
 		return _free;
 	}
 
-	size_t getAllocated() { return _allocated; }
+	size_t getAllocated() const { return _allocated; }
 
-	size_t getOverhead() { return _overhead; }
+	size_t getOverhead() const { return _overhead; }
 
 	static inline Memory* get() { return _allocator; }
 
@@ -107,10 +114,5 @@ private:
 	Block* sortedMerge(Block* a, Block* b);
 	void frontBackSplit(Block* source, Block** frontRef, Block** backRef);
 
-	inline Block* getHeader(void* p) {
-		// Header is located behind the pointer's address.#
-		size_t adjustment_loc = HEADER_SIZE - offsetof(struct Block, adjustment);
-		uint8_t* adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
-		return reinterpret_cast<Block*>((char*)p - *adjustment - HEADER_SIZE);
-	}
+	inline Block* getHeader(void* p);
 };

@@ -162,7 +162,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	uint32_t defrag_iterations = 1;
 	Memory::get()->defragment();
 	cout << endl;
-	cout << "AFTER " << defrag_iterations << " DEFRAGMENTATION ITERATIONS" << endl;
+	cout << "AFTER DEFRAGMENTATION" << endl;
 	OutputFreeList(&log);
 
 	cin.get();
