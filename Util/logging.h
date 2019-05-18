@@ -1,11 +1,12 @@
 #pragma once
 #include "stdafx.h"
 #include "memory.h"
+#include "string_fe.h"
 
 class FERROUS_UTIL_API LogOutputBase {
 public:
-	virtual void write(const wchar_t* msg) = 0;
-	virtual void writeLine(const wchar_t* msg) = 0;
+	virtual void write(const FeString& msg) = 0;
+	virtual void writeLine(const FeString& msg) = 0;
 	virtual void clear() = 0;
 	virtual void close() = 0;
 };
@@ -18,8 +19,8 @@ public:
 protected:
 	friend class Logger;
 
-	void write(const wchar_t* msg);
-	void writeLine(const wchar_t* msg);
+	void write(const FeString& msg);
+	void writeLine(const FeString& msg);
 	void clear();
 	void close();
 private:
@@ -37,9 +38,9 @@ public:
 
 	void addOutput(LogOutputBase* output);
 
-	void writeLine(const wchar_t* msg);
+	void writeLine(const FeString& msg);
 
-	void write(const wchar_t* msg);
+	void write(const FeString& msg);
 
 	void clear();
 

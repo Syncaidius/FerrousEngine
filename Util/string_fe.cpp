@@ -4,6 +4,31 @@
 #include "localization.h"
 #include <vector>
 
+#pragma region STATIC
+FeString FeString::dateTime(const wchar_t* format) {
+	static size_t buf_size = 80;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size);
+
+	assert(format != nullptr);
+	time_t now = time(nullptr);
+	struct tm tstruct;
+	localtime_s(&tstruct, &now);
+	size_t len = wcsftime(buf, buf_size, format, &tstruct);
+	if (len == 0) { // buffer was not big enough
+		size_t old_size = buf_size;
+		buf_size *= 2;
+
+		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
+		return dateTime(format);
+	}
+
+	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len + 1ULL);
+	memcpy(mem, buf, len * sizeof(wchar_t));
+	return FeString(mem, len);
+}
+#pragma endregion
+
+#pragma region INSTANCED
 FeString::FeString() {
 	_data = Memory::get()->allocType<wchar_t>();
 	_length = 0;
@@ -19,6 +44,7 @@ FeString::FeString(const FeString& copy) {
 FeString::FeString(wchar_t* c_data, size_t length) {
 	_length = length;
 	_data = c_data;
+	_data[_length] = L'\0';
 }
 
 FeString::FeString(const char* c_data) {
@@ -52,7 +78,6 @@ FeString FeString::toLower() {
 	for (size_t i = 0; i < _length; i++)
 		new_data[i] = std::tolower(_data[i], loc);
 
-	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
 }
 
@@ -66,7 +91,6 @@ FeString FeString::toUpper() {
 	for (size_t i = 0; i < _length; i++)
 		new_data[i] = std::toupper(_data[i], loc);
 
-	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
 }
 
@@ -94,7 +118,6 @@ FeString FeString::capitalize() {
 		}
 	}
 
-	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
 }
 
@@ -122,7 +145,6 @@ FeString FeString::capitalizeFirst() {
 		}
 	}
 
-	new_data[_length] = L'\0';
 	return FeString(new_data, _length);
 }
 
@@ -157,7 +179,6 @@ FeString FeString::trim() {
 	wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
 
-	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len);
 }
 
@@ -180,8 +201,6 @@ FeString FeString::trimStart() {
 	wchar_t* new_data = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
-
-	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len);
 }
 
@@ -207,8 +226,6 @@ FeString FeString::trimEnd() {
 
 	wchar_t* new_data = Memory::get()->allocType<wchar_t>(new_len + 1ULL);
 	memcpy(new_data, _data, new_len * sizeof(wchar_t));
-
-	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len);
 }
 
@@ -253,8 +270,6 @@ FeString FeString::substr(const size_t startIndex) {
 	wchar_t* mem = Memory::get()->allocType<wchar_t>(count + 1ULL);
 	wchar_t* src_pos = _data + startIndex;
 	memcpy(mem, src_pos, count * sizeof(wchar_t));
-	mem[count] = '\0';
-
 	return FeString(mem, count);
 }
 
@@ -264,8 +279,6 @@ FeString FeString::substr(const size_t startIndex, const size_t count) {
 	wchar_t* mem = Memory::get()->allocType<wchar_t>(count + 1ULL);
 	wchar_t* src_pos = _data + startIndex;
 	Memory::get()->copy(mem, src_pos, count * sizeof(wchar_t));
-	mem[count] = '\0';
-
 	return FeString(mem, count);
 }
 
@@ -353,8 +366,6 @@ FeString FeString::replace(const FeString* input, const FeString* replacement) {
 		memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
 	}
 
-	mem[new_len] = L'\0';
-
 	return FeString(mem, new_len);
 }
 
@@ -420,4 +431,36 @@ bool FeString::startsWith(const FeString* input) {
 
 	return false;
 }
+#pragma endregion
+
+#pragma region OPERATORS
+FeString operator +(const FeString& a, const FeString& b) {
+	size_t len = a._length + b._length;
+
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(len + 1ULL);
+	wchar_t* p_data = mem;
+
+	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
+	p_data += a._length;
+	memcpy(p_data, b._data, b._length * sizeof(wchar_t));
+
+	return FeString(mem, len);
+}
+
+FeString operator "" _fe(const char* a, size_t len) {
+	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
+	for (size_t i = 0; i < len; i++)
+		p[i] = a[i];
+
+	return FeString(p, len);
+}
+
+FeString operator "" _fe(const wchar_t* a, size_t len) {
+	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
+	Memory::get()->copyType<wchar_t>(p, a, len);
+	return FeString(p, len);
+}
+#pragma endregion
+
+
 

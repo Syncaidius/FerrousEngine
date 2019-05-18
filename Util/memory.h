@@ -46,7 +46,6 @@ public:
 	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
 	template<typename T> T* allocType(const size_t num_elements = 1) {
 		void* mem = alloc(sizeof(T) * num_elements);
-		memset(mem, 0, sizeof(T));
 		return reinterpret_cast<T*>(mem);
 	}
 

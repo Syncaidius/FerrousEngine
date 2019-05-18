@@ -49,7 +49,7 @@ void Logger::clear() {
 	}
 }
 
-void Logger::write(const wchar_t* msg) {
+void Logger::write(const FeString& msg) {
 	LogOutputHandle* end = _outputs;
 	end += _output_slot_count;
 	for (LogOutputHandle* i = _outputs; i != end; i++) {
@@ -58,32 +58,15 @@ void Logger::write(const wchar_t* msg) {
 	}
 }
 
-void Logger::writeLine(const wchar_t* msg) {
-	// Timestamp
-	time_t now = time(0);
-	struct tm tstruct;
-	wchar_t buf[80];
-	localtime_s(&tstruct , &now);
-	wcsftime(buf, sizeof(buf), L"%X", &tstruct);
+void Logger::writeLine(const FeString& msg) {
+	FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg;
 
-	Memory* test = Memory::get();
-	const size_t msglen = wcslen(msg);
-	const size_t strlen = msglen + wcslen(buf) + 4; // 4 extra chars for the [], space and null termination.
-	wchar_t* cc = Memory::get()->allocType<wchar_t>(strlen); // TODO perhaps allocate a reusable buffer, then only resize it if a message is larger than it's capacity.
-	wcscat_s(cc, strlen, L"[");
-	wcscat_s(cc, strlen, buf);
-	wcscat_s(cc, strlen, L"] ");
-	wcscat_s(cc, strlen, msg);
+	// NOTE: Problem occurs when concatenating [ and date together. Date appears to get overwritten when memory is allocated to fit the concatenated result. Memory seems to get overwritten, when it should not be possible.
 
 	LogOutputHandle* end = _outputs;
 	end += _output_slot_count;
 	for (LogOutputHandle* i = _outputs; i != end; i++) {
 		if (i != nullptr)
-			i->output->writeLine(cc);
+			i->output->writeLine(result);
 	}
-
-	Memory::get()->dealloc(cc);
-
-	// TODO implement stream-based writing
-	// See: https://stackoverflow.com/questions/14086417/how-to-write-custom-input-stream-in-c
 }

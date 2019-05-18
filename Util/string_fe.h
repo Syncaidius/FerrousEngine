@@ -11,6 +11,12 @@ public:
 	static FeString concat(const FeString& a, const FeString& b);
 	static FeString format(const FeString& str, ...);
 
+	/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
+	static FeString dateTime(const wchar_t* format);
+
+	/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
+	static FeString dataTime(const FeString& format) { return dataTime(format.c_str()); }
+
 	FeString();
 	FeString(const FeString& copy);
 	FeString(const char* c_data);
@@ -65,45 +71,21 @@ public:
 	/*Returns a pointer to the raw underlying character data.*/
 	wchar_t* c_str() const { return _data; }
 private:
+	/* Takes a pointer to character data and stores it, instead of allocating a separate copy of it. */
 	FeString(wchar_t* c_data, size_t length);
-	friend FeString operator +(const FeString& a, const FeString& b);
-	friend FeString operator "" _fe(const char* c_data, size_t len);
-	friend FeString operator "" _fe(const wchar_t* c_data, size_t len);
+
+	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
+	friend FeString FERROUS_UTIL_API operator "" _fe(const char* c_data, size_t len);
+	friend FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* c_data, size_t len);
+
 	wchar_t* _data;
 	size_t _length;
 };
 
-FeString operator +(const FeString& a, const FeString& b) {
-	size_t a_bytes = a._length * sizeof(wchar_t);
-	size_t b_bytes = b._length * sizeof(wchar_t);
-	size_t len = a._length + b._length;
-	size_t num_bytes = a_bytes + b_bytes + sizeof(wchar_t);
+#pragma region OPERATORS
+FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
 
-	void* mem = Memory::get()->alloc(num_bytes);
-	char* p_data = reinterpret_cast<char*>(mem);
+FeString FERROUS_UTIL_API operator "" _fe(const char* a, size_t len);
 
-	memcpy(p_data, a._data, a_bytes);
-	p_data += a_bytes;
-	memcpy(p_data, b._data, b_bytes);
-	p_data += b_bytes;
-	*p_data = L'\0';
-
-	return FeString((wchar_t*)mem, len);
-}
-
-FeString operator "" _fe(const char* a, size_t len) {
-	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
-	for (size_t i = 0; i < len; i++)
-		p[i] = p[i];
-
-	p[len] = L'\0';
-	return FeString(p, len);
-}
-
-FeString operator "" _fe(const wchar_t* a, size_t len) {
-	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);
-	Memory::get()->copyType<wchar_t>(p, a, len);
-
-	p[len] = L'\0';
-	return FeString(p, len);
-}
+FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* a, size_t len);
+#pragma endregion

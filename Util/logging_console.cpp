@@ -11,12 +11,12 @@ LogConsoleOutput::~LogConsoleOutput() {
 	FreeConsole();
 }
 
-void LogConsoleOutput::write(const wchar_t* msg) {
-	std::wcout << msg;
+void LogConsoleOutput::write(const FeString& msg) {
+	std::wcout << msg.c_str();
 }
 
-void LogConsoleOutput::writeLine(const wchar_t* msg) {
-	std::wcout << msg << std::endl;
+void LogConsoleOutput::writeLine(const FeString& msg) {
+	std::wcout << msg.c_str() << std::endl;
 }
 
 void LogConsoleOutput::clear() {
