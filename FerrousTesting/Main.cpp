@@ -51,7 +51,7 @@ void RunStringTest(Logger* log) {
 	FeString aString("String A");
 	FeString bString(L"String B");
 	FeString cString = " = String C"_fe;
-	FeString result = aString + " + " + bString + " = The result"_fe;
+	FeString result = aString + 1 + " + " + bString +  2.3458 + " = The result"_fe;
 	FeString resultLower = result.toLower();
 	FeString resultUpper = result.toUpper();
 	FeString resultCapsAll = ("this is a capitalized string"_fe).capitalize();

@@ -8,6 +8,7 @@
 FeString FeString::dateTime(const wchar_t* format) {
 	static size_t buf_size = 80;
 	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size);
+	// TODO thread safety (spinlock)
 
 	assert(format != nullptr);
 	time_t now = time(nullptr);
@@ -24,6 +25,26 @@ FeString FeString::dateTime(const wchar_t* format) {
 
 	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len + 1ULL);
 	memcpy(mem, buf, len * sizeof(wchar_t));
+	return FeString(mem, len);
+}
+
+
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type*>
+FeString FeString::concat_number(const FeString & a, const T & v, const wchar_t* format) {
+	size_t len_v = 1;
+	T vn = v;
+	while (vn /= 10)
+		len_v++;
+
+	size_t len = a._length + len_v;
+
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(len + 1ULL);
+	wchar_t* p_data = mem;
+
+	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
+	p_data += a._length;
+	_snwprintf(p_data, len_v, format, v);
+
 	return FeString(mem, len);
 }
 #pragma endregion
@@ -446,6 +467,18 @@ FeString operator +(const FeString& a, const FeString& b) {
 
 	return FeString(mem, len);
 }
+
+FeString operator +(const FeString& a, const uint8_t& v) { return FeString::concat_number<uint8_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const uint16_t& v) { return FeString::concat_number<uint16_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const uint32_t& v) { return FeString::concat_number<uint32_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const uint64_t& v) { return FeString::concat_number<uint64_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const int8_t& v) { return FeString::concat_number<int8_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const int16_t& v) { return FeString::concat_number<int16_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const int32_t& v) { return FeString::concat_number<int32_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const int64_t& v) { return FeString::concat_number<int64_t>(a, v, L"%d"); }
+FeString operator +(const FeString& a, const double& v) { return FeString::concat_number<double>(a, v, L"%f"); }
+FeString operator +(const FeString& a, const long double& v) { return FeString::concat_number<long double>(a, v, L"%f"); }
+FeString operator +(const FeString& a, const float& v) { return FeString::concat_number<float>(a, v, L"%f"); }
 
 FeString operator "" _fe(const char* a, size_t len) {
 	wchar_t* p = Memory::get()->allocType<wchar_t>(len + 1ULL);

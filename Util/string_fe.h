@@ -8,6 +8,9 @@ public:
 	/* The value returned by indexOf() if no instance was found. */
 	const static size_t INDEXOF_NONE = SIZE_MAX;
 
+	template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
+	inline static FeString concat_number(const FeString & a, const T & v, const wchar_t* format);
+
 	static FeString concat(const FeString& a, const FeString& b);
 	static FeString format(const FeString& str, ...);
 
@@ -84,6 +87,17 @@ private:
 
 #pragma region OPERATORS
 FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const uint16_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const uint32_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const uint64_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const int8_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const int16_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const int32_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const int64_t& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const double& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const long double& v);
+FeString FERROUS_UTIL_API operator +(const FeString& a, const float& v);
 
 FeString FERROUS_UTIL_API operator "" _fe(const char* a, size_t len);
 
