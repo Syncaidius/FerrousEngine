@@ -42,6 +42,10 @@ public:
 
 	void write(const FeString& msg);
 
+	void writeFormatted(const FeString& str, ...);
+
+	void writeFormattedLine(const FeString& str, ...);
+
 	void clear();
 
 private:

@@ -3,7 +3,6 @@
 #include "memory.h"
 #include "localization.h"
 #include <vector>
-#include <cstdarg>
 
 #pragma region STATIC
 FeString FeString::format(const FeString& str, ...) {
@@ -12,6 +11,14 @@ FeString FeString::format(const FeString& str, ...) {
 
 	va_list args;
 	va_start(args, str);
+	FeString result = format(str, args);
+	va_end(args);
+	return result;
+}
+
+FeString FeString::format(const FeString& str, va_list args) {
+	static size_t buf_size = 80;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
 	int len_v = _vsnwprintf(buf, buf_size, str.c_str(), args);
 
 	/* Buffer too small? */
@@ -28,7 +35,6 @@ FeString FeString::format(const FeString& str, ...) {
 
 	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len_v + 1ULL);
 	memcpy(mem, buf, len_v * sizeof(wchar_t));
-	va_end(args);
 	return FeString(mem, len_v);
 }
 

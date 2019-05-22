@@ -60,13 +60,32 @@ void Logger::write(const FeString& msg) {
 
 void Logger::writeLine(const FeString& msg) {
 	FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg;
-
-	// NOTE: Problem occurs when concatenating [ and date together. Date appears to get overwritten when memory is allocated to fit the concatenated result. Memory seems to get overwritten, when it should not be possible.
-
 	LogOutputHandle* end = _outputs;
 	end += _output_slot_count;
 	for (LogOutputHandle* i = _outputs; i != end; i++) {
 		if (i != nullptr)
 			i->output->writeLine(result);
 	}
+}
+
+void Logger::writeFormatted(const FeString& str, ...) {
+	static size_t buf_size = 80;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
+
+	va_list args;
+	va_start(args, str);
+	FeString result = FeString::format(str, args);
+	va_end(args);
+	write(result);
+}
+
+void Logger::writeFormattedLine(const FeString& str, ...) {
+	static size_t buf_size = 80;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
+
+	va_list args;
+	va_start(args, str);
+	FeString result = FeString::format(str, args);
+	va_end(args);
+	writeLine(result);
 }
