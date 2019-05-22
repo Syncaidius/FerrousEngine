@@ -3,11 +3,61 @@
 #include "memory.h"
 #include "localization.h"
 #include <vector>
+#include <cstdarg>
 
 #pragma region STATIC
-//FeString FeString::format(const FeString& str, ...) {
-//
-//}
+FeString FeString::format(const FeString& str, ...) {
+	static size_t buf_size = 80;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
+
+	va_list args;
+	va_start(args, str);
+	int len_v = _vsnwprintf(buf, buf_size, str.c_str(), args);
+
+	/* Buffer too small? */
+	if (len_v < 0) {
+		len_v = -len_v;
+
+		size_t old_size = buf_size;
+		buf_size = (buf_size * 2) + len_v; // Double size and ensure it will be enough for the current value too.
+		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
+
+		// Try again. Should work this time.
+		len_v = _vsnwprintf(buf, buf_size, str.c_str(), args);
+	}
+
+	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len_v + 1ULL);
+	memcpy(mem, buf, len_v * sizeof(wchar_t));
+	va_end(args);
+	return FeString(mem, len_v);
+}
+
+template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type*>
+FeString FeString::concat_number(const FeString& a, const T& v, const wchar_t* format) {
+	static size_t buf_size = 10;
+	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
+
+	int len_v = _snwprintf(buf, buf_size, format, v);
+
+	/* Buffer too small? */
+	if (len_v < 0) {
+		len_v = -len_v;
+		size_t old_size = buf_size;
+		buf_size = (buf_size * 2) + len_v; // Double size and ensure it will be enough for the value.
+
+		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
+		return concat_number(a, v, format);
+	}
+
+	size_t total_len = a._length + len_v;
+	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(total_len + 1ULL);
+	wchar_t* p_data = mem;
+	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
+	p_data += a._length;
+	memcpy(p_data, buf, len_v * sizeof(wchar_t));
+
+	return FeString(mem, total_len);
+}
 
 FeString FeString::dateTime(const wchar_t* format) {
 	static size_t buf_size = 80;
@@ -29,31 +79,6 @@ FeString FeString::dateTime(const wchar_t* format) {
 	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len + 1ULL);
 	memcpy(mem, buf, len * sizeof(wchar_t));
 	return FeString(mem, len);
-}
-
-
-template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type*>
-FeString FeString::concat_number(const FeString & a, const T & v, const wchar_t* format) {
-	static size_t buf_size = 10;
-	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
-
-	size_t len_v = _snwprintf(buf, buf_size, format, v);
-	if (len_v < 0) {
-		size_t old_size = buf_size;
-		buf_size *= 2;
-
-		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
-		return concat_number(a, v, format);
-	}
-
-	size_t total_len = a._length + len_v;
-	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(total_len + 1ULL);
-	wchar_t* p_data = mem;
-	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
-	p_data += a._length;
-	memcpy(p_data, buf, len_v * sizeof(wchar_t));
-
-	return FeString(mem, total_len);
 }
 #pragma endregion
 

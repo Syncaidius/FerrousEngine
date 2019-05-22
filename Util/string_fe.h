@@ -10,7 +10,7 @@ public:
 
 	template <typename T, typename std::enable_if<std::is_arithmetic<T>::value>::type* = nullptr>
 	inline static FeString concat_number(const FeString & a, const T & v, const wchar_t* format);
-	
+
 	static FeString format(const FeString& str, ...);
 
 	/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */

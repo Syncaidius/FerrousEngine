@@ -51,6 +51,7 @@ void RunStringTest(Logger* log) {
 	FeString aString("String A");
 	FeString bString(L"String B");
 	FeString cString = " = String C"_fe;
+	FeString formattedString = FeString::format("%d plus %d equals %d"_fe, 5, 6, 5 + 6);
 	FeString result = aString + 1 + " + " + bString +  2.3458 + " = The result"_fe;
 	FeString resultLower = result.toLower();
 	FeString resultUpper = result.toUpper();
@@ -79,6 +80,7 @@ void RunStringTest(Logger* log) {
 	wcout << "A string: " << aString.c_str() << endl;
 	wcout << "B string: " << bString.c_str() << endl;
 	wcout << "C string: " << cString.c_str() << endl;
+	wcout << "Formatted: " << formattedString.c_str() << endl;
 	wcout << "Result: " << result.c_str() << endl;
 	wcout << endl;
 
