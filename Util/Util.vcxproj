@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="game_time.cpp" />
     <ClCompile Include="localization.cpp" />
     <ClCompile Include="string_fe.cpp" />
     <ClCompile Include="logging.cpp" />
@@ -28,6 +29,7 @@
     <ClCompile Include="memory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="game_timer.h" />
     <ClInclude Include="string_fe.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
