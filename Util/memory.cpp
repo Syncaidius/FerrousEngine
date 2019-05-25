@@ -7,6 +7,8 @@ Memory* Memory::_allocator = new Memory();
 Memory::Memory() {
 	assert(PAGE_SIZE > HEADER_SIZE);
 
+	_count_allocated = 0;
+	_count_free = 0;
 	_start = malloc(PAGE_SIZE);
 	reset();
 }
@@ -26,7 +28,7 @@ void* Memory::allocFast(const size_t size_bytes) {
 		if (block->size < size_bytes) {
 			prev = block;
 			block = block->next;
-			assert(block != block->next);
+			//assert(block != block->next);
 			continue;
 		}
 
@@ -67,6 +69,8 @@ void* Memory::allocFast(const size_t size_bytes) {
 		}
 
 		block->ref_count = 1;
+		_count_allocated++;
+		_count_free--;
 		break;
 	}
 
@@ -148,8 +152,13 @@ void Memory::dealloc(void* p) {
 	assert(block_to_free != _free);
 
 	_allocated -= block_to_free->size;
-	block_to_free->next = _free;
+	if (!tryMerge(block_to_free, _free)) {
+		block_to_free->next = _free;
+		_count_free++;
+	}
+
 	_free = block_to_free;
+	_count_allocated--;
 }
 
 void Memory::reset(void) {
@@ -170,20 +179,30 @@ void Memory::defragment(void) {
 		uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + HEADER_SIZE + prev->size;
 		uintptr_t start = reinterpret_cast<uintptr_t>(cur);
 
-		if (start == ending) {
-			_overhead -= HEADER_SIZE;
-			_allocated -= HEADER_SIZE;
-			prev->size += cur->size + HEADER_SIZE; // Include header of 'other' too
-			prev->next = cur->next; // Detach cur
+		if (tryMerge(prev, cur)) {
 			cur = prev;
 		}
 		else {
-			// cur was not absorbed, so that becomes the previous block.
-			prev = cur;
+			prev = cur; // cur was not absorbed, so that becomes the previous block.
 		}
 
 		cur = cur->next;
 	}
+}
+
+bool Memory::tryMerge(Block* prev, Block* cur) {
+	uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + HEADER_SIZE + prev->size;
+	uintptr_t start = reinterpret_cast<uintptr_t>(cur);
+
+	if (start == ending) {
+		_overhead -= HEADER_SIZE;
+		_allocated -= HEADER_SIZE;
+		prev->size += cur->size + HEADER_SIZE; // Include header of 'other' too
+		prev->next = cur->next; // Detach cur
+		return true;
+	}
+
+	return false;
 }
 
 void Memory::mergeSort(Block** headRef) {

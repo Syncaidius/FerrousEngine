@@ -42,9 +42,11 @@ public:
 
 	void write(const FeString& msg);
 
-	void writeFormatted(const FeString& str, ...);
+	/* A formattable version of write() */
+	void writeF(const FeString& str, ...);
 
-	void writeFormattedLine(const FeString& str, ...);
+	/* A formattable version of writeLine()*/
+	void writeLineF(const FeString& str, ...);
 
 	void clear();
 

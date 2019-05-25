@@ -108,7 +108,10 @@ private:
 	Block* _free;
 	size_t _allocated;
 	size_t _overhead;
+	size_t _count_free;
+	size_t _count_allocated;
 
+	bool tryMerge(Block* prev, Block* cur);
 	void mergeSort(Block** headRef);
 	Block* sortedMerge(Block* a, Block* b);
 	void frontBackSplit(Block* source, Block** frontRef, Block** backRef);

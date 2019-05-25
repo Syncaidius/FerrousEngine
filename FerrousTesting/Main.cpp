@@ -17,14 +17,14 @@ void OutputFreeList(Logger* log) {
 	size_t size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
 	double overhead_percent = ((double)overhead / (double)size) * 100.0;
 
-	cout << "   Allocated: " << allocated << "/" << size << " bytes -- Overhead: " << overhead << " bytes (" << overhead_percent << "%)" << endl;
+	log->writeLineF("   Allocated: %d/%d bytes -- Overhead: %d bytes (%f%%)", allocated, size, overhead, overhead_percent);
 
 	Memory::Block * freeList = mem->getFreeList();
 	while (freeList != nullptr) {
 		uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
 		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->next);
 		uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::HEADER_SIZE + freeList->size;
-		cout << "   ptr: " << p << " -- end: " << p_end << " -- size: " << freeList->size << " -- Next ptr: " << p_next << endl;
+		log->writeLineF("ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->size, p_next);
 		total += freeList->size;
 
 		if (freeList->next != nullptr) {
@@ -52,7 +52,7 @@ void RunStringTest(Logger* log) {
 	FeString bString(L"String B");
 	FeString cString = " = String C"_fe;
 	FeString formattedString = FeString::format("%d plus %d equals %d"_fe, 5, 6, 5 + 6);
-	FeString result = aString + 1 + " + " + bString +  2.3458 + " = The result"_fe;
+	FeString result = aString + 1 + " + " + bString + 2.3458 + " = The result"_fe;
 	FeString resultLower = result.toLower();
 	FeString resultUpper = result.toUpper();
 	FeString resultCapsAll = ("this is a capitalized string"_fe).capitalize();
@@ -77,37 +77,37 @@ void RunStringTest(Logger* log) {
 	bool endsWith = toSearch.endsWith(&"searched."_fe);
 	bool endsWithFail = toSearch.endsWith(&"searching!"_fe);
 
-	wcout << "A string: " << aString.c_str() << endl;
-	wcout << "B string: " << bString.c_str() << endl;
-	wcout << "C string: " << cString.c_str() << endl;
-	wcout << "Formatted: " << formattedString.c_str() << endl;
-	wcout << "Result: " << result.c_str() << endl;
-	wcout << endl;
+	log->writeLineF("A string: %s", aString.c_str());
+	log->writeLineF("B string:  %s", bString.c_str());
+	log->writeLineF("C string:  %s", cString.c_str());
+	log->writeLineF("Formatted:  %s", formattedString.c_str());
+	log->writeLineF("Result:  %s", result.c_str());
+	log->writeLineF(" ");
 
-	wcout << "Lower-case: " << resultLower.c_str() << endl;
-	wcout << "Upper-case: " << resultUpper.c_str() << endl;
-	wcout << "Capitalized (all): " << resultCapsAll.c_str() << endl;
-	wcout << "Capitalized (1st): " << resultCapsFirst.c_str() << endl;
-	wcout << endl;
+	log->writeLineF("Lower-case: %s", resultLower.c_str());
+	log->writeLineF("Upper-case: %s",resultUpper.c_str());
+	log->writeLineF("Capitalized (all): %s",resultCapsAll.c_str());
+	log->writeLineF("Capitalized (1st): %s",resultCapsFirst.c_str());
+	log->writeLineF(" ");
 
-	wcout << "Trimmed: {" << resultTrimmed.c_str() << "}" << endl;
-	wcout << "Trimmed (start): {" << resultTrimStart.c_str() << "}" << endl;
-	wcout << "Trimmed (end): {" << resultTrimEnd.c_str() << "}"<< endl;
-	wcout << endl;
+	log->writeLineF("Trimmed: {%s}",resultTrimmed.c_str());
+	log->writeLineF("Trimmed (start): {%s}",resultTrimStart.c_str());
+	log->writeLineF("Trimmed (end): {%s}",resultTrimEnd.c_str());
+	log->writeLineF(" ");
 
-	wcout << "Replacement Target: " << toReplace.c_str() << endl;
-	wcout << "Replace \"replace\" with \"start\": {" << resultReplaced.c_str() << "}" << endl;
-	wcout << "Substr 0 to 10: {" << resultSubStr.c_str() << "}" << endl;
-	wcout << endl;
+	log->writeLineF("Replacement Target: %s",toReplace.c_str());
+	log->writeLineF("Replace \"replace\" with \"start\": {%s}",resultReplaced.c_str());
+	log->writeLineF("Substr 0 to 10: {%s}",resultSubStr.c_str());
+	log->writeLineF(" ");
 
-	wcout << "Target: " << toSearch.c_str() << endl;
-	wcout << "indexOf(\"string\"): " << indexOfString << endl;
-	wcout << "indexOf(\"searched\"): " << indexOfSearched << endl;
-	wcout << "indexOf(\"chicken\"): " << (indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found") << endl;
-	wcout << "startsWith(\"I am\"): " << (startsWith ? "true" : "false") << endl;
-	wcout << "startsWith(\"I'm not\"): " << (startsWithFail ? "true" : "false") << endl;
-	wcout << "endsWith(\"searched.\"): " << (endsWith ? "true" : "false") << endl;
-	wcout << "endsWith(\"searching!\"): " << (endsWithFail ? "true" : "false") << endl;
+	log->writeLineF("Target: %s",toSearch.c_str());
+	//log->writeLineF("indexOf(\"string\"): %d",indexOfString);
+	//log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
+	//log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found"));
+	//log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? "true" : "false"));
+	//log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? "true" : "false"));
+	//log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? "true" : "false"));
+	//log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? "true" : "false");
 }
 
 const int NUM_ALLOCATIONS = 40;
@@ -119,7 +119,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	log.writeLine(L"Memory allocator test");
 	log.writeLine(L"=====================");
-	cout << "Created allocator with page size: " << Memory::PAGE_SIZE << " bytes" << endl;
+	log.writeLineF("Created allocator with page size: %d bytes"_fe, Memory::PAGE_SIZE);
 
 	OutputFreeList(&log);
 	cout << endl;

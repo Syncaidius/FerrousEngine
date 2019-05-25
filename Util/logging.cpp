@@ -68,7 +68,7 @@ void Logger::writeLine(const FeString& msg) {
 	}
 }
 
-void Logger::writeFormatted(const FeString& str, ...) {
+void Logger::writeF(const FeString& str, ...) {
 	static size_t buf_size = 80;
 	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
 
@@ -79,7 +79,7 @@ void Logger::writeFormatted(const FeString& str, ...) {
 	write(result);
 }
 
-void Logger::writeFormattedLine(const FeString& str, ...) {
+void Logger::writeLineF(const FeString& str, ...) {
 	static size_t buf_size = 80;
 	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
 
