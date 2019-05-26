@@ -387,7 +387,7 @@ FeString FeString::replace(const FeString* input, const FeString* replacement) {
 
 	// Build new string
 	size_t replacement_bytes = replacement->_length * sizeof(wchar_t);
-	size_t count = indices.size();
+	size_t count = indices._size();
 	size_t new_len = _length;
 
 	// TODO find a better way to handle negative input_dif, instead of branching.

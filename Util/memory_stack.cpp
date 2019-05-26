@@ -3,8 +3,8 @@
 Memory::Stack::Stack(Memory* mem_parent, void* mem) {
 	_parent = mem_parent;
 
-	_start = mem;
-	_pos = _start;
+	_mem = mem;
+	_pos = _mem;
 }
 
 Memory::Stack::~Stack(void) {
@@ -23,5 +23,5 @@ void Memory::Stack::revertTo(void* p) {
 }
 
 void Memory::Stack::reset() {
-	_pos = (void*)((char*)_start);
+	_pos = (void*)((char*)_mem);
 }

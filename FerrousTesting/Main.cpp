@@ -14,32 +14,32 @@ void OutputFreeList(Logger* log) {
 	size_t total = allocated;
 	size_t num_free = 0;
 
-	size_t size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
-	double overhead_percent = ((double)overhead / (double)size) * 100.0;
+	size_t _size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
+	double overhead_percent = ((double)overhead / (double)_size) * 100.0;
 
-	log->writeLineF("   Allocated: %d/%d bytes -- Overhead: %d bytes (%f%%)", allocated, size, overhead, overhead_percent);
+	log->writeLineF("   Allocated: %d/%d bytes -- Overhead: %d bytes (%f%%)", allocated, _size, overhead, overhead_percent);
 
 	Memory::Block * freeList = mem->getFreeList();
 	while (freeList != nullptr) {
 		uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
-		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->next);
-		uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::HEADER_SIZE + freeList->size;
-		log->writeLineF("ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->size, p_next);
-		total += freeList->size;
+		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->getNext());
+		uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::BLOCK_HEADER_SIZE + freeList->getSize();
+		log->writeLineF("ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->getSize(), p_next);
+		total += freeList->getSize();
 
-		if (freeList->next != nullptr) {
+		if (freeList->getNext() != nullptr) {
 			if (p_next >= p)
 				cout << "      diff to next: " << (p_next - p) << "bytes" << endl;
 			else
 				cout << "      diff to next: -" << (p - p_next) << " bytes" << endl;
 		}
-		freeList = freeList->next;
+		freeList = freeList->getNext();
 		num_free++;
 	}
 
-	cout << "Total: " << total << "/" << size << " -- Free blocks: " << num_free << endl;
-	if (total < size)
-		cout << "LEAK DETECTED: " << (size - total) << " bytes" << endl;
+	cout << "Total: " << total << "/" << _size << " -- Free blocks: " << num_free << endl;
+	if (total < _size)
+		cout << "LEAK DETECTED: " << (_size - total) << " bytes" << endl;
 }
 
 void RunStringTest(Logger* log) {

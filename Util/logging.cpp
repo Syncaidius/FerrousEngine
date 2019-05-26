@@ -31,12 +31,12 @@ void Logger::addOutput(LogOutputBase* output) {
 
 	// If we've reached here, no slots were found. Expand!
 	// TODO use vector?
-	uint64_t next = _output_slot_count++;
-	Memory::get()->reallocType(_outputs, next, _output_slot_count);
+	uint64_t _next = _output_slot_count++;
+	Memory::get()->reallocType(_outputs, _next, _output_slot_count);
 
 	// Jump straight to the slot we just added.
 	i = _outputs;
-	i += next;
+	i += _next;
 	*i->output = *output;
 }
 
