@@ -10,36 +10,54 @@ using namespace std;
 void OutputFreeList(Logger* log) {
 	Memory* mem = Memory::get();
 	size_t overhead = mem->getOverhead();
-	size_t allocated = mem->getAllocated();
+	size_t allocated = mem->getTotalAllocated();
 	size_t total = allocated;
-	size_t num_free = 0;
+	size_t tracked_total = allocated + overhead;
+	size_t num_free_blocks = 0;
+	size_t capacity = mem->getPageCount() * Memory::PAGE_SIZE;
+	size_t free = capacity - tracked_total;
 
-	size_t _size = Memory::PAGE_SIZE; // TODO replace with getSize() whenever paging is implemented.
-	double overhead_percent = ((double)overhead / (double)_size) * 100.0;
+	double overhead_percent = ((double)overhead / (double)capacity) * 100.0;
+	double tracked_total_percent = ((double)tracked_total / (double)capacity) * 100.0;
+	double free_percent = ((double)free / (double)capacity) * 100.0;
 
-	log->writeLineF("   Allocated: %d/%d bytes -- Overhead: %d bytes (%f%%)", allocated, _size, overhead, overhead_percent);
+	log->writeLineF("Allocated: %d/%d bytes", allocated, capacity);
+	log->writeLineF("Overhead: %d bytes(%f%%)", overhead, overhead_percent);
+	log->writeLineF("Free: %d/%d bytes(%f%%)", free, capacity, free_percent);
+	log->writeLineF("Pages: %d", mem->getPageCount());
+	log->writeLineF("Tracked total: %d/%d bytes(%f%%)", tracked_total, capacity, tracked_total_percent);
 
-	Memory::Block * freeList = mem->getFreeList();
-	while (freeList != nullptr) {
-		uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
-		uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->getNext());
-		uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::BLOCK_HEADER_SIZE + freeList->getSize();
-		log->writeLineF("ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->getSize(), p_next);
-		total += freeList->getSize();
+	Memory::Page* page = mem->getFirstPage();
+	int page_id = 0;
+	while (page != nullptr) {
+		log->writeLineF("PAGE %d START[", page_id);
 
-		if (freeList->getNext() != nullptr) {
-			if (p_next >= p)
-				cout << "      diff to next: " << (p_next - p) << "bytes" << endl;
-			else
-				cout << "      diff to next: -" << (p - p_next) << " bytes" << endl;
+		Memory::Block* freeList = page->getFreeList();
+		while (freeList != nullptr) {
+			uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
+			uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->getNext());
+			uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::BLOCK_HEADER_SIZE + freeList->getSize();
+			log->writeLineF("  ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->getSize(), p_next);
+			total += freeList->getSize();
+
+			//if (freeList->getNext() != nullptr) {
+			//	if (p_next >= p)
+			//		cout << "      diff to next: " << (p_next - p) << "bytes" << endl;
+			//	else
+			//		cout << "      diff to next: -" << (p - p_next) << " bytes" << endl;
+			//}
+			freeList = freeList->getNext();
+			num_free_blocks++;
 		}
-		freeList = freeList->getNext();
-		num_free++;
+
+		log->writeLineF("] PAGE %d END", page_id);
+		page = page->getNext();
+		page_id++;
 	}
 
-	cout << "Total: " << total << "/" << _size << " -- Free blocks: " << num_free << endl;
-	if (total < _size)
-		cout << "LEAK DETECTED: " << (_size - total) << " bytes" << endl;
+	cout << "Total: " << total << "/" << capacity << " -- Free blocks: " << num_free_blocks << endl;
+	if (total < capacity)
+		cout << "LEAK DETECTED: " << (capacity - total) << " bytes" << endl;
 }
 
 void RunStringTest(Logger* log) {
@@ -101,13 +119,13 @@ void RunStringTest(Logger* log) {
 	log->writeLineF(" ");
 
 	log->writeLineF("Target: %s",toSearch.c_str());
-	//log->writeLineF("indexOf(\"string\"): %d",indexOfString);
-	//log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
-	//log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found"));
-	//log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? "true" : "false"));
-	//log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? "true" : "false"));
-	//log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? "true" : "false"));
-	//log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? "true" : "false");
+	log->writeLineF("indexOf(\"string\"): %d",indexOfString);
+	log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
+	log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found"));
+	log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? "true" : "false"));
+	log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? "true" : "false"));
+	log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? "true" : "false"));
+	log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? "true" : "false");
 }
 
 const int NUM_ALLOCATIONS = 40;
@@ -155,18 +173,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLine(L" "); // TODO empty line overload.
 	log.writeLine(L"BEFORE STRING TEST");
 	OutputFreeList(&log);
+	log.writeLine(L" ");
+
+	log.writeLine("Press any key to run string test...");
+	cin.get();
 	RunStringTest(&log);
+	log.writeLine(L" ");
 
 	log.writeLine(L" "); // TODO empty line overload.
 	log.writeLine(L"AFTER STRING TEST");
 	OutputFreeList(&log);
 
 	uint32_t defrag_iterations = 1;
-	Memory::get()->defragment();
+	Memory::get()->defragment(1);
 	cout << endl;
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	OutputFreeList(&log);
 
+	log.writeLine("Press any key to exit...");
 	cin.get();
 	return 0;
 }

@@ -13,7 +13,7 @@ public:
 		friend class Memory;
 		size_t _size;
 		Block* _next;
-		uint32_t _page_id;
+		void* _page;
 		uint16_t _ref_count;
 		uint8_t _adjustment;
 
@@ -26,14 +26,9 @@ public:
 			return _blocks;
 		}
 
-	private:
-		friend class Memory;
-		Page* _next;
-		Block* _blocks;
-		size_t _allocated;
-		size_t _overhead;
-		size_t _blocks_free;
-		size_t _blocks_allocated;
+		inline Page* getNext() {
+			return _next;
+		}
 
 		inline size_t getAllocated() const {
 			return _allocated;
@@ -42,6 +37,15 @@ public:
 		inline size_t getOverhead() const {
 			return _overhead;
 		}
+
+	private:
+		friend class Memory;
+		Page* _next;
+		Block* _blocks;
+		size_t _allocated;
+		size_t _overhead;
+		size_t _blocks_free;
+		size_t _blocks_allocated;
 	};
 
 	class Stack {
@@ -144,7 +148,7 @@ private:
 	~Memory();
 
 	Page* _pages;
-	Page* _cur_defrag; /* Next page to be defragged. */
+	Page* _page_to_defrag; /* Next page to be defragged. */
 	size_t _total_alloc;
 	size_t _total_overhead;
 	size_t _total_free_blocks;
@@ -154,7 +158,7 @@ private:
 	/* Gets an aligned pointer within the specified block of memory. */
 	inline void* align(void* p, uint8_t alignment, size_t start_offset = 0);
 
-	bool tryMerge(Block* prev, Block* cur);
+	bool tryMerge(Page* page, Block* prev, Block* cur);
 	void mergeSort(Block** headRef);
 	Block* sortedMerge(Block* a, Block* b);
 	void frontBackSplit(Block* source, Block** frontRef, Block** backRef);

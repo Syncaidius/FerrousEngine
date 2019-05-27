@@ -13,8 +13,9 @@ Memory::Memory() {
 
 	_total_alloc_blocks = 0;
 	_total_free_blocks = 0;
+	_total_pages = 0;
 	_pages = newPage();
-	_cur_defrag = _pages;
+	_page_to_defrag = _pages;
 	reset(false);
 }
 
@@ -29,7 +30,9 @@ Memory::~Memory(void) {
 
 Memory::Page* Memory::newPage(void) {
 	Page* p = reinterpret_cast<Page*>(malloc(PAGE_SIZE + PAGE_HEADER_SIZE));
+	_total_pages++;
 	resetPage(p);
+	return p;
 }
 
 void Memory::resetPage(Page* p) {
@@ -39,11 +42,13 @@ void Memory::resetPage(Page* p) {
 	p->_allocated = PAGE_DEFAULT_OVERHEAD;
 	p->_blocks_allocated = 0;
 	p->_blocks_free = 1;
+	p->_next = nullptr;
 
 	p->_blocks = reinterpret_cast<Block*>(data_start);
 	p->_blocks->_size = PAGE_FREE_SIZE;
 	p->_blocks->_ref_count = 0;
 	p->_blocks->_next = nullptr;
+	p->_blocks->_page = p;
 }
 
 void* Memory::allocFast(const size_t size_bytes) {
@@ -101,6 +106,7 @@ void* Memory::allocFast(const size_t size_bytes) {
 				}
 			}
 
+			block->_page = page;
 			block->_ref_count = 1;
 			_total_alloc_blocks++;
 			_total_free_blocks--;
@@ -142,11 +148,6 @@ void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num
 	memcpy(mem, target, old_num_bytes);
 	dealloc(target);
 	target = mem;
-
-	// TODO this can be sped up a lot if the end of target is followed by a free block capable of fitting the extra capacity. We would reduce fragmentation from allocating and releasing.
-	//	-- This would also require tracking all memory blocks (free and allocated) in a second linked list in order to immediately detect whether an adjacent block is free or not.
-	//		-- ^ would slow down defragmentation, maybe.
-	//		-- Perhaps wrap free-list entries in node containers, then have Blocks in a linked list of their own.
 }
 
 void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
@@ -189,17 +190,22 @@ void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
 
 void Memory::dealloc(void* p) {
 	assert(p != nullptr);
-	Block* block_to_free = getHeader(p);
-	assert(block_to_free != _blocks);
+	Block* blk = getHeader(p);
+	Page* page = reinterpret_cast<Page*>(blk->_page);
+	assert(blk != page->_blocks);
 
-	_allocated -= block_to_free->_size;
-	if (!tryMerge(block_to_free, _blocks)) {
-		block_to_free->_next = _blocks;
-		_blocks_free++;
+	page->_allocated -= blk->_size;
+	_total_alloc -= blk->_size;
+
+	if (!tryMerge(page, blk, page->_blocks)) {
+		blk->_next = page->_blocks;
+		page->_blocks_free++;
+		_total_free_blocks++;
 	}
 
-	_blocks = block_to_free;
-	_blocks_allocated--;
+	page->_blocks = blk;
+	page->_blocks_allocated--;
+	_total_alloc_blocks--;
 }
 
 void Memory::reset(bool release_pages) {
@@ -226,7 +232,7 @@ void Memory::reset(bool release_pages) {
 		p = p->_next;
 	}
 
-	_cur_defrag = _pages;
+	_page_to_defrag = _pages;
 	_total_alloc = _total_pages * PAGE_DEFAULT_OVERHEAD;
 	_total_overhead = _total_alloc;
 	_total_free_blocks = _total_pages;
@@ -238,15 +244,15 @@ void Memory::defragment(int iterations) {
 
 	for(int i = 0; i < iterations; i++)
 	{
-		mergeSort(&_cur_defrag->_blocks);
-		Block* prev = _cur_defrag->_blocks;
-		Block* cur = _cur_defrag->_blocks->_next;
+		mergeSort(&_page_to_defrag->_blocks);
+		Block* prev = _page_to_defrag->_blocks;
+		Block* cur = _page_to_defrag->_blocks->_next;
 
 		while (cur != nullptr) {
 			uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + BLOCK_HEADER_SIZE + prev->_size;
 			uintptr_t start = reinterpret_cast<uintptr_t>(cur);
 
-			if (tryMerge(prev, cur)) {
+			if (tryMerge(_page_to_defrag, prev, cur)) {
 				cur = prev;
 			}
 			else {
@@ -260,11 +266,11 @@ void Memory::defragment(int iterations) {
 		if iteration count is higher than total page count. */
 		num_done++;
 		if (num_done < _total_pages) {
-			if (_cur_defrag->_next != nullptr) {
-				_cur_defrag = _cur_defrag->_next;
+			if (_page_to_defrag->_next != nullptr) {
+				_page_to_defrag = _page_to_defrag->_next;
 			}
 			else {
-				_cur_defrag = _pages;
+				_page_to_defrag = _pages;
 			}
 		}
 		else {
@@ -273,13 +279,17 @@ void Memory::defragment(int iterations) {
 	}
 }
 
-bool Memory::tryMerge(Block* prev, Block* cur) {
+bool Memory::tryMerge(Page* page, Block* prev, Block* cur) {
 	uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + BLOCK_HEADER_SIZE + prev->_size;
 	uintptr_t start = reinterpret_cast<uintptr_t>(cur);
 
 	if (start == ending) {
-		_overhead -= BLOCK_HEADER_SIZE;
-		_allocated -= BLOCK_HEADER_SIZE;
+		page->_overhead -= BLOCK_HEADER_SIZE;
+		page->_allocated -= BLOCK_HEADER_SIZE;
+
+		_total_overhead -= BLOCK_HEADER_SIZE;
+		_total_alloc -= BLOCK_HEADER_SIZE;
+
 		prev->_size += cur->_size + BLOCK_HEADER_SIZE; // Include header of 'other' too
 		prev->_next = cur->_next; // Detach cur
 		return true;
@@ -350,7 +360,7 @@ void Memory::frontBackSplit(Block* source, Block** frontRef, Block** backRef) {
 }
 
 Memory::Block* Memory::getHeader(void* p) {
-	// Header is located behind the pointer's address.#
+	// Header is located behind the pointer's address.
 	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _adjustment);
 	uint8_t* _adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
 	return reinterpret_cast<Block*>((char*)p - *_adjustment - BLOCK_HEADER_SIZE);
