@@ -72,8 +72,8 @@ public:
 	const static size_t BLOCK_HEADER_SIZE = sizeof(Block);
 	const static size_t PAGE_HEADER_SIZE = sizeof(Page);
 	const static size_t PAGE_SIZE = 8192;
-	const static size_t PAGE_DEFAULT_OVERHEAD = BLOCK_HEADER_SIZE + PAGE_HEADER_SIZE;
-	const static size_t PAGE_FREE_SIZE = PAGE_SIZE - PAGE_DEFAULT_OVERHEAD;
+	const static size_t PAGE_MIN_OVERHEAD = BLOCK_HEADER_SIZE + PAGE_HEADER_SIZE;
+	const static size_t PAGE_FREE_SIZE = PAGE_SIZE - PAGE_MIN_OVERHEAD;
 
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
 	void* alloc(const size_t size_bytes);

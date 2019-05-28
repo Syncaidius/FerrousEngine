@@ -5,7 +5,7 @@
 Memory* Memory::_allocator = new Memory();
 
 Memory::Memory() {
-	assert(PAGE_SIZE > BLOCK_HEADER_SIZE + PAGE_HEADER_SIZE);
+	assert(PAGE_SIZE > PAGE_MIN_OVERHEAD);
 
 	_total_alloc = 0;
 	_total_overhead = 0;
@@ -29,8 +29,12 @@ Memory::~Memory(void) {
 }
 
 Memory::Page* Memory::newPage(void) {
-	Page* p = reinterpret_cast<Page*>(malloc(PAGE_SIZE + PAGE_HEADER_SIZE));
+	Page* p = reinterpret_cast<Page*>(malloc(PAGE_SIZE));
 	_total_pages++;
+	_total_overhead += PAGE_MIN_OVERHEAD;
+	_total_alloc += PAGE_MIN_OVERHEAD;
+	_total_free_blocks++;
+
 	resetPage(p);
 	return p;
 }
@@ -38,8 +42,8 @@ Memory::Page* Memory::newPage(void) {
 void Memory::resetPage(Page* p) {
 	char* data_start = reinterpret_cast<char*>(p) + PAGE_HEADER_SIZE;
 
-	p->_overhead = PAGE_DEFAULT_OVERHEAD;
-	p->_allocated = PAGE_DEFAULT_OVERHEAD;
+	p->_overhead = PAGE_MIN_OVERHEAD;
+	p->_allocated = PAGE_MIN_OVERHEAD;
 	p->_blocks_allocated = 0;
 	p->_blocks_free = 1;
 	p->_next = nullptr;
@@ -49,6 +53,38 @@ void Memory::resetPage(Page* p) {
 	p->_blocks->_ref_count = 0;
 	p->_blocks->_next = nullptr;
 	p->_blocks->_page = p;
+	p->_blocks->_adjustment = 0;
+}
+
+void Memory::reset(bool release_pages) {
+	Page* p = _pages;
+
+	/* Release all but the first page. */
+	if (release_pages) {
+		p = _pages->_next;
+		Page* next = p->_next;
+		while (p != nullptr) {
+			next = p->_next;
+			free(p);
+			p = next;
+		}
+
+		_pages->_next = nullptr;
+		_total_pages = 1;
+	}
+
+	/* Reset all remaining pages */
+	p = _pages;
+	while (p != nullptr) {
+		resetPage(p);
+		p = p->_next;
+	}
+
+	_page_to_defrag = _pages;
+	_total_alloc = _total_pages * PAGE_MIN_OVERHEAD;
+	_total_overhead = _total_alloc;
+	_total_free_blocks = _total_pages;
+	_total_alloc_blocks = 0;
 }
 
 void* Memory::allocFast(const size_t size_bytes) {
@@ -91,10 +127,17 @@ void* Memory::allocFast(const size_t size_bytes) {
 				block->_size = size_bytes;
 
 				// We've just allocated a new header and the requested # of bytes.
+				page->_allocated += size_bytes + BLOCK_HEADER_SIZE;
+				page->_overhead += BLOCK_HEADER_SIZE;
+
 				_total_alloc += size_bytes + BLOCK_HEADER_SIZE;
 				_total_overhead += BLOCK_HEADER_SIZE;
 			}
-			else { // TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE), can we throw it into the block after it (if exists)
+			else { 
+				// TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE), can we throw it into the block after it (if exists)
+
+				// Take the whole block, including the leftover/extra bytes.
+				page->_allocated += block->getSize();
 				_total_alloc += block->_size;
 
 				if (block == page->_blocks) {
@@ -104,12 +147,18 @@ void* Memory::allocFast(const size_t size_bytes) {
 					if (prev != nullptr)
 						prev->_next = block->_next;
 				}
+
+				_total_free_blocks--;
+				page->_blocks_free--;
 			}
 
+			// Update stats
 			block->_page = page;
 			block->_ref_count = 1;
+
+			page->_blocks_allocated++;
+
 			_total_alloc_blocks++;
-			_total_free_blocks--;
 			return p;
 		}
 
@@ -203,40 +252,9 @@ void Memory::dealloc(void* p) {
 		_total_free_blocks++;
 	}
 
-	page->_blocks = blk;
+	page->_blocks = blk; // Free list starts at released block, regardless of if it merged or not.
 	page->_blocks_allocated--;
 	_total_alloc_blocks--;
-}
-
-void Memory::reset(bool release_pages) {
-	Page* p = _pages;
-
-	/* Release all but the first page. */
-	if (release_pages) {
-		p = _pages->_next;
-		Page* next = p->_next;
-		while (p != nullptr) {
-			next = p->_next;
-			free(p);
-			p = next;
-		}
-
-		_pages->_next = nullptr;
-		_total_pages = 1;
-	}
-
-	/* Reset all remaining pages */
-	p = _pages;
-	while (p != nullptr) {
-		resetPage(p);
-		p = p->_next;
-	}
-
-	_page_to_defrag = _pages;
-	_total_alloc = _total_pages * PAGE_DEFAULT_OVERHEAD;
-	_total_overhead = _total_alloc;
-	_total_free_blocks = _total_pages;
-	_total_alloc_blocks = 0;
 }
 
 void Memory::defragment(int iterations) {

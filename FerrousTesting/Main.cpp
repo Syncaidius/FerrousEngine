@@ -7,57 +7,60 @@
 #include <Windows.h>
 using namespace std;
 
-void OutputFreeList(Logger* log) {
+void OutputFreeList() {
+	//NOTE: we use cout here to avoid interfering with memory allocation statistics.
+
 	Memory* mem = Memory::get();
-	size_t overhead = mem->getOverhead();
-	size_t allocated = mem->getTotalAllocated();
-	size_t total = allocated;
-	size_t tracked_total = allocated + overhead;
-	size_t num_free_blocks = 0;
-	size_t capacity = mem->getPageCount() * Memory::PAGE_SIZE;
-	size_t free = capacity - tracked_total;
 
-	double overhead_percent = ((double)overhead / (double)capacity) * 100.0;
-	double tracked_total_percent = ((double)tracked_total / (double)capacity) * 100.0;
-	double free_percent = ((double)free / (double)capacity) * 100.0;
+	// Track reported stats
+	Memory::Page* p = mem->getFirstPage();
+	size_t r_pages = mem->getPageCount();
+	size_t a_pages = 0;
 
-	log->writeLineF("Allocated: %d/%d bytes", allocated, capacity);
-	log->writeLineF("Overhead: %d bytes(%f%%)", overhead, overhead_percent);
-	log->writeLineF("Free: %d/%d bytes(%f%%)", free, capacity, free_percent);
-	log->writeLineF("Pages: %d", mem->getPageCount());
-	log->writeLineF("Tracked total: %d/%d bytes(%f%%)", tracked_total, capacity, tracked_total_percent);
+	while (p) {
+		// Reported counts
+		size_t pr_alloc = p->getAllocated();
+		size_t pr_overhead = p->getOverhead();
+		size_t pr_free = Memory::PAGE_SIZE - pr_alloc;
+		size_t pr_blocks_alloc = mem->getAllocBlockCount();
+		size_t pr_blocks_free = mem->getFreeBlockCount();
 
-	Memory::Page* page = mem->getFirstPage();
-	int page_id = 0;
-	while (page != nullptr) {
-		log->writeLineF("PAGE %d START[", page_id);
+		// Actual counters
+		size_t pa_alloc = Memory::PAGE_HEADER_SIZE;
+		size_t pa_overhead = Memory::PAGE_HEADER_SIZE;
+		size_t pa_free = 0;
+		size_t pa_blocks_free = 0;
 
-		Memory::Block* freeList = page->getFreeList();
-		while (freeList != nullptr) {
-			uintptr_t p = reinterpret_cast<uintptr_t>(freeList);
-			uintptr_t p_next = reinterpret_cast<uintptr_t>(freeList->getNext());
-			uintptr_t p_end = reinterpret_cast<uint64_t>(freeList) + Memory::BLOCK_HEADER_SIZE + freeList->getSize();
-			log->writeLineF("  ptr: %d -- end: %d -- size: %d -- Next ptr: %d", p, p_end, freeList->getSize(), p_next);
-			total += freeList->getSize();
-
-			//if (freeList->getNext() != nullptr) {
-			//	if (p_next >= p)
-			//		cout << "      diff to next: " << (p_next - p) << "bytes" << endl;
-			//	else
-			//		cout << "      diff to next: -" << (p - p_next) << " bytes" << endl;
-			//}
-			freeList = freeList->getNext();
-			num_free_blocks++;
+		Memory::Block* b = p->getFreeList();
+		while (b) {
+			pa_alloc += Memory::BLOCK_HEADER_SIZE + b->getSize();
+			pa_overhead += Memory::BLOCK_HEADER_SIZE;
+			pa_blocks_free++;
+			b = b->getNext();
 		}
 
-		log->writeLineF("] PAGE %d END", page_id);
-		page = page->getNext();
-		page_id++;
-	}
+		pa_free = Memory::PAGE_SIZE - pa_alloc;
 
-	cout << "Total: " << total << "/" << capacity << " -- Free blocks: " << num_free_blocks << endl;
-	if (total < capacity)
-		cout << "LEAK DETECTED: " << (capacity - total) << " bytes" << endl;
+		cout << "PAGE " << (a_pages + 1) << " OF " << r_pages << endl;
+		cout << "   Reported:" << endl;
+		cout << "      -- Allocated: " << pr_alloc << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Overhead: " << pr_overhead << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Free: " << pr_free << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Allocated Blocks: " << pr_blocks_alloc << endl;
+		cout << "      -- Free Blocks: " << pr_blocks_free << endl;
+		cout << "      -- Alloc & Free Total: " << (pr_free + pr_alloc) << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << endl;
+		cout << "   Actual:" << endl;
+		cout << "      -- Allocated: " << pa_alloc << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Overhead: " << pa_overhead << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Free: " << pa_free << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+		cout << "      -- Allocated Blocks: [Not Tracked]" << endl;
+		cout << "      -- Free Blocks: " << pa_blocks_free << endl;
+		cout << "      -- Alloc & Free Total: " << (pa_free + pa_alloc) << "/" << Memory::PAGE_SIZE << " bytes" << endl;
+
+		p = p->getNext();
+		a_pages++;
+	}
 }
 
 void RunStringTest(Logger* log) {
@@ -139,7 +142,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLine(L"=====================");
 	log.writeLineF("Created allocator with page size: %d bytes"_fe, Memory::PAGE_SIZE);
 
-	OutputFreeList(&log);
+	OutputFreeList();
 	cout << endl;
 
 	// Do some random allocations/releases
@@ -164,15 +167,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 			markers[i] = nullptr;
 		}
 		else {
-			cout << "Did not release block " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
+			cout << "Kept block " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 		}
 	}
 
 	// Output a map of allocator memory.
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	log.writeLine(L" "); // TODO empty line overload.
-	log.writeLine(L"BEFORE STRING TEST");
-	OutputFreeList(&log);
+	OutputFreeList();
 	log.writeLine(L" ");
 
 	log.writeLine("Press any key to run string test...");
@@ -181,14 +183,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLine(L" ");
 
 	log.writeLine(L" "); // TODO empty line overload.
-	log.writeLine(L"AFTER STRING TEST");
-	OutputFreeList(&log);
+	log.writeLine(L"MEMORY AFTER TEST");
+	OutputFreeList();
 
 	uint32_t defrag_iterations = 1;
 	Memory::get()->defragment(1);
 	cout << endl;
 	cout << "AFTER DEFRAGMENTATION" << endl;
-	OutputFreeList(&log);
+	OutputFreeList();
 
 	log.writeLine("Press any key to exit...");
 	cin.get();
