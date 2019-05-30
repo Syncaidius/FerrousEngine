@@ -4,6 +4,8 @@
 
 class FERROUS_UTIL_API Memory {
 public:
+	struct Page;
+
 	struct Block {
 	public:
 		inline size_t getSize() { return _size; }
@@ -13,7 +15,7 @@ public:
 		friend class Memory;
 		size_t _size;
 		Block* _next;
-		void* _page;
+		Page* _page; // TODO store page ID instead. We can cut 4 bytes off here.
 		uint16_t _ref_count;
 		uint8_t _adjustment;
 
@@ -36,6 +38,14 @@ public:
 
 		inline size_t getOverhead() const {
 			return _overhead;
+		}
+
+		inline size_t getBlocksAllocated() const {
+			return _blocks_allocated;
+		}
+
+		inline size_t getBlocksFree() const {
+			return _blocks_free;
 		}
 
 	private:
@@ -69,6 +79,7 @@ public:
 		void* _pos;
 	};
 
+	const static size_t PAGE_LOOKUP_TABLE_BASE_SIZE = 1024; // In bytes.
 	const static size_t BLOCK_HEADER_SIZE = sizeof(Block);
 	const static size_t PAGE_HEADER_SIZE = sizeof(Page);
 	const static size_t PAGE_SIZE = 8192;

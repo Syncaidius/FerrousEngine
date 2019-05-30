@@ -88,7 +88,7 @@ void Memory::reset(bool release_pages) {
 }
 
 void* Memory::allocFast(const size_t size_bytes) {
-	assert(size_bytes < PAGE_SIZE - BLOCK_HEADER_SIZE);
+	assert(size_bytes < PAGE_FREE_SIZE);
 
 	Page* page = _pages;
 	while (page != nullptr) {
@@ -134,10 +134,10 @@ void* Memory::allocFast(const size_t size_bytes) {
 				_total_overhead += BLOCK_HEADER_SIZE;
 			}
 			else { 
-				// TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE), can we throw it into the block after it (if exists)
+				// TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE) throw it into an physically-adjacent block (if free).
 
 				// Take the whole block, including the leftover/extra bytes.
-				page->_allocated += block->getSize();
+				page->_allocated += block->_size;
 				_total_alloc += block->_size;
 
 				if (block == page->_blocks) {
@@ -240,7 +240,7 @@ void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
 void Memory::dealloc(void* p) {
 	assert(p != nullptr);
 	Block* blk = getHeader(p);
-	Page* page = reinterpret_cast<Page*>(blk->_page);
+	Page* page = blk->_page;
 	assert(blk != page->_blocks);
 
 	page->_allocated -= blk->_size;

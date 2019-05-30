@@ -22,26 +22,46 @@ void OutputFreeList() {
 		size_t pr_alloc = p->getAllocated();
 		size_t pr_overhead = p->getOverhead();
 		size_t pr_free = Memory::PAGE_SIZE - pr_alloc;
-		size_t pr_blocks_alloc = mem->getAllocBlockCount();
-		size_t pr_blocks_free = mem->getFreeBlockCount();
+		size_t pr_blocks_alloc = p->getBlocksAllocated();
+		size_t pr_blocks_free = p->getBlocksFree();
 
 		// Actual counters
-		size_t pa_alloc = Memory::PAGE_HEADER_SIZE;
-		size_t pa_overhead = Memory::PAGE_HEADER_SIZE;
+		size_t pa_alloc = 0;
+		size_t pa_overhead = 0;
 		size_t pa_free = 0;
+		size_t pa_blocks_alloc = 0;
 		size_t pa_blocks_free = 0;
 
-		Memory::Block* b = p->getFreeList();
+		cout << "PAGE " << (a_pages + 1) << " OF " << r_pages << endl;
+		cout << "   Blocks:" << endl;
+
+		// Iterate through all blocks to calculate exactly how much overhead there is
+		char* page_data = reinterpret_cast<char*>(p) + Memory::PAGE_HEADER_SIZE;
+		char* data_end = reinterpret_cast<char*>(p) + Memory::PAGE_SIZE;
+
+		Memory::Block* b = nullptr;
+		while (page_data < data_end) {
+			b = reinterpret_cast<Memory::Block*>(page_data);
+			pa_blocks_alloc++;
+			page_data += Memory::BLOCK_HEADER_SIZE + b->getSize();
+		}
+
+		// Calculate free block size
+		b = p->getFreeList();
 		while (b) {
-			pa_alloc += Memory::BLOCK_HEADER_SIZE + b->getSize();
-			pa_overhead += Memory::BLOCK_HEADER_SIZE;
+			pa_free += b->getSize();		
 			pa_blocks_free++;
+
+			cout << "      (" << pa_blocks_free << ") Address: " << b << " -- size: " << b->getSize() << " bytes" << endl;
 			b = b->getNext();
 		}
 
-		pa_free = Memory::PAGE_SIZE - pa_alloc;
+		pa_overhead = (pa_blocks_alloc * Memory::BLOCK_HEADER_SIZE);
+		pa_overhead += Memory::PAGE_HEADER_SIZE;
+		pa_blocks_alloc -= pa_blocks_free;
+		pa_alloc = Memory::PAGE_SIZE - pa_free;
 
-		cout << "PAGE " << (a_pages + 1) << " OF " << r_pages << endl;
+		cout << endl;
 		cout << "   Reported:" << endl;
 		cout << "      -- Allocated: " << pr_alloc << "/" << Memory::PAGE_SIZE << " bytes" << endl;
 		cout << "      -- Overhead: " << pr_overhead << "/" << Memory::PAGE_SIZE << " bytes" << endl;
@@ -54,7 +74,7 @@ void OutputFreeList() {
 		cout << "      -- Allocated: " << pa_alloc << "/" << Memory::PAGE_SIZE << " bytes" << endl;
 		cout << "      -- Overhead: " << pa_overhead << "/" << Memory::PAGE_SIZE << " bytes" << endl;
 		cout << "      -- Free: " << pa_free << "/" << Memory::PAGE_SIZE << " bytes" << endl;
-		cout << "      -- Allocated Blocks: [Not Tracked]" << endl;
+		cout << "      -- Allocated Blocks: " << pa_blocks_alloc << endl;
 		cout << "      -- Free Blocks: " << pa_blocks_free << endl;
 		cout << "      -- Alloc & Free Total: " << (pa_free + pa_alloc) << "/" << Memory::PAGE_SIZE << " bytes" << endl;
 
