@@ -59,7 +59,7 @@
     <ClInclude Include="string_fe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game_timer.h">
+    <ClInclude Include="game_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

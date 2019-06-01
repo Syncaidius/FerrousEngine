@@ -3,9 +3,17 @@
 #include <Util/logging.h>
 #include <Util/string_fe.h>
 #include <Util/localization.h>
+#include <Util/game_time.h>
 #include <map>
 #include <Windows.h>
 using namespace std;
+
+/*	=============================================
+	NOTICE: This program is currently used as a scratchpad or testing area 
+	for various parts of the engine during development. 
+
+	It will be messy!
+	============================================= */
 
 void OutputFreeList() {
 	//NOTE: we use cout here to avoid interfering with memory allocation statistics.
@@ -195,26 +203,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	// Output a map of allocator memory.
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	log.writeLine(L" "); // TODO empty line overload.
-	OutputFreeList();
-	log.writeLine(L" ");
+	//log.writeLine(L" "); // TODO empty line overload.
+	//OutputFreeList();
+	//log.writeLine(L" ");
 
-	log.writeLine("Press any key to run string test...");
-	cin.get();
-	RunStringTest(&log);
-	log.writeLine(L" ");
+	//log.writeLine("Press any key to run string test...");
+	//cin.get();
+	//RunStringTest(&log);
+	//log.writeLine(L" ");
 
-	log.writeLine(L" "); // TODO empty line overload.
-	log.writeLine(L"MEMORY AFTER STRING TEST");
-	OutputFreeList();
+	//log.writeLine(L" "); // TODO empty line overload.
+	//log.writeLine(L"MEMORY AFTER STRING TEST");
+	//OutputFreeList();
 
-	uint32_t defrag_iterations = 1;
-	Memory::get()->defragment(1);
-	cout << endl;
-	cout << "AFTER DEFRAGMENTATION" << endl;
-	OutputFreeList();
+	//uint32_t defrag_iterations = 1;
+	//Memory::get()->defragment(1);
+	//cout << endl;
+	//cout << "AFTER DEFRAGMENTATION" << endl;
+	//OutputFreeList();
 
-	log.writeLine(L"Press any key to exit...");
-	cin.get();
+	//log.writeLine(L"Press any key to exit...");
+	//cin.get();
+
+	GameTime* timer = new GameTime(true, 60);
+	while (true) {
+		uint32_t updates_needed = timer->tick();
+
+		for (int i = 0; i < updates_needed; i++) {
+			log.writeLineF("Frame %d -- time: %f ms -- delta: %f", timer->getFrameId(), timer->getFrameTime(), timer->getDelta());
+		}
+	}
 	return 0;
 }

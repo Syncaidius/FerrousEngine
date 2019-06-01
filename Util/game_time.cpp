@@ -1,4 +1,4 @@
-#include "game_timer.h"
+#include "game_time.h"
 #include <thread>
 
 GameTime::GameTime(bool fixedTimestep, uint32_t targetFps) {
@@ -6,7 +6,7 @@ GameTime::GameTime(bool fixedTimestep, uint32_t targetFps) {
 	setTargetFps(targetFps);
 	_fps = 0;
 	_total_time = 0;
-	_total_frames = 0;
+	_frame_id = 0;
 	_frame_time = 0;
 	_delta = 0;
 	_accumulated = 0;
@@ -77,14 +77,20 @@ uint32_t GameTime::tick() {
 		}
 	}
 	else { // Variable timestep.
-		_delta = _target_time / elapsed;		
+		_delta = elapsed / _target_time;
 		_accumulated = 0;
 		required_frames = 1;
 	}
 
-	_prev_time = time;
-	_total_frames += required_frames;
+	if (required_frames > 0)
+	{
+		auto f_time = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time - _prev_frame_time);
+		_frame_time = f_time.count(); // *1000.0; // Milliseconds
+		_prev_frame_time = time;
+	}
 
+	_prev_time = time;
+	_frame_id += required_frames;
 	return required_frames;
 }
 

@@ -29,7 +29,7 @@
     <ClCompile Include="memory.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="game_timer.h" />
+    <ClInclude Include="game_time.h" />
     <ClInclude Include="string_fe.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
