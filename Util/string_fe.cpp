@@ -19,18 +19,16 @@ FeString FeString::format(const FeString& str, ...) {
 FeString FeString::format(const FeString& str, va_list args) {
 	static size_t buf_size = 80;
 	static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Thread-safe due to each thread having its own version of the static.
-	int len_v = _vsnwprintf(buf, buf_size, str.c_str(), args);
+	int len_v = vswprintf(buf, buf_size, str.c_str(), args);
 
 	/* Buffer too small? */
-	if (len_v < 0) {
-		len_v = -len_v;
-
+	while (len_v < 0) {
 		size_t old_size = buf_size;
 		buf_size = (buf_size * 2) + len_v; // Double size and ensure it will be enough for the current value too.
 		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
 
 		// Try again. Should work this time.
-		len_v = _vsnwprintf(buf, buf_size, str.c_str(), args);
+		len_v = vswprintf(buf, buf_size, str.c_str(), args);
 	}
 
 	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len_v + 1ULL);

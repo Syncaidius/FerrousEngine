@@ -123,32 +123,34 @@ void RunStringTest(Logger* log) {
 	log->writeLineF("C string:  %s", cString.c_str());
 	log->writeLineF("Formatted:  %s", formattedString.c_str());
 	log->writeLineF("Result:  %s", result.c_str());
-	log->writeLineF(" ");
+	log->writeLine(" ");
 
 	log->writeLineF("Lower-case: %s", resultLower.c_str());
 	log->writeLineF("Upper-case: %s",resultUpper.c_str());
 	log->writeLineF("Capitalized (all): %s",resultCapsAll.c_str());
 	log->writeLineF("Capitalized (1st): %s",resultCapsFirst.c_str());
-	log->writeLineF(" ");
+	log->writeLine(" ");
 
 	log->writeLineF("Trimmed: {%s}",resultTrimmed.c_str());
 	log->writeLineF("Trimmed (start): {%s}",resultTrimStart.c_str());
 	log->writeLineF("Trimmed (end): {%s}",resultTrimEnd.c_str());
-	log->writeLineF(" ");
+	log->writeLine(" ");
 
 	log->writeLineF("Replacement Target: %s",toReplace.c_str());
 	log->writeLineF("Replace \"replace\" with \"start\": {%s}",resultReplaced.c_str());
 	log->writeLineF("Substr 0 to 10: {%s}",resultSubStr.c_str());
-	log->writeLineF(" ");
+	log->writeLine(" ");
 
 	log->writeLineF("Target: %s",toSearch.c_str());
 	log->writeLineF("indexOf(\"string\"): %d",indexOfString);
 	log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
-	log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? "not found" : "found"));
-	log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? "true" : "false"));
-	log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? "true" : "false"));
-	log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? "true" : "false"));
-	log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? "true" : "false");
+
+	// NOTE: problem caused by using literals in variable argument list????
+	log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? L"not found" : L"found"));
+	log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? L"true" : L"false"));
+	log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? L"true" : L"false"));
+	log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? L"true" : L"false"));
+	log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? L"true" : L"false");
 }
 
 const int NUM_ALLOCATIONS = 40;
@@ -203,7 +205,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLine(L" ");
 
 	log.writeLine(L" "); // TODO empty line overload.
-	log.writeLine(L"MEMORY AFTER TEST");
+	log.writeLine(L"MEMORY AFTER STRING TEST");
 	OutputFreeList();
 
 	uint32_t defrag_iterations = 1;
@@ -212,7 +214,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	OutputFreeList();
 
-	log.writeLine("Press any key to exit...");
+	log.writeLine(L"Press any key to exit...");
 	cin.get();
 	return 0;
 }

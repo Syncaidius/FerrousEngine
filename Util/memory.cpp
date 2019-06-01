@@ -272,6 +272,8 @@ void Memory::defragment(int iterations) {
 
 			if (tryMerge(_page_to_defrag, prev, cur)) {
 				cur = prev;
+				_page_to_defrag->_blocks_free--;
+				_total_free_blocks--;
 			}
 			else {
 				prev = cur; // cur was not absorbed, so that becomes the previous block.
