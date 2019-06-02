@@ -113,7 +113,8 @@ public:
 
 	/*Allocates a new block of memory capable of fitting num_elements of type T, then copies the old one to it. Once complete, the memory of the old array is released for reuse.
 	Updates the oldArray pointer to point to the newly-resized array.*/
-	template<typename T> void reallocType(T*& target, const size_t old_num_elements, const size_t num_elements) {
+	template<typename T> 
+	void reallocType(T*& target, const size_t old_num_elements, const size_t num_elements) {
 		realloc((void*&)target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
 	}
 
@@ -130,6 +131,13 @@ public:
 	Stack* allocStack(const size_t size_bytes, const uint8_t alignment);
 
 	void dealloc(void* p);
+
+	/* Calls the object's destructor and dallocates its memory.*/
+	template<typename T>
+	void deallocType(T* obj_location) {
+		obj_location->~T();
+		dealloc(obj_location);
+	}
 
 	void reset(bool release_pages);
 

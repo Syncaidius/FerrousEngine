@@ -58,12 +58,21 @@ double GameTime::getTotalTime() {
 	return _total_time;
 }
 
+uint64_t GameTime::getFrameId() {
+	return _frame_id;
+}
+
+double GameTime::getDelta() {
+	return _delta;
+}
+
 uint32_t GameTime::tick() {
 	// TODO: Implement custom sleep() func to pad times and "sleep" most of it away then spinway for the padded amount.
+	//		 This is to help reduce CPU usage from ticking endlessly during fixed-timestep.
 	// http://www.cplusplus.com/forum/windows/33865/
 	auto time = std::chrono::high_resolution_clock::now();
 	auto time_elapsed = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time - _prev_time);
-	double elapsed = time_elapsed.count(); // *1000.0; // Milliseconds
+	double elapsed = time_elapsed.count();
 
 	uint32_t required_frames = 0;
 
@@ -84,9 +93,9 @@ uint32_t GameTime::tick() {
 
 	if (required_frames > 0)
 	{
-		auto f_time = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time - _prev_frame_time);
-		_frame_time = f_time.count(); // *1000.0; // Milliseconds
-		_prev_frame_time = time;
+		auto f_time = std::chrono::duration_cast<std::chrono::duration<double, std::milli>>(time - _prev_tick_time);
+		_frame_time = f_time.count();
+		_prev_tick_time = time;
 	}
 
 	_prev_time = time;

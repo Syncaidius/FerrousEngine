@@ -5,7 +5,7 @@
 
 class FERROUS_UTIL_API GameTime{
 public:
-	GameTime(bool fixedTimestep, uint32_t targetFps);
+	GameTime(bool fixedTimestep = true, uint32_t targetFps = 60);
 	~GameTime();
 
 	bool getPaused();
@@ -21,12 +21,12 @@ public:
 	double getFrameTime();
 	double getTargetFrameTime();
 
-	/* The total amount of frame time recorded by this timer, across all frames. */
+	/* The total time recorded by the current GameTime instance. */
 	double getTotalTime();
 
-	inline const uint64_t getFrameId() { return _frame_id; }
+	uint64_t getFrameId();
 
-	inline const double getDelta() { return _delta; }
+	double getDelta();
 
 	/* Updates the current game time and returns the number of updates required to advance. */
 	uint32_t tick();
@@ -36,12 +36,12 @@ private:
 	uint64_t _frame_id;
 	uint32_t _target_fps;
 	uint32_t _fps;
-	double _frame_time; /* The time of the previously-completed frame */
+	double _frame_time; /* The time of the previously-completed tick() */
 	double _total_time;
 	double _target_time;
 	double _delta;
 	double _accumulated;
 
 	std::chrono::high_resolution_clock::time_point _prev_time;
-	std::chrono::high_resolution_clock::time_point _prev_frame_time;
+	std::chrono::high_resolution_clock::time_point _prev_tick_time;
 };
