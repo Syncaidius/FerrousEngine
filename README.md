@@ -5,6 +5,7 @@ Since the project has just been started, there is a shortage of details right no
  * [PhysX 4.x](https://github.com/NVIDIAGameWorks/PhysX) for physics - Surprise, it's open source!
  * [AssImp](http://www.assimp.org/) for model loading  
  * [Lua](https://www.lua.org/) for scripting
+ * [FreeType](https://www.freetype.org/) for font processing. Repo located [here](https://sv.nongnu.org/maintenance/UsingGit)
 
 You may be asking, why DirectX 12? 
 Well, it's adoption rate is finally picking up speed. By the time the engine is usable in a game, DirectX12 should be much more commonplace. The same goes for Vulkan. If not, falling back to DX11/OpenGL is always an option later down the line.
