@@ -1,5 +1,5 @@
 #include "stdafx.h";
-#include "memory.h";
+#include "allocation.h";
 
 // Static
 Memory* Memory::_allocator = new Memory();
@@ -193,6 +193,7 @@ void Memory::deref(void* p) {
 }
 
 void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes) {
+	// TODO retrieve block, get old size from that.
 	void* mem = alloc(num_bytes);
 	memcpy(mem, target, old_num_bytes);
 	dealloc(target);
@@ -205,10 +206,6 @@ void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
 }
 
 void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
-	assert(alignment >= 1);
-	assert(alignment <= 128);
-	assert((alignment & (alignment - 1)) == 0);;
-
 	size_t expanded_bytes = size_bytes + alignment;
 	void* p = alloc(expanded_bytes);
 	return align(p, alignment, 0);
@@ -224,16 +221,20 @@ Memory::Stack* Memory::allocStack(const size_t size_bytes, const uint8_t alignme
 }
 
 void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
+	assert(alignment >= 1);
+	assert(alignment <= 128);
+	assert((alignment & (alignment - 1)) == 0);;
+
 	uintptr_t raw_start = reinterpret_cast<uintptr_t>(p) + start_offset;
 
 	/* Calc adjustment by masking off the lower bits of address, to determine how "misaligned" it is.*/
 	size_t mask = (alignment - 1);
 	size_t misalignment = (raw_start & mask);
-	size_t _adjustment = alignment - misalignment;
-	uintptr_t alignedAddr = raw_start + alignment;
 
 	Block * block = reinterpret_cast<Block*>((char*)p - BLOCK_HEADER_SIZE);
-	block->_adjustment = alignment + start_offset;
+	block->_adjustment = alignment - misalignment;
+	uintptr_t alignedAddr = raw_start + block->_adjustment;
+
 	return reinterpret_cast<void*>(alignedAddr);
 }
 
@@ -384,4 +385,8 @@ Memory::Block* Memory::getHeader(void* p) {
 	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _adjustment);
 	uint8_t* _adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
 	return reinterpret_cast<Block*>((char*)p - *_adjustment - BLOCK_HEADER_SIZE);
+}
+
+size_t Memory::getTotalAllocated() {
+	return _total_alloc;
 }

@@ -1,8 +1,23 @@
 #pragma once
 #include "stdafx.h"
 #include "util.h";
+class FERROUS_UTIL_API Allocator {
+public:
+	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
+	virtual void* alloc(const size_t size_bytes) = 0;
 
-class FERROUS_UTIL_API Memory {
+	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
+	template<typename T> T* allocType(const size_t num_elements = 1) {
+		void* mem = alloc(sizeof(T) * num_elements);
+		return reinterpret_cast<T*>(mem);
+	}
+
+	virtual void dealloc(void* p) = 0;
+
+	virtual size_t getTotalAllocated() = 0;
+};
+
+class FERROUS_UTIL_API Memory : public Allocator {
 public:
 	struct Page;
 
@@ -90,13 +105,7 @@ public:
 	void* alloc(const size_t size_bytes);
 
 	/*Allocates, but does not zero, a new block of memory capable of fitting the requested number of bytes. */
-	inline void* allocFast(const size_t size_bytes);
-
-	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
-	template<typename T> T* allocType(const size_t num_elements = 1) {
-		void* mem = alloc(sizeof(T) * num_elements);
-		return reinterpret_cast<T*>(mem);
-	}
+	void* allocFast(const size_t size_bytes);
 
 	template<typename T> inline T* allocTypeFast(const size_t num_elements = 1) {
 		void* mem = allocFast(sizeof(T) * num_elements);
@@ -113,7 +122,7 @@ public:
 
 	/*Allocates a new block of memory capable of fitting num_elements of type T, then copies the old one to it. Once complete, the memory of the old array is released for reuse.
 	Updates the oldArray pointer to point to the newly-resized array.*/
-	template<typename T> 
+	template<typename T>
 	void reallocType(T*& target, const size_t old_num_elements, const size_t num_elements) {
 		realloc((void*&)target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
 	}
@@ -141,15 +150,15 @@ public:
 
 	void reset(bool release_pages);
 
-	/* defragments the specified number of pages. Continues from the last defragmented page. 
-	If the last page is reached, it will wrap around to the first page and start over, 
+	/* defragments the specified number of pages. Continues from the last defragmented page.
+	If the last page is reached, it will wrap around to the first page and start over,
 	unless the total number of pages is less than the specified amount.*/
-	void defragment(int iterations); 
-	
+	void defragment(int iterations);
+
 	Memory::Page* getFirstPage() { return _pages; }
 
 	/* Gets the total number of allocated bytes. */
-	inline size_t getTotalAllocated() const { return _total_alloc; }
+	size_t getTotalAllocated();
 
 	inline size_t getOverhead() const { return _total_overhead; }
 

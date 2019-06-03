@@ -1,7 +1,7 @@
 #pragma once
 #include "ferrous_head.h"
 #include "settings.h"
-#include <Util/memory.h>
+#include <Util/allocation.h>
 #include <Util/game_time.h>
 #include <Util/logging.h>
 

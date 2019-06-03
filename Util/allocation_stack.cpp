@@ -1,4 +1,4 @@
-#include "memory.h";
+#include "allocation.h";
 
 Memory::Stack::Stack(Memory* mem_parent, void* mem) {
 	_parent = mem_parent;

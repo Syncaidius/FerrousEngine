@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "memory.h"
+#include "allocation.h"
 #include "string_fe.h"
 
 class FERROUS_UTIL_API LogOutputBase {

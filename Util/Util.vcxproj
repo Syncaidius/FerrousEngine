@@ -24,16 +24,16 @@
     <ClCompile Include="string_fe.cpp" />
     <ClCompile Include="logging.cpp" />
     <ClCompile Include="logging_console.cpp" />
-    <ClCompile Include="memory_stack.cpp" />
+    <ClCompile Include="allocation_stack.cpp" />
     <ClCompile Include="DllMain.cpp" />
-    <ClCompile Include="memory.cpp" />
+    <ClCompile Include="allocation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game_time.h" />
     <ClInclude Include="string_fe.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
-    <ClInclude Include="memory.h" />
+    <ClInclude Include="allocation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="util.h" />
   </ItemGroup>
