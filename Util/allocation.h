@@ -18,7 +18,18 @@ public:
 
 	virtual void dealloc(void* p) = 0;
 
-	virtual size_t getTotalAllocated() = 0;
+	/* Calls the object's destructor and dallocates its memory.*/
+	template<typename T>
+	void deallocType(T* obj_location) {
+		obj_location->~T();
+		dealloc(obj_location);
+	}
+
+	/* gets the amount of allocated memory that is currently in use by the current allocator. */
+	virtual size_t getUsed() = 0;
+
+	/* Gets amount of memory allocated/reserved for the current allocator. */
+	virtual size_t getCapacity() = 0;
 };
 
 class FERROUS_UTIL_API Memory : public Allocator {
@@ -122,13 +133,6 @@ public:
 
 	void dealloc(void* p);
 
-	/* Calls the object's destructor and dallocates its memory.*/
-	template<typename T>
-	void deallocType(T* obj_location) {
-		obj_location->~T();
-		dealloc(obj_location);
-	}
-
 	void reset(bool release_pages);
 
 	/* defragments the specified number of pages. Continues from the last defragmented page.
@@ -139,7 +143,10 @@ public:
 	Memory::Page* getFirstPage() { return _pages; }
 
 	/* Gets the total number of allocated bytes. */
-	size_t getTotalAllocated();
+	size_t getUsed();
+
+	/* Gets amount of memory allocated/reserved for the current allocator. */
+	size_t getCapacity();
 
 	inline size_t getOverhead() const { return _total_overhead; }
 
@@ -192,13 +199,15 @@ public:
 	/* Resets the stack back to it's starting address.*/
 	void reset(void);
 
-	size_t getTotalAllocated();
+	size_t getUsed();
+
+	size_t getCapacity();
 private:
 	friend class Allocator;
-	StackAllocator(Allocator* parent, void* mem);
+	StackAllocator(Allocator* parent, void* mem, size_t num_bytes);
 
 	Allocator* _parent;
 	void* _mem;
-	uintptr_t _end;
 	void* _pos;
+	size_t _capacity;
 };

@@ -377,6 +377,10 @@ Memory::Block* Memory::getHeader(void* p) {
 	return reinterpret_cast<Block*>((char*)p - *_adjustment - BLOCK_HEADER_SIZE);
 }
 
-size_t Memory::getTotalAllocated() {
+size_t Memory::getUsed() {
 	return _total_alloc;
+}
+
+size_t Memory::getCapacity() {
+	return Memory::PAGE_SIZE* _total_pages;
 }

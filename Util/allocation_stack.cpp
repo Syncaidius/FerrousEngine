@@ -1,10 +1,11 @@
 #include "allocation.h";
 
-StackAllocator::StackAllocator(Allocator* parent, void* mem) {
+StackAllocator::StackAllocator(Allocator* parent, void* mem, size_t num_bytes) {
 	_parent = parent;
 
 	_mem = mem;
 	_pos = _mem;
+	_capacity = num_bytes;
 }
 
 StackAllocator::~StackAllocator(void) {
@@ -26,10 +27,14 @@ void StackAllocator::reset() {
 	_pos = (void*)((char*)_mem);
 }
 
-size_t StackAllocator::getTotalAllocated() {
+size_t StackAllocator::getUsed() {
 	return &_pos - &_mem;
 }
 
+size_t StackAllocator::getCapacity() {
+	return _capacity;
+}
+
 void StackAllocator::dealloc(void* p) {
-	// TODO implement (track correctly so we can automatically revertTo() when appropriate.
+	// Do nothing. Stack allocator relies solely on reset() or revertTo() for reusing memory.
 }
