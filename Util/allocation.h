@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
 #include "util.h";
+class FERROUS_UTIL_API StackAllocator;
+
 class FERROUS_UTIL_API Allocator {
 public:
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
@@ -11,6 +13,8 @@ public:
 		void* mem = alloc(sizeof(T) * num_elements);
 		return reinterpret_cast<T*>(mem);
 	}
+
+	StackAllocator* allocStack(const size_t size_bytes, const uint8_t alignment = 1);
 
 	virtual void dealloc(void* p) = 0;
 
@@ -73,27 +77,6 @@ public:
 		size_t _blocks_allocated;
 	};
 
-	class Stack {
-	public:
-		/* Allocates the specified amount of memory.*/
-		void* alloc(size_t num_bytes);
-
-		/* De-allocate all allocated memory in the stack to the specified pointer.*/
-		void revertTo(void* p);
-
-		/* Resets the stack back to it's starting address.*/
-		void reset(void);
-	private:
-		friend class Memory;
-		Stack(Memory* mem_parent, void* mem);
-		~Stack();
-
-		Memory* _parent;
-		void* _mem;
-		uintptr_t _end;
-		void* _pos;
-	};
-
 	const static size_t PAGE_LOOKUP_TABLE_BASE_SIZE = 1024; // In bytes.
 	const static size_t BLOCK_HEADER_SIZE = sizeof(Block);
 	const static size_t PAGE_HEADER_SIZE = sizeof(Page);
@@ -136,8 +119,6 @@ public:
 
 	/* Allocates a block of aligned memory.*/
 	void* allocAligned(const size_t size_bytes, uint8_t alignment);
-
-	Stack* allocStack(const size_t size_bytes, const uint8_t alignment);
 
 	void dealloc(void* p);
 
@@ -194,4 +175,30 @@ private:
 	inline Block* getHeader(void* p);
 	Page* newPage(void);
 	void resetPage(Page* p);
+};
+
+class FERROUS_UTIL_API StackAllocator : public Allocator {
+public:
+	~StackAllocator();
+
+	/* Allocates the specified amount of memory.*/
+	void* alloc(size_t num_bytes);
+
+	/* De-allocate all allocated memory in the stack to the specified pointer.*/
+	void revertTo(void* p);
+
+	void dealloc(void* p);
+
+	/* Resets the stack back to it's starting address.*/
+	void reset(void);
+
+	size_t getTotalAllocated();
+private:
+	friend class Allocator;
+	StackAllocator(Allocator* parent, void* mem);
+
+	Allocator* _parent;
+	void* _mem;
+	uintptr_t _end;
+	void* _pos;
 };

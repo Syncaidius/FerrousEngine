@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="allocation_memory.cpp" />
     <ClCompile Include="game_time.cpp" />
     <ClCompile Include="localization.cpp" />
     <ClCompile Include="string_fe.cpp" />
