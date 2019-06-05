@@ -5,6 +5,7 @@
 Logger::Logger(uint16_t initial_slot_count) {
 	_output_slot_count = initial_slot_count;
 	_outputs = Memory::get()->allocType<LogOutputHandle>(_output_slot_count);
+	Memory::ZeroType<LogOutputHandle>(_outputs, _output_slot_count);
 }
 
 Logger::~Logger() {

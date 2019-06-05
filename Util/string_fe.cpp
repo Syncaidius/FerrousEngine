@@ -31,7 +31,7 @@ FeString FeString::format(const FeString& str, va_list args) {
 		len_v = vswprintf(buf, buf_size, str.c_str(), args);
 	}
 
-	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len_v + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(len_v + 1ULL);
 	memcpy(mem, buf, len_v * sizeof(wchar_t));
 	return FeString(mem, len_v);
 }
@@ -54,7 +54,7 @@ FeString FeString::concat_number(const FeString& a, const T& v, const wchar_t* f
 	}
 
 	size_t total_len = a._length + len_v;
-	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(total_len + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(total_len + 1ULL);
 	wchar_t* p_data = mem;
 	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
 	p_data += a._length;
@@ -80,7 +80,7 @@ FeString FeString::dateTime(const wchar_t* format) {
 		return dateTime(format);
 	}
 
-	wchar_t* mem = Memory::get()->allocTypeFast<wchar_t>(len + 1ULL);
+	wchar_t* mem = Memory::get()->allocType<wchar_t>(len + 1ULL);
 	memcpy(mem, buf, len * sizeof(wchar_t));
 	return FeString(mem, len);
 }

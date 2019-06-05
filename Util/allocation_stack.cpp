@@ -10,6 +10,7 @@ StackAllocator::StackAllocator(Allocator* parent, void* mem, size_t num_bytes) {
 
 StackAllocator::~StackAllocator(void) {
 	_parent->dealloc(this);
+	_parent = nullptr;
 }
 
 void* StackAllocator::alloc(size_t num_bytes) {
@@ -17,6 +18,13 @@ void* StackAllocator::alloc(size_t num_bytes) {
 	_pos = (void*)((char*)_pos + num_bytes);
 	// TODO ensure stack cannot overflow into memory it does not own when full.
 	return _pos;
+}
+
+void* StackAllocator::allocAligned(const size_t size_bytes, const uint8_t alignment) {
+	size_t expanded_bytes = size_bytes + alignment;
+	void* p = alloc(expanded_bytes);
+	size_t adjustment = align(p, alignment, 0);
+	return p;
 }
 
 void StackAllocator::revertTo(void* p) {

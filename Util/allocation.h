@@ -16,6 +16,8 @@ public:
 
 	StackAllocator* allocStack(const size_t size_bytes, const uint8_t alignment = 1);
 
+	virtual void* allocAligned(const size_t size_bytes, const uint8_t alignment) = 0;
+
 	virtual void dealloc(void* p) = 0;
 
 	/* Calls the object's destructor and dallocates its memory.*/
@@ -30,6 +32,9 @@ public:
 
 	/* Gets amount of memory allocated/reserved for the current allocator. */
 	virtual size_t getCapacity() = 0;
+
+protected:
+	uint8_t align(void*& p, uint8_t alignment, size_t offset);
 };
 
 class FERROUS_UTIL_API Memory : public Allocator {
@@ -98,14 +103,6 @@ public:
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
 	void* alloc(const size_t size_bytes);
 
-	/*Allocates, but does not zero, a new block of memory capable of fitting the requested number of bytes. */
-	void* allocFast(const size_t size_bytes);
-
-	template<typename T> inline T* allocTypeFast(const size_t num_elements = 1) {
-		void* mem = allocFast(sizeof(T) * num_elements);
-		return reinterpret_cast<T*>(mem);
-	}
-
 	/* Increments the reference count of a block of memory. If the reference count hits 0, it will automatically be deallocated. */
 	void ref(void* p);
 
@@ -158,6 +155,16 @@ public:
 
 	static inline Memory* get() { return _allocator; }
 
+	static inline void Zero(void* p, uint8_t val, size_t num_bytes) {
+		memset(p, val, num_bytes);
+	}
+
+	template<typename T> 
+	static inline void ZeroType(T* dest, const size_t num_elements) {
+		memset(dest, 0, sizeof(T) * num_elements);
+	}
+
+
 private:
 	static Memory* _allocator;
 	Memory();
@@ -170,9 +177,6 @@ private:
 	size_t _total_free_blocks;
 	size_t _total_alloc_blocks;
 	size_t _total_pages;
-
-	/* Gets an aligned pointer within the specified block of memory. */
-	inline void* align(void* p, uint8_t alignment, size_t start_offset = 0);
 
 	bool tryMerge(Page* page, Block* prev, Block* cur);
 	void mergeSort(Block** headRef);
@@ -190,6 +194,8 @@ public:
 
 	/* Allocates the specified amount of memory.*/
 	void* alloc(size_t num_bytes);
+
+	void* allocAligned(const size_t size_bytes, const uint8_t alignment);
 
 	/* De-allocate all allocated memory in the stack to the specified pointer.*/
 	void revertTo(void* p);

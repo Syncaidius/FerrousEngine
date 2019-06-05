@@ -86,7 +86,7 @@ void Memory::reset(bool release_pages) {
 	_total_alloc_blocks = 0;
 }
 
-void* Memory::allocFast(const size_t size_bytes) {
+void* Memory::alloc(const size_t size_bytes) {
 	assert(size_bytes < PAGE_FREE_SIZE);
 
 	Page* page = _pages;
@@ -173,12 +173,6 @@ void* Memory::allocFast(const size_t size_bytes) {
 	return nullptr;
 }
 
-void* Memory::alloc(const size_t size_bytes) {
-	void* p = allocFast(size_bytes);
-	memset(p, 0, size_bytes);
-	return p;
-}
-
 void Memory::ref(void* p) {
 	Block* b = getHeader(p);
 	b->_ref_count++;
@@ -207,25 +201,10 @@ void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
 void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
 	size_t expanded_bytes = size_bytes + alignment;
 	void* p = alloc(expanded_bytes);
-	return align(p, alignment, 0);
-}
 
-void* Memory::align(void* p, uint8_t alignment, size_t start_offset) {
-	assert(alignment >= 1);
-	assert(alignment <= 128);
-	assert((alignment & (alignment - 1)) == 0);;
-
-	uintptr_t raw_start = reinterpret_cast<uintptr_t>(p) + start_offset;
-
-	/* Calc adjustment by masking off the lower bits of address, to determine how "misaligned" it is.*/
-	size_t mask = (alignment - 1);
-	size_t misalignment = (raw_start & mask);
-
-	Block * block = reinterpret_cast<Block*>((char*)p - BLOCK_HEADER_SIZE);
-	block->_adjustment = alignment - misalignment;
-	uintptr_t alignedAddr = raw_start + block->_adjustment;
-
-	return reinterpret_cast<void*>(alignedAddr);
+	Block* block = reinterpret_cast<Block*>((char*)p - BLOCK_HEADER_SIZE);
+	block->_adjustment = align(p, alignment, 0);
+	return p;
 }
 
 void Memory::dealloc(void* p) {
