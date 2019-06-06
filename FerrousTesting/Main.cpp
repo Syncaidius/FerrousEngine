@@ -4,6 +4,7 @@
 #include <Util/string_fe.h>
 #include <Util/localization.h>
 #include <Util/game_time.h>
+#include <Util/file.h>
 #include <map>
 #include <Windows.h>
 using namespace std;
@@ -153,12 +154,22 @@ void RunStringTest(Logger* log) {
 	log->writeLineF("indexOf(\"string\"): %d",indexOfString);
 	log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
 
-	// NOTE: problem caused by using literals in variable argument list????
 	log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? L"not found" : L"found"));
 	log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? L"true" : L"false"));
 	log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? L"true" : L"false"));
 	log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? L"true" : L"false"));
 	log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? L"true" : L"false");
+}
+
+void RunEngineTest(Logger* log) {
+	GameTime* timer = new GameTime(true, 60);
+	while (true) {
+		uint32_t updates_needed = timer->tick();
+
+		for (int i = 0; i < updates_needed; i++) {
+			log->writeLineF("Frame %d -- time: %f ms -- delta: %f", timer->getFrameId(), timer->getFrameTime(), timer->getDelta());
+		}
+	}
 }
 
 const int NUM_ALLOCATIONS = 40;
@@ -225,13 +236,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	//log.writeLine(L"Press any key to exit...");
 	//cin.get();
 
-	GameTime* timer = new GameTime(true, 60);
-	while (true) {
-		uint32_t updates_needed = timer->tick();
+	//RunEngineTest(&log);
+	FeString workingDir = File::getWorkingDirectory();
+	log.writeLineF("Current Path: %s", workingDir.c_str());
+	log.writeLineF("   Is directory: %d", File::isDirectory(&workingDir));
+	log.writeLineF("   Is file: %d", File::isFile(&workingDir));
 
-		for (int i = 0; i < updates_needed; i++) {
-			log.writeLineF("Frame %d -- time: %f ms -- delta: %f", timer->getFrameId(), timer->getFrameTime(), timer->getDelta());
-		}
-	}
+	bool fExists = File::exists(L"FerrousTesting.exe");
+	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
+
+	log.writeLine(L"Press any key to exit...");
+	cin.get();
+
 	return 0;
 }

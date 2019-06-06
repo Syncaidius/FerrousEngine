@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="allocation_memory.cpp" />
+    <ClCompile Include="file.cpp" />
+    <ClCompile Include="file_global_info.cpp" />
     <ClCompile Include="game_time.cpp" />
     <ClCompile Include="localization.cpp" />
     <ClCompile Include="string_fe.cpp" />
@@ -30,6 +32,7 @@
     <ClCompile Include="allocation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="file.h" />
     <ClInclude Include="game_time.h" />
     <ClInclude Include="string_fe.h" />
     <ClInclude Include="localization.h" />
