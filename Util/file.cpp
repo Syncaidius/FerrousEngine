@@ -18,25 +18,30 @@ File::FileResult File::deleteFile(const wchar_t* path) {
 	auto p = fs::path(path);
 
 	if (!fs::exists(p))
-		return FileResult::NotFound;
+		return NotFound;
 
 	if (fs::is_directory(p))
-		return FileResult::NotFile;
+		return NotFile;
 
-	return fs::remove(p) ? FileResult::Success : FileResult::UnknownError;
+	return fs::remove(p) ? Success : UnknownError;
 }
 
 File::FileResult File::deleteDirectory(const wchar_t* path, bool recursive) {
 	auto p = fs::path(path);
 
 	if (!fs::exists(p))
-		return FileResult::NotFound;
+		return NotFound;
 
 	if (!fs::is_directory(p))
-		return FileResult::NotDirectory;
+		return NotDirectory;
 
-	if (!fs::is_empty(p) && recursive)
-		return FileResult::NotEmpty;
+	if (recursive) {
+		return fs::remove_all(p) > 0 ? Success : UnknownError;
+	}
+	else {
+		if (!fs::is_empty(p))
+			return NotEmpty;
 
-	return fs::remove(p) ? FileResult::Success : FileResult::UnknownError;
+		return fs::remove(p) ? Success : UnknownError;
+	}
 }
