@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FerrousEngine", "FerrousEngine\FerrousEngine.vcxproj", "{49FE14AF-D0F7-4325-A128-958D79E20FA5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "FerrousTesting", "FerrousTesting\FerrousTesting.vcxproj", "{718D24F3-E152-42AB-898D-18639B4ACEBD}"
+	ProjectSection(ProjectDependencies) = postProject
+		{49FE14AF-D0F7-4325-A128-958D79E20FA5} = {49FE14AF-D0F7-4325-A128-958D79E20FA5}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Util", "Util\Util.vcxproj", "{09641BAD-4B4F-4291-AFFE-45344E642D1A}"
 EndProject

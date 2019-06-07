@@ -83,11 +83,13 @@ uint32_t GameTime::tick() {
 		while (_accumulated >= _target_time) {
 			required_frames++;
 			_accumulated -= _target_time;
+			_total_time += _target_time;
 		}
 	}
 	else { // Variable timestep.
 		_delta = elapsed / _target_time;
 		_accumulated = 0;
+		_total_time += elapsed;
 		required_frames = 1;
 	}
 

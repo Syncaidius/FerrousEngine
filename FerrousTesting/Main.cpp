@@ -245,7 +245,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	bool fExists = File::exists(L"FerrousTesting.exe");
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
-	log.writeLine(L"Press any key to exit...");
+	//GameTime test = GameTime(false, 60);
+	//double timeStart = test.getTotalTime();
+
+	//int iterations = 10000;
+	//for (int i = 0; i < iterations; i++) {
+	//	test.tick();
+	//	log.writeLine("test");
+	//}
+
+	//// [16:04:47] Time taken to log 10000 lines: 12701.788800 ms - std::endl
+	//double timeTaken = test.getTotalTime() - timeStart;
+	//log.writeLineF(L"Time taken to log %d lines: %f ms", iterations, timeTaken);
 	cin.get();
 
 	return 0;
