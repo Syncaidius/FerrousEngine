@@ -48,9 +48,6 @@
     <ClCompile Include="file_global_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="file_exceptions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

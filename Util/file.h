@@ -33,8 +33,22 @@ public:
 		/* An attempt was made to create a file which already exists. */
 		AlreadyExists = 7,
 
+		/* An operation was attempted on a File but it was already closed.*/
+		AlreadyClosed = 8,
+
 		/* An unknown error occurred. */
 		UnknownError = 255,
+	};
+
+	enum class SeekOrigin {
+		/* From the beginning of the file. */
+		Beginning = 0,
+
+		/* From the current read or write position of the file.*/
+		Current = 1,
+
+		/* From the end of the file. */
+		End = 2,
 	};
 
 	enum class AccessFlags : uint8_t {
@@ -57,14 +71,6 @@ public:
 
 		/* If the file is opened, it will be truncated to 0 bytes of data ready to */
 		Truncate = 8,
-	};
-
-	class Exception : std::exception {
-		const char* _msg;
-		Result _result;
-
-	public:
-		Exception(const char* msg, Result result);
 	};
 
 	static bool exists(const wchar_t* path);
@@ -122,7 +128,15 @@ public:
 		return create(path->c_str());
 	}
 
-	void close();
+	Result seek(AccessFlags flags, SeekOrigin origin, int32_t num_bytes);
+	Result setPos(AccessFlags flags, size_t pos);
+	Result getPos(AccessFlags flags, size_t& pos);
+
+	Result setSize(size_t size);
+	size_t getSize();
+
+	Result close();
+	inline const bool isOpen() { return _isOpen; }
 	
 	~File();
 
@@ -136,15 +150,10 @@ private:
 
 	File(const wchar_t* path, const AccessFlags access, const ModeFlags mode);
 
-	Result setPos(AccessFlags flags, size_t pos);
-	size_t getPos(AccessFlags flags);
-
-	Result setSize(size_t size);
-	size_t getSize();
-
 	AccessFlags _access;
 	ModeFlags _mode;
 	size_t _pos;
+	bool _isOpen;
 	const FeString _path;
 	std::fstream _stream;
 };

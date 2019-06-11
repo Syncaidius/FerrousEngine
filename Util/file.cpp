@@ -1,7 +1,8 @@
 #include "file.h"
 #include "allocation.h"
 
-namespace fs = std::filesystem;
+using namespace std;
+namespace fs = filesystem;
 
 #pragma region Static
 bool File::exists(const wchar_t* path) {
@@ -48,8 +49,6 @@ File::Result File::deleteDirectory(const wchar_t* path, bool recursive) {
 	}
 }
 
-
-
 File::Result File::open(
 	const wchar_t* path,
 	File*& file,
@@ -79,7 +78,7 @@ File::Result File::create(const wchar_t* path) {
 	if (fs::exists(path))
 		return Result::AlreadyExists;
 
-	auto stream = std::fstream(path);
+	auto stream = fstream(path);
 	stream.close();
 	return Result::Success;
 }
@@ -89,23 +88,30 @@ File::Result File::create(const wchar_t* path) {
 #pragma region Instanced
 
 File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode) {
+	if (_isOpen)
+		close();
+
+	_access = access;
+	_mode = mode;
+	_isOpen = true;
+
 	int modeFlags = 0;
 	if ((access & AccessFlags::Read) == AccessFlags::Read) 
-		modeFlags |= std::ios::in;
+		modeFlags |= ios::in;
 
 	if ((access & AccessFlags::Write) == AccessFlags::Write) 
-		modeFlags |= std::ios::out;
+		modeFlags |= ios::out;
 
 	if ((mode & ModeFlags::Binary) == ModeFlags::Binary)
-		modeFlags |= std::ios::binary;
+		modeFlags |= ios::binary;
 
 	if ((mode & ModeFlags::Append) == ModeFlags::Append)
-		modeFlags |= std::ios::app;
+		modeFlags |= ios::app;
 
 	if ((mode & ModeFlags::Truncate) == ModeFlags::Truncate)
-		modeFlags |= std::ios::trunc;
+		modeFlags |= ios::trunc;
 
-	_stream = std::fstream(path, modeFlags);
+	_stream = fstream(path, modeFlags);
 }
 
 File::~File() {
@@ -113,39 +119,84 @@ File::~File() {
 	Memory::get()->dealloc(this);
 }
 
-size_t File::getPos(File::AccessFlags access) {
+File::Result File::getPos(File::AccessFlags access, size_t& pos) {
+	if (!_isOpen) {
+		pos = 0;
+		return Result::AlreadyClosed;
+	}
 
 	switch (access) {
 	case AccessFlags::Read:
-		return _stream.tellg();
+		pos = _stream.tellg();
+		return Result::Success;
 
 	case AccessFlags::Write:
-		return _stream.tellp();
+		pos = _stream.tellp();
+		return Result::Success;
 
 	default:
-		throw Exception("Only Read or Write flags accepted.", Result::InvalidFlags);
+		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
+		return Result::InvalidFlags;
 	}
-
-	return 0;
 }
 
 File::Result File::setPos(File::AccessFlags access, size_t pos) {
+	if (!_isOpen)
+		return Result::AlreadyClosed;
+
 	switch (access) {
 	case AccessFlags::Read:
-		_stream.seekg(pos, std::ios_base::beg);
+		_stream.seekg(pos, ios_base::beg);
+		return Result::Success;
+		break;
 
 	case AccessFlags::Write:
-		_stream.seekp(pos, std::ios_base::beg);
+		_stream.seekp(pos, ios_base::beg);
+		return Result::Success;
+		break;
 
 	default:
-		throw Exception("Only Read or Write flags accepted.", Result::InvalidFlags);
+		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
+		return Result::InvalidFlags;
 	}
 
 	return Result::UnknownError;
 }
 
-void File::close() {
+File::Result File::seek(File::AccessFlags access, File::SeekOrigin origin, int32_t num_bytes) {
+	if (!_isOpen)
+		return Result::AlreadyClosed;
+
+	int o = ios_base::beg;
+	if (origin == SeekOrigin::Current)
+		o = ios_base::cur;
+	else if (origin == SeekOrigin::End)
+			o = ios_base::end;
+
+	switch (access) {
+	case AccessFlags::Read:
+		_stream.seekg(num_bytes, o);
+		return Result::Success;
+		break;
+
+	case AccessFlags::Write:
+		_stream.seekp(num_bytes, o);
+		return Result::Success;
+		break;
+
+	default:
+		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
+		return Result::InvalidFlags;
+	}
+}
+
+File::Result File::close() {
+	if (!_isOpen)
+		return Result::AlreadyClosed;
+
 	_stream.close();
+	_isOpen = false;
+	return Result::Success;
 }
 
 #pragma endregion
