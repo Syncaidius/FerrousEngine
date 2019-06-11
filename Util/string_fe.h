@@ -71,10 +71,10 @@ public:
 	FeString capitalize();
 
 	/* Gets the length of the string.*/
-	size_t getLength() const { return _length; }
+	const inline size_t len() const { return _length; }
 
 	/*Returns a pointer to the raw underlying character data.*/
-	wchar_t* c_str() const { return _data; }
+	const inline wchar_t* c_str() const { return _data; }
 private:
 	/* Takes a pointer to character data and stores it, instead of allocating a separate copy of it. */
 	FeString(wchar_t* c_data, size_t length);

@@ -2,16 +2,38 @@
 #include "util.h"
 #include "string_fe.h"
 #include <filesystem>
+#include <fstream>
 
 class FERROUS_UTIL_API File {
 public:
 	enum class Result : uint8_t {
+		/* File was not found.*/
 		NotFound = 0,
+		
+		/* Operation succeeded.*/
 		Success = 1,
+
+		/* A file-based call was made on a non-file path.*/
 		NotFile = 2,
+
+		/* A directory-based call was made on a file path.*/
 		NotDirectory = 3,
+
+		/* The file or directory was not empty.*/
 		NotEmpty = 4,
 
+		/* The position was out of bounds. 
+		This is usually because the file was shrunk below the currnet position, 
+		or an attempt was made to set the position beyond the end of a file. */
+		OutOfBounds = 5,
+
+		/* Occurs when invalid flags were provided to a function. */
+		InvalidFlags = 6,
+
+		/* An attempt was made to create a file which already exists. */
+		AlreadyExists = 7,
+
+		/* An unknown error occurred. */
 		UnknownError = 255,
 	};
 
@@ -23,9 +45,26 @@ public:
 
 	enum class ModeFlags : uint8_t {
 		None = 0,
-		Open = 1,
-		Create = 2,
-		Append = 4,
+
+		/* Creates the file if it is missing, otherwise the existing file will be opened. */
+		Create = 1,
+
+		/* Once the file is opened, move to the end of the file to write new data.*/
+		Append = 2,
+
+		/* Open the file in binary mode. Default is text mode.*/
+		Binary = 4,
+
+		/* If the file is opened, it will be truncated to 0 bytes of data ready to */
+		Truncate = 8,
+	};
+
+	class Exception : std::exception {
+		const char* _msg;
+		Result _result;
+
+	public:
+		Exception(const char* msg, Result result);
 	};
 
 	static bool exists(const wchar_t* path);
@@ -60,6 +99,33 @@ public:
 		return deleteDirectory(path->c_str(), recursive);
 	}
 
+	static Result open(const wchar_t* path, File*& file);
+	inline static Result open(const FeString* path, File*& file) {
+		return deleteDirectory(path->c_str(), file);
+	}
+
+	static Result open(
+		const wchar_t* path, 
+		File*& file, 
+		AccessFlags access, 
+		ModeFlags mode);
+	inline static Result open(
+		const FeString* path, 
+		File*& file, 
+		AccessFlags access, 
+		ModeFlags mode) {
+		return open(path->c_str(), file, access, mode);
+	}
+
+	static Result create(const wchar_t* path);
+	inline static Result create(const FeString* path) {
+		return create(path->c_str());
+	}
+
+	void close();
+	
+	~File();
+
 private:
 	struct GlobalInfo {
 		GlobalInfo();
@@ -68,10 +134,19 @@ private:
 
 	static GlobalInfo* _info;
 
+	File(const wchar_t* path, const AccessFlags access, const ModeFlags mode);
+
+	Result setPos(AccessFlags flags, size_t pos);
+	size_t getPos(AccessFlags flags);
+
+	Result setSize(size_t size);
+	size_t getSize();
+
 	AccessFlags _access;
 	ModeFlags _mode;
 	size_t _pos;
-	std::ostream _stream;
+	const FeString _path;
+	std::fstream _stream;
 };
 
 #pragma region Operators
@@ -87,6 +162,18 @@ inline File::AccessFlags& operator |= (File::AccessFlags& l, File::AccessFlags r
 	return l;
 }
 
+inline File::AccessFlags operator & (File::AccessFlags l, File::AccessFlags r)
+{
+	using T = std::underlying_type_t <File::AccessFlags>;
+	return static_cast<File::AccessFlags>(static_cast<T>(l) | static_cast<T>(r));
+}
+
+inline File::AccessFlags& operator &= (File::AccessFlags & l, File::AccessFlags r)
+{
+	l = l & r;
+	return l;
+}
+
 inline File::ModeFlags operator | (File::ModeFlags l, File::ModeFlags r)
 {
 	using T = std::underlying_type_t <File::ModeFlags>;
@@ -98,4 +185,21 @@ inline File::ModeFlags& operator |= (File::ModeFlags & l, File::ModeFlags r)
 	l = l | r;
 	return l;
 }
+
+inline File::ModeFlags operator & (File::ModeFlags l, File::ModeFlags r) {
+	using T = std::underlying_type_t <File::ModeFlags>;
+	return static_cast<File::ModeFlags>(static_cast<T>(l) & static_cast<T>(r));
+}
+
+inline File::ModeFlags& operator &= (File::ModeFlags& l, File::ModeFlags r)
+{
+	l = l & r;
+	return l;
+}
+
+inline bool operator == (File::ModeFlags l, bool r) {
+	using T = std::underlying_type_t <File::ModeFlags>;
+	return static_cast<T>(l) > 0;
+}
+
 #pragma endregion

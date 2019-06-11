@@ -245,10 +245,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	bool fExists = File::exists(L"FerrousTesting.exe");
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
+	File* testFile;
+	File::Result r = File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create);
+	log.writeLineF("File::open() result: %d", r);
+	if (r == File::Result::Success) {
+		log.writeLineF("File created successfully!");
+	}
+	testFile->close();
+
+
 	//GameTime test = GameTime(false, 60);
 	//double timeStart = test.getTotalTime();
 
-	//int iterations = 10000;
+	//int iterations = 5000;
 	//for (int i = 0; i < iterations; i++) {
 	//	test.tick();
 	//	log.writeLine("test");
