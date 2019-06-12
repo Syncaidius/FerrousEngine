@@ -1,6 +1,6 @@
 #include "allocation.h";
 
-StackAllocator::StackAllocator(Allocator* parent, void* mem, size_t num_bytes) {
+StackAllocator::StackAllocator(FerrousAllocator* parent, void* mem, size_t num_bytes) {
 	_parent = parent;
 
 	_mem = mem;

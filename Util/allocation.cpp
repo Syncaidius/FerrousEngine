@@ -2,7 +2,7 @@
 #include "allocation.h";
 
 /* Allocates a memory stack with with the specified number of bytes, in a single contiguous block.*/
-StackAllocator* Allocator::allocStack(const size_t num_bytes, const uint8_t alignment) {
+StackAllocator* FerrousAllocator::allocStack(const size_t num_bytes, const uint8_t alignment) {
 	size_t stack_header = sizeof(StackAllocator);
 	size_t total_bytes = num_bytes + stack_header + alignment;
 	void* p = alloc(total_bytes);
@@ -11,7 +11,7 @@ StackAllocator* Allocator::allocStack(const size_t num_bytes, const uint8_t alig
 	return new (p) StackAllocator(this, pAligned, num_bytes);
 }
 
-uint8_t Allocator::align(void*& p, uint8_t alignment, size_t start_offset) {
+uint8_t FerrousAllocator::align(void*& p, uint8_t alignment, size_t start_offset) {
 	assert(alignment >= 1);
 	assert(alignment <= 128);
 	assert((alignment & (alignment - 1)) == 0);;
