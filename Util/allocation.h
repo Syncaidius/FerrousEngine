@@ -33,6 +33,11 @@ public:
 	/* Gets amount of memory allocated/reserved for the current allocator. */
 	virtual size_t getCapacity() = 0;
 
+	/* Increases reference counter of allocated memory.*/
+	virtual void ref(void* p) = 0;
+
+	virtual void deref(void* p) = 0;
+
 protected:
 	uint8_t align(void*& p, uint8_t alignment, size_t offset);
 };
@@ -118,10 +123,10 @@ public:
 		realloc((void*&)target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
 	}
 
-	void copy(void* dest, const void* src, const size_t num_bytes);
+	static void copy(void* dest, const void* src, const size_t num_bytes);
 
 	/* Copies memory from the source, to the destination. */
-	template<typename T> inline void copyType(T* dest, const T* src, const size_t num_elements) {
+	template<typename T> inline static void copyType(T* dest, const T* src, const size_t num_elements) {
 		copy(dest, src, sizeof(T) * num_elements);
 	}
 
@@ -204,6 +209,10 @@ public:
 
 	/* Resets the stack back to it's starting address.*/
 	void reset(void);
+
+	void ref(void* p);
+
+	void deref(void* p);
 
 	size_t getUsed();
 

@@ -119,7 +119,7 @@ void RunStringTest(Logger* log) {
 	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);
 
 	FeString toReplace = "I am a replaced string full of replacements, which replaces things.";
-	FeString resultReplaced = toReplace.replace(&"replace"_fe, &"start"_fe);
+	FeString resultReplaced = toReplace.replace("replace"_fe, "start"_fe);
 	FeString resultSubStr = toReplace.substr(0, 10);
 
 	bool startsWith = toSearch.startsWith(&"I am"_fe);
@@ -214,27 +214,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	// Output a map of allocator memory.
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	//log.writeLine(L" "); // TODO empty line overload.
-	//OutputFreeList();
-	//log.writeLine(L" ");
+	log.writeLine(L" "); // TODO empty line overload.
+	OutputFreeList();
+	log.writeLine(L" ");
 
-	//log.writeLine("Press any key to run string test...");
-	//cin.get();
-	//RunStringTest(&log);
-	//log.writeLine(L" ");
+	log.writeLine("Press any key to run string test...");
+	cin.get();
+	RunStringTest(&log);
+	log.writeLine(L" ");
 
-	//log.writeLine(L" "); // TODO empty line overload.
-	//log.writeLine(L"MEMORY AFTER STRING TEST");
-	//OutputFreeList();
+	log.writeLine(L" "); // TODO empty line overload.
+	log.writeLine(L"MEMORY AFTER STRING TEST");
+	OutputFreeList();
 
-	//uint32_t defrag_iterations = 1;
-	//Memory::get()->defragment(1);
-	//cout << endl;
-	//cout << "AFTER DEFRAGMENTATION" << endl;
-	//OutputFreeList();
+	uint32_t defrag_iterations = 1;
+	Memory::get()->defragment(1);
+	cout << endl;
+	cout << "AFTER DEFRAGMENTATION" << endl;
+	OutputFreeList();
 
-	//log.writeLine(L"Press any key to exit...");
-	//cin.get();
+	log.writeLine(L"Press any key to exit...");
+	cin.get();
 
 	//RunEngineTest(&log);
 	FeString workingDir = File::getWorkingDirectory();
