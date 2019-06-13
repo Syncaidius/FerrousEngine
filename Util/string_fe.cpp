@@ -90,8 +90,8 @@ FeString::FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator) 
 	_data[_length] = L'\0';
 }
 
-FeString::FeString(const char* c_data) {
-	_allocator = Memory:: get();
+FeString::FeString(const char* c_data, FerrousAllocator* allocator) {
+	_allocator = allocator;
 	_length = strlen(c_data);
 	_data = _allocator->allocType<wchar_t>(_length + 1ULL);
 
@@ -101,13 +101,16 @@ FeString::FeString(const char* c_data) {
 	_data[_length] = L'\0';
 }
 
-FeString::FeString(const wchar_t* c_data) {
-	_allocator = Memory::get();
+FeString::FeString(const wchar_t* c_data, FerrousAllocator* allocator) {
+	_allocator = allocator;
 	_length = wcslen(c_data);
 	_data = _allocator->allocType<wchar_t>(_length + 1ULL);
 	memcpy(_data, c_data, _length * sizeof(wchar_t));
 	_data[_length] = L'\0';
 }
+
+FeString::FeString(const char* c_data) : FeString(c_data, Memory::get()) { }
+FeString::FeString(const wchar_t* c_data) : FeString(c_data, Memory::get()) { }
 
 FeString::~FeString() {
 	_allocator->deref(_data);
