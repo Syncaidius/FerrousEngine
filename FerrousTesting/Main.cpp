@@ -172,7 +172,7 @@ void RunEngineTest(Logger* log) {
 	}
 }
 
-const int NUM_ALLOCATIONS = 40;
+const int NUM_ALLOCATIONS = 100;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Logger log(1);
@@ -191,26 +191,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	srand(14);
 
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN);
+	log.writeLineF("Performing %d random allocations...", NUM_ALLOCATIONS);
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t alloc_size = ((uint64_t)rand() % 64) + 1;
 		markers[i] = Memory::get()->alloc(alloc_size);
-		if (markers[i] != nullptr)
-			cout << "Allocated block of " << alloc_size << " bytes at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
+		//if (markers[i] != nullptr)
+		//	cout << "Allocated block of " << alloc_size << " bytes at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 	}
 
 	// Release random blocks
 	//SetConsoleTextAttribute(console, FOREGROUND_INTENSITY);
+	log.writeLine("Randomly deallocating...");
+	size_t rngDeallocations = 0;
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t rand_release = (((uint64_t)rand() % 4000) + 1);
 		if (rand_release < 2500) {
+			rngDeallocations++;
 			Memory::get()->dealloc(markers[i]);
-			cout << "Released block " << reinterpret_cast<uintptr_t>(markers[i]) << " via allocator" << endl;
 			markers[i] = nullptr;
 		}
-		else {
-			cout << "Kept block " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
-		}
 	}
+	log.writeLineF("Randomly deallocated %d blocks", rngDeallocations);
 
 	// Output a map of allocator memory.
 	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
@@ -233,7 +234,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	OutputFreeList();
 
-	log.writeLine(L"Press any key to exit...");
+	log.writeLine(L"Press any key to start file I/O test.");
 	cin.get();
 
 	//RunEngineTest(&log);
@@ -250,7 +251,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLineF("File::open() result: %d", r);
 	if (r == File::Result::Success) {
 		log.writeLineF("File created successfully!");
+		testFile->write("This is a test file!"_fe);
 	}
+
+	size_t fSize = 0;
+	if(testFile->getSize(fSize) == File::Result::Success)
+		log.writeLineF("Written %d bytes to file", fSize);
 	testFile->close();
 
 
@@ -266,6 +272,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	//// [16:04:47] Time taken to log 10000 lines: 12701.788800 ms - std::endl
 	//double timeTaken = test.getTotalTime() - timeStart;
 	//log.writeLineF(L"Time taken to log %d lines: %f ms", iterations, timeTaken);
+	log.writeLine(L"Press any key to exit...");
 	cin.get();
 
 	return 0;

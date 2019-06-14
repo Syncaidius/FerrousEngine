@@ -133,10 +133,57 @@ public:
 	Result getPos(AccessFlags flags, size_t& pos);
 
 	Result setSize(size_t size);
-	size_t getSize();
+	Result getSize(size_t& size);
+
+	void readBytes(char* dest, size_t num_bytes);
+	template<typename T>
+	inline void read(T* dest) {
+		readBytes(reinterpret_cast<char*>(dest), sizeof(T));
+	}
+
+	template<>
+	inline void read<FeString>(FeString* dest) {
+		size_t len;
+		read<size_t>(&len);
+
+		wchar_t* data = Memory::get()->allocType<wchar_t>(len + 1);
+		readBytes(reinterpret_cast<char*>(data), sizeof(wchar_t) * (len + 1));
+		new (dest) FeString(data, Memory::get());
+	}
+
+	void writeBytes(const char* bytes, size_t num_bytes);
+	template<typename T>
+	inline void write(const T& value) {
+		writeBytes(reinterpret_cast<const char*>(value), sizeof(T));
+	}
+
+	template<>
+	inline void write(const FeString& value) {
+		size_t len = value.len();
+		write(&len);
+		const wchar_t* data = value.c_str();
+		writeBytes(reinterpret_cast<const char*>(data), sizeof(wchar_t) * (len + 1));
+	}
+
+	template<typename T>
+	inline void readArray(T* dest, size_t num_elements) {
+		size_t num_bytes = num_elements * sizeof(T);
+		readBytes(reinterpret_cast<char*>(dest), num_bytes);
+	}
+
+	template<typename T>
+	inline void writeArray(const T* dest, size_t num_elements) {
+		size_t num_bytes = num_elements * sizeof(T);
+		writeBytes(reinterpret_cast<const char*>(dest), num_bytes);
+	}
 
 	Result close();
 	inline const bool isOpen() { return _isOpen; }
+	const bool canRead();
+	const bool canWrite();
+
+	/* Gets the underlying file stream.*/
+	inline std::fstream& getStream() { return _stream; }
 	
 	~File();
 
@@ -158,7 +205,7 @@ private:
 	std::fstream _stream;
 };
 
-#pragma region Operators
+#pragma region Enum Operators
 inline File::AccessFlags operator | (File::AccessFlags l, File::AccessFlags r)
 {
 	using T = std::underlying_type_t <File::AccessFlags>;

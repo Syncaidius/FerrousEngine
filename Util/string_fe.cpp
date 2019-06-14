@@ -69,7 +69,12 @@ FeString FeString::dateTime(const wchar_t* format, FerrousAllocator* allocator) 
 #pragma endregion
 
 #pragma region INSTANCED
-FeString::FeString() {
+FeString::FeString(FerrousAllocator* allocator) {
+	_allocator = allocator;
+	_data = _allocator->allocType<wchar_t>();
+	_length = 0;
+}
+FeString::FeString() : FeString(Memory::get()){
 	_allocator = Memory::get();
 	_data = _allocator->allocType<wchar_t>();
 	_length = 0;
@@ -114,6 +119,7 @@ FeString::FeString(const wchar_t* c_data) : FeString(c_data, Memory::get()) { }
 
 FeString::~FeString() {
 	_allocator->deref(_data);
+	_allocator = nullptr;
 }
 
 FeString FeString::toLower() {

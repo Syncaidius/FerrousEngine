@@ -190,6 +190,49 @@ File::Result File::seek(File::AccessFlags access, File::SeekOrigin origin, int32
 	}
 }
 
+File::Result File::getSize(size_t& num_bytes) {
+	if (!_isOpen) {
+		num_bytes = 0;
+		return Result::AlreadyClosed;
+	}
+
+	// TODO Perhaps this can be retrieved faster via std::filesystem?
+
+	// Use use whichever position we have access to.
+	if (canRead()) {
+		size_t curPos = _stream.tellg();
+		_stream.seekg(0, ios_base::end);
+		num_bytes = _stream.tellg();
+		_stream.seekg(curPos, ios_base::beg);
+	}
+	else if (canWrite()) {
+		size_t curPos = _stream.tellp();
+		_stream.seekp(0, ios_base::end);
+		num_bytes = _stream.tellp();
+		_stream.seekp(curPos, ios_base::beg);
+	}
+
+	return Result::Success;
+}
+
+File::Result File::setSize(size_t num_bytes) {
+	if (!_isOpen) {
+		num_bytes = 0;
+		return Result::AlreadyClosed;
+	}
+
+	// TODO Perhaps this can be retrieved faster via std::filesystem?
+
+	if (canWrite()) {
+		size_t curPos = _stream.tellp();
+		_stream.seekp(num_bytes - 1, ios_base::beg);
+		_stream.write("", 1);
+		_stream.seekp(curPos, ios_base::beg);
+	}
+
+	return Result::Success;
+}
+
 File::Result File::close() {
 	if (!_isOpen)
 		return Result::AlreadyClosed;
@@ -197,6 +240,22 @@ File::Result File::close() {
 	_stream.close();
 	_isOpen = false;
 	return Result::Success;
+}
+
+const bool File::canRead() {
+	return (_access & AccessFlags::Read) == AccessFlags::Read;
+}
+
+const bool File::canWrite() {
+	return (_access & AccessFlags::Write) == AccessFlags::Write;
+}
+
+void File::readBytes(char* dest, size_t num_bytes) {
+	_stream.read(dest, num_bytes);
+}
+
+void File::writeBytes(const char* data, size_t num_bytes) {
+	_stream.write(data, num_bytes);
 }
 
 #pragma endregion
