@@ -247,16 +247,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
 	File* testFile;
-	File::Result r = File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create);
-	log.writeLineF("File::open() result: %d", r);
-	if (r == File::Result::Success) {
-		log.writeLineF("File created successfully!");
-		testFile->write("This is a test file!"_fe);
-	}
+	File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create);
+	log.writeLineF("File created successfully!");
+	testFile->write("This is a test file!"_fe);
 
 	size_t fSize = 0;
-	if(testFile->getSize(fSize) == File::Result::Success)
-		log.writeLineF("Written %d bytes to file", fSize);
+	testFile->getSize(fSize);
+	log.writeLineF("Written %d bytes to file", fSize);
 	testFile->close();
 
 

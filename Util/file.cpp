@@ -17,70 +17,64 @@ bool File::isFile(const wchar_t* path) {
 	return !fs::is_directory(path);
 }
 
-File::Result File::deleteFile(const wchar_t* path) {
+void File::deleteFile(const wchar_t* path) {
 	auto p = fs::path(path);
 
 	if (!fs::exists(p))
-		return Result::NotFound;
+		throw NotFoundError();
 
 	if (fs::is_directory(p))
-		return Result::NotFile;
+		throw NotAFileError();
 
-	return fs::remove(p) ? Result::Success : Result::UnknownError;
+	if (!fs::remove(p))
+		throw RemovalError();
 }
 
-File::Result File::deleteDirectory(const wchar_t* path, bool recursive) {
+void File::deleteDirectory(const wchar_t* path, bool recursive) {
 	auto p = fs::path(path);
 
 	if (!fs::exists(p))
-		return Result::NotFound;
+		throw DirectoryNotFoundError();
 
 	if (!fs::is_directory(p))
-		return Result::NotDirectory;
+		throw NotDirectoryError();
 
 	if (recursive) {
-		return fs::remove_all(p) > 0 ? Result::Success : Result::UnknownError;
+		if (fs::remove_all(p) <= 0)
+			throw RemovalError();
 	}
 	else {
 		if (!fs::is_empty(p))
-			return Result::NotEmpty;
+			throw DirectoryNotEmptyError();
 
-		return fs::remove(p) ? Result::Success : Result::UnknownError;
+		if (!fs::remove(p))
+			throw RemovalError();
 	}
 }
 
-File::Result File::open(
+void File::open(
 	const wchar_t* path,
 	File*& file,
 	AccessFlags access,
 	ModeFlags mode) {
 
-	Result result = Result::Success;
-
 	if (!fs::exists(path)) {
-		if ((mode & ModeFlags::Create) != ModeFlags::Create) {
-			result = Result::NotFound;
-		}
-		else {
-			result = create(path);
-		}
+		if ((mode & ModeFlags::Create) != ModeFlags::Create)
+			throw NotFoundError();
+		else
+			create(path);
 	}
 
-	if (result == Result::Success) {
-		void* mem = Memory::get()->allocType<File>();
-		file = new (mem) File(path, access, mode);
-	}
-
-	return result;
+	void* mem = Memory::get()->allocType<File>();
+	file = new (mem) File(path, access, mode);
 }
 
-File::Result File::create(const wchar_t* path) {
+void File::create(const wchar_t* path) {
 	if (fs::exists(path))
-		return Result::AlreadyExists;
+		throw AlreadyExistsError();
 
-	auto stream = fstream(path);
+	fstream stream = fstream(path);
 	stream.close();
-	return Result::Success;
 }
 
 #pragma endregion
@@ -119,53 +113,45 @@ File::~File() {
 	Memory::get()->dealloc(this);
 }
 
-File::Result File::getPos(File::AccessFlags access, size_t& pos) {
-	if (!_isOpen) {
-		pos = 0;
-		return Result::AlreadyClosed;
-	}
+void File::getPos(File::AccessFlags access, size_t& pos) {
+	if (!_isOpen)
+		throw NotOpenError();
 
 	switch (access) {
 	case AccessFlags::Read:
 		pos = _stream.tellg();
-		return Result::Success;
+		break;
 
 	case AccessFlags::Write:
 		pos = _stream.tellp();
-		return Result::Success;
+		break;
 
 	default:
-		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
-		return Result::InvalidFlags;
+		throw InvalidAccessFlagsError(this);
 	}
 }
 
-File::Result File::setPos(File::AccessFlags access, size_t pos) {
+void File::setPos(File::AccessFlags access, size_t pos) {
 	if (!_isOpen)
-		return Result::AlreadyClosed;
+		throw NotOpenError();
 
 	switch (access) {
 	case AccessFlags::Read:
 		_stream.seekg(pos, ios_base::beg);
-		return Result::Success;
 		break;
 
 	case AccessFlags::Write:
 		_stream.seekp(pos, ios_base::beg);
-		return Result::Success;
 		break;
 
 	default:
-		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
-		return Result::InvalidFlags;
+		throw InvalidAccessFlagsError(this);
 	}
-
-	return Result::UnknownError;
 }
 
-File::Result File::seek(File::AccessFlags access, File::SeekOrigin origin, int32_t num_bytes) {
+void File::seek(File::AccessFlags access, File::SeekOrigin origin, int32_t num_bytes) {
 	if (!_isOpen)
-		return Result::AlreadyClosed;
+		throw NotOpenError();
 
 	int o = ios_base::beg;
 	if (origin == SeekOrigin::Current)
@@ -176,25 +162,20 @@ File::Result File::seek(File::AccessFlags access, File::SeekOrigin origin, int32
 	switch (access) {
 	case AccessFlags::Read:
 		_stream.seekg(num_bytes, o);
-		return Result::Success;
 		break;
 
 	case AccessFlags::Write:
 		_stream.seekp(num_bytes, o);
-		return Result::Success;
 		break;
 
 	default:
-		assert(false); // Only read or write flags are accepted. (Read | Write) combined is also not accepted.
-		return Result::InvalidFlags;
+		throw InvalidAccessFlagsError(this);
 	}
 }
 
-File::Result File::getSize(size_t& num_bytes) {
-	if (!_isOpen) {
-		num_bytes = 0;
-		return Result::AlreadyClosed;
-	}
+void File::getSize(size_t& num_bytes) {
+	if (!_isOpen)
+		throw NotOpenError();
 
 	// TODO Perhaps this can be retrieved faster via std::filesystem?
 
@@ -211,17 +192,13 @@ File::Result File::getSize(size_t& num_bytes) {
 		num_bytes = _stream.tellp();
 		_stream.seekp(curPos, ios_base::beg);
 	}
-
-	return Result::Success;
 }
 
-File::Result File::setSize(size_t num_bytes) {
-	if (!_isOpen) {
-		num_bytes = 0;
-		return Result::AlreadyClosed;
-	}
+void File::setSize(size_t num_bytes) {
+	if (!_isOpen)
+		throw NotOpenError();
 
-	// TODO Perhaps this can be retrieved faster via std::filesystem?
+	// TODO Perhaps this can be done faster via std::filesystem?
 
 	if (canWrite()) {
 		size_t curPos = _stream.tellp();
@@ -229,17 +206,14 @@ File::Result File::setSize(size_t num_bytes) {
 		_stream.write("", 1);
 		_stream.seekp(curPos, ios_base::beg);
 	}
-
-	return Result::Success;
 }
 
-File::Result File::close() {
+void File::close() {
 	if (!_isOpen)
-		return Result::AlreadyClosed;
+		throw NotOpenError();
 
 	_stream.close();
 	_isOpen = false;
-	return Result::Success;
 }
 
 const bool File::canRead() {
@@ -251,10 +225,22 @@ const bool File::canWrite() {
 }
 
 void File::readBytes(char* dest, size_t num_bytes) {
+	if (!_isOpen)
+		throw NotOpenError();
+
+	if (!canRead())
+		throw ReadAccessError(this);
+
 	_stream.read(dest, num_bytes);
 }
 
 void File::writeBytes(const char* data, size_t num_bytes) {
+	if (!_isOpen)
+		throw NotOpenError();
+
+	if (!canWrite())
+		throw WriteAccessError(this);
+
 	_stream.write(data, num_bytes);
 }
 
