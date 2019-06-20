@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "allocation.h"
-#include "string_fe.h"
+#include "strings.h"
 
 class FERROUS_UTIL_API LogOutputBase {
 public:

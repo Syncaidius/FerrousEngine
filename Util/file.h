@@ -1,6 +1,6 @@
 #pragma once
 #include "util.h"
-#include "string_fe.h"
+#include "strings.h"
 #include <filesystem>
 #include <fstream>
 
@@ -71,22 +71,19 @@ public:
 		deleteDirectory(path->c_str(), recursive);
 	}
 
-	static void open(const wchar_t* path, File*& file);
-	inline static void open(const FeString* path, File*& file) {
-		deleteDirectory(path->c_str(), file);
-	}
-
 	static void open(
 		const wchar_t* path, 
 		File*& file, 
-		AccessFlags access, 
-		ModeFlags mode);
+		const AccessFlags access, 
+		const ModeFlags mode,
+		const UtfEncoding encoding = UtfEncoding::UTF8);
 	inline static void open(
 		const FeString* path, 
 		File*& file, 
-		AccessFlags access, 
-		ModeFlags mode) {
-		return open(path->c_str(), file, access, mode);
+		const AccessFlags access, 
+		const ModeFlags mode,
+		const UtfEncoding encoding = UtfEncoding::UTF8) {
+		return open(path->c_str(), file, access, mode, encoding);
 	}
 
 	static void create(const wchar_t* path);
@@ -102,46 +99,35 @@ public:
 	void getSize(size_t& size);
 
 	void readBytes(char* dest, size_t num_bytes);
-	template<typename T>
-	inline void read(T* dest) {
-		readBytes(reinterpret_cast<char*>(dest), sizeof(T));
-	}
-
-	template<>
-	inline void read<FeString>(FeString* dest) {
-		size_t len;
-		read<size_t>(&len);
-
-		wchar_t* data = Memory::get()->allocType<wchar_t>(len + 1);
-		readBytes(reinterpret_cast<char*>(data), sizeof(wchar_t) * (len + 1));
-		new (dest) FeString(data, Memory::get());
-	}
-
 	void writeBytes(const char* bytes, size_t num_bytes);
-	template<typename T>
-	inline void write(const T& value) {
-		writeBytes(reinterpret_cast<const char*>(value), sizeof(T));
-	}
 
-	template<>
-	inline void write(const FeString& value) {
-		size_t len = value.len();
-		write(&len);
-		const wchar_t* data = value.c_str();
-		writeBytes(reinterpret_cast<const char*>(data), sizeof(wchar_t) * (len + 1));
-	}
+#pragma region Read Helpers
+	inline void readU8(uint8_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readU16(uint16_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readU32(uint32_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readU64(uint64_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readI8(int8_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readI16(int16_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readI32(int32_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readI64(int64_t* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readFloat(float* dest, uint32_t count = 1) { read(dest, count); }
+	inline void readDouble(double* dest, uint32_t count = 1) { read(dest, count); }
+	size_t readString(FeString* dest, uint32_t count = 1);
+#pragma endregion
 
-	template<typename T>
-	inline void readArray(T* dest, size_t num_elements) {
-		size_t num_bytes = num_elements * sizeof(T);
-		readBytes(reinterpret_cast<char*>(dest), num_bytes);
-	}
-
-	template<typename T>
-	inline void writeArray(const T* dest, size_t num_elements) {
-		size_t num_bytes = num_elements * sizeof(T);
-		writeBytes(reinterpret_cast<const char*>(dest), num_bytes);
-	}
+#pragma region Write Helpers
+	inline void writeU8(const uint8_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeU16(const uint16_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeU32(const uint32_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeU64(const uint64_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeI8(const int8_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeI16(const int16_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeI32(const int32_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeI64(const int64_t* val, uint32_t count = 1) { write(val, count); }
+	inline void writeFloat(const float* val, uint32_t count = 1) { write(val, count); }
+	inline void writeDouble(const double* val, uint32_t count = 1) { write(val, count); }
+	void writeString(const FeString* val, uint32_t count = 1);
+#pragma endregion
 
 	void close();
 	inline const bool isOpen() { return _isOpen; }
@@ -182,7 +168,20 @@ private:
 
 	static GlobalInfo* _info;
 
-	File(const wchar_t* path, const AccessFlags access, const ModeFlags mode);
+	File(const wchar_t* path, 
+		const AccessFlags access,
+		const ModeFlags mode, 
+		const UtfEncoding encoding = UtfEncoding::UTF16_LE);
+
+	template<typename T>
+	inline void read(T* dest, uint32_t count) {
+		readBytes(reinterpret_cast<char*>(dest), sizeof(T) * count);
+	}
+
+	template<typename T>
+	inline void write(const T* value, uint32_t count) {
+		writeBytes(reinterpret_cast<const char*>(value), sizeof(T) * count);
+	}
 
 	AccessFlags _access;
 	ModeFlags _mode;

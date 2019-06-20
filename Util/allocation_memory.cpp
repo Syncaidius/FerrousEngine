@@ -189,7 +189,7 @@ void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num
 	// TODO retrieve block, get old size from that.
 	void* mem = alloc(num_bytes);
 	memcpy(mem, target, old_num_bytes);
-	dealloc(target);
+	deref(target);
 	target = mem;
 }
 

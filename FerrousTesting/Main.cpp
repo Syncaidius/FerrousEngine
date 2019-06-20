@@ -1,7 +1,7 @@
 #include "stdafx.h";
 #include <Util/util.h>;
 #include <Util/logging.h>
-#include <Util/string_fe.h>
+#include <Util/strings.h>
 #include <Util/localization.h>
 #include <Util/game_time.h>
 #include <Util/file.h>
@@ -249,7 +249,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	File* testFile;
 	File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create);
 	log.writeLineF("File created successfully!");
-	testFile->write("This is a test file!"_fe);
+	testFile->writeString("This is a test file!"_fe);
 
 	size_t fSize = 0;
 	testFile->getSize(fSize);

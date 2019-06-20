@@ -4,8 +4,28 @@
 #include <iostream>
 #include <cstdarg>
 
+enum struct UtfEncoding : uint8_t {
+	/* UTF-8*/
+	UTF8 = 0,
+
+	/* UTF-16 Big Endian (BE) */
+	UTF16_BE = 1,
+
+	/* UTF-16 Little Endian (LE).*/
+	UTF16_LE = 2,
+};
+
+class FERROUS_UTIL_API UtfString;
+
 class FERROUS_UTIL_API FeString {
 public:
+	const static char UTF_BOM_ANSI[];
+	const static char UTF_BOM_8[];
+	const static char UTF_BOM_16_BE[];
+	const static char UTF_BOM_16_LE[];
+	const static char* UTF_BOM[];
+
+
 	/* The value returned by indexOf() if no instance was found. */
 	const static size_t INDEXOF_NONE = SIZE_MAX;
 
@@ -35,8 +55,8 @@ public:
 	FeString(const FeString& copy);
 	FeString(const char* c_data, FerrousAllocator* allocator);
 	FeString(const wchar_t* c_data, FerrousAllocator* allocator);
-	FeString(const char* c_data);
-	FeString(const wchar_t* c_data);
+	inline FeString(const char* c_data) : FeString(c_data, Memory::get()) {}
+	inline FeString(const wchar_t* c_data) : FeString(c_data, Memory::get()) {}
 	~FeString();
 
 	FeString substr(const size_t startIndex);
@@ -81,12 +101,22 @@ public:
 	/* Capitalizes the first character of each word in the string and returns a new string.*/
 	FeString capitalize();
 
+	/* Re-encodes the current string to the specified encoding and returns the result as a byte array. */
+	UtfString encode(UtfEncoding encoding, FerrousAllocator* allocator);
+	inline UtfString encode(UtfEncoding encoding) {
+		return encode(encoding, _allocator);
+	}
+
 	/* Gets the length of the string.*/
 	const inline size_t len() const { return _length; }
 
 	/*Returns a pointer to the raw underlying character data.*/
 	const inline wchar_t* c_str() const { return _data; }
 private:
+	const static uint8_t UTF8_LEAD_MASK[];
+	const static uint8_t UTF8_LEAD_CAPACITY[];
+	const static uint8_t UTF8_TRAIL_MASK;
+
 	/* Takes a pointer to character data and stores it, instead of allocating a separate copy of it. */
 	FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator);
 
@@ -110,6 +140,32 @@ private:
 	FerrousAllocator* _allocator;
 };
 
+class FERROUS_UTIL_API UtfString {
+public:
+	UtfString(uint32_t len, FerrousAllocator* allocator);
+	~UtfString();
+
+	/* Decodes a byte array of UTF data into a usable FeString and returns it.*/
+	FeString decode(FerrousAllocator* allocator);
+	inline FeString decode() {
+		return decode(_allocator);
+	}
+
+	/* Culls any excess bytes from the end of the current UTF string. 
+	Upon instantiation a UTF string is allocated memory for it's worst-case byte-count (usually 4 bytes) per character.
+	Note that any copies of the current instance will not receive the culled memory pointer. */
+	void cull();
+
+
+private:
+	friend FERROUS_UTIL_API class FeString;
+	char* _data;
+	FerrousAllocator* _allocator;
+	size_t _num_bytes;
+	uint32_t _len;
+	UtfEncoding _encoding;
+};
+
 #pragma region OPERATORS
 FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
 FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
@@ -125,6 +181,5 @@ FeString FERROUS_UTIL_API operator +(const FeString& a, const long double& v);
 FeString FERROUS_UTIL_API operator +(const FeString& a, const float& v);
 
 FeString FERROUS_UTIL_API operator "" _fe(const char* a, size_t len);
-
 FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* a, size_t len);
 #pragma endregion

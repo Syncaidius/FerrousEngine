@@ -55,8 +55,9 @@ void File::deleteDirectory(const wchar_t* path, bool recursive) {
 void File::open(
 	const wchar_t* path,
 	File*& file,
-	AccessFlags access,
-	ModeFlags mode) {
+	const AccessFlags access,
+	const ModeFlags mode,
+	const UtfEncoding encoding) {
 
 	if (!fs::exists(path)) {
 		if ((mode & ModeFlags::Create) != ModeFlags::Create)
@@ -81,7 +82,7 @@ void File::create(const wchar_t* path) {
 
 #pragma region Instanced
 
-File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode) {
+File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, const UtfEncoding encoding) {
 	if (_isOpen)
 		close();
 
@@ -244,4 +245,19 @@ void File::writeBytes(const char* data, size_t num_bytes) {
 	_stream.write(data, num_bytes);
 }
 
+size_t File::readString(FeString* dest, uint32_t count) {
+	if (!_isOpen)
+		throw NotOpenError();
+
+	if (!canWrite())
+		throw WriteAccessError(this);
+
+	//wchar_t* mem = // How to allocate memory
+	//size_t len = readString()
+	return 0;
+}
+
+void File::writeString(const FeString* val, uint32_t count) {
+
+}
 #pragma endregion

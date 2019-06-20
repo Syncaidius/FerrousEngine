@@ -24,9 +24,6 @@
     <ClCompile Include="logging_console.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="string_fe.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="localization.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,6 +45,12 @@
     <ClCompile Include="file_global_info.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="strings_fe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strings_utf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -62,9 +65,6 @@
     <ClInclude Include="localization.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="string_fe.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game_time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -72,6 +72,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
