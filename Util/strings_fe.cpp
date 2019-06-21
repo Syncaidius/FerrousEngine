@@ -83,7 +83,7 @@ FeString::FeString() : FeString(Memory::get()){
 FeString::FeString(const FeString& copy) {
 	_allocator = copy._allocator;
 	_data = copy._data;
-	_allocator->ref(_data); // TODO virtualize ref() in FerrousAllocator.
+	_allocator->ref(_data);
 	_length = copy._length;
 }
 

@@ -26,7 +26,7 @@ const uint8_t UtfString::UTF8_LEAD_CAPACITY[] = {
 };
 
 UtfString::UtfString(uint32_t len, UtfEncoding encoding, FerrousAllocator* allocator) {
-	_len = len;
+	_length = len;
 	_allocator = allocator;
 	_num_bytes = 0;
 	_encoding = encoding;
@@ -50,6 +50,17 @@ UtfString::UtfString(uint32_t len, UtfEncoding encoding, FerrousAllocator* alloc
 		// TODO throw exception for invalid encoding
 		break;
 	}
+}
+
+UtfString::UtfString(const UtfString& copy) {
+	_allocator = copy._allocator;
+	_encoding = copy._encoding;
+	_mem = copy._mem;
+	_data = copy._data;
+	_allocator->ref(_mem);
+	_length = copy._length;
+	_num_bytes = copy._num_bytes;
+
 }
 
 UtfString::~UtfString() {

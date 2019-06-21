@@ -138,6 +138,7 @@ public:
 	const static char UTF_BOM_16_LE[];
 	const static char* UTF_BOM[];
 
+	UtfString(const UtfString& copy);
 	UtfString(uint32_t len, UtfEncoding encoding, FerrousAllocator* allocator);
 	~UtfString();
 
@@ -152,7 +153,7 @@ public:
 	FeString decode() const;
 
 	inline const size_t byteLen() { return _num_bytes; }
-	inline const uint32_t len() { return _len; }
+	inline const uint32_t len() { return _length; }
 	inline const char* getData() { return _data; }
 
 private:
@@ -165,7 +166,7 @@ private:
 	char* _mem;
 	FerrousAllocator* _allocator;
 	size_t _num_bytes;
-	uint32_t _len;
+	uint32_t _length;
 	UtfEncoding _encoding;
 };
 
