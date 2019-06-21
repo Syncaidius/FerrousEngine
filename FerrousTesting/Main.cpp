@@ -1,4 +1,4 @@
-#include "stdafx.h";
+﻿#include "stdafx.h";
 #include <Util/util.h>;
 #include <Util/logging.h>
 #include <Util/strings.h>
@@ -247,9 +247,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
 	File* testFile;
-	File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create);
+	File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create, UtfEncoding::UTF8);
 	log.writeLineF("File created successfully!");
-	testFile->writeString("This is a test file!"_fe);
+	testFile->writeString(&U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
 
 	size_t fSize = 0;
 	testFile->getSize(fSize);

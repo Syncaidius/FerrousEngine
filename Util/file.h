@@ -34,9 +34,6 @@ public:
 
 		/* Open the file in binary mode. Default is text mode.*/
 		Binary = 4,
-
-		/* If the file is opened, it will be truncated to 0 bytes of data ready to */
-		Truncate = 8,
 	};
 
 	static bool exists(const wchar_t* path);
@@ -171,7 +168,7 @@ private:
 	File(const wchar_t* path, 
 		const AccessFlags access,
 		const ModeFlags mode, 
-		const UtfEncoding encoding = UtfEncoding::UTF16_LE);
+		const UtfEncoding encoding);
 
 	template<typename T>
 	inline void read(T* dest, uint32_t count) {
@@ -185,7 +182,7 @@ private:
 
 	AccessFlags _access;
 	ModeFlags _mode;
-	size_t _pos;
+	UtfEncoding _encoding;
 	bool _isOpen;
 	const FeString _path;
 	std::fstream _stream;

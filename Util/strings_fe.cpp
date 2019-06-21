@@ -4,28 +4,6 @@
 #include <vector>
 
 #pragma region STATIC
-const char FeString::UTF_BOM_ANSI[] = { 0 };
-const char FeString::UTF_BOM_8[] = { 3, 0xEF, 0xBB, 0xBF };
-const char FeString::UTF_BOM_16_BE[] = { 2, 0xFE, 0xFF };
-const char FeString::UTF_BOM_16_LE[] = { 2, 0xFF, 0xFE };
-const char* FeString::UTF_BOM[] = { FeString::UTF_BOM_ANSI, FeString::UTF_BOM_8, FeString::UTF_BOM_16_BE, FeString::UTF_BOM_16_LE };
-
-const uint8_t FeString::UTF8_TRAIL_MASK = 0b10000000;
-const uint8_t FeString::UTF8_LEAD_MASK[] = {
-	0b0, // Dummy for 0-bytes         - 0xxxxxxx
-	0b0, // Dummy for 1-byte          - 0xxxxxxx
-	0b11000000, // 2-byte char        - 110xxxxx
-	0b11100000, // 3-byte char        - 1110xxxx
-	0b11110000, // 4-byte char	      - 11110xxx
-};
-
-const uint8_t FeString::UTF8_LEAD_CAPACITY[] = {
-	0b01111111, // Dummy for 0-bytes  - 0xxxxxxx
-	0b01111111, // Dummy for 1-byte   - 0xxxxxxx
-	0b00011111, // 2-byte char        - 110xxxxx
-	0b00001111, // 3-byte char        - 1110xxxx
-	0b00000111, // 4-byte char        - 11110xxx
-};
 
 FeString FeString::format(const FeString& str, FerrousAllocator* allocator, va_list args) {
 	static size_t buf_size = 80;
@@ -65,47 +43,6 @@ FeString FeString::format(const FeString& str, ...) {
 
 FeString FeString::format(const FeString& str, va_list args) {
 	return format(str, Memory::get(), args);
-}
-
-UtfString FeString::encode(const FeString& string, UtfEncoding encoding, FerrousAllocator* allocator) {
-	UtfString result = UtfString(string._length, allocator);
-	size_t pos = string._length + 1; // Start with the null terminator
-	size_t b = 0;
-
-	switch (encoding) {
-	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
-		while (pos > 0) {
-			pos--;
-
-			if (string._data[b] < 128) {
-				result._data[b] = (char)string._data[b];
-				b++;
-			}
-			else {
-				uint8_t char_bytes = 1;
-				wchar_t c = string._data[b];
-				while (c > UTF8_LEAD_CAPACITY[char_bytes]) {
-					result._data[b++] = UTF8_TRAIL_MASK | (c & 63); // first 6 bits = c & (32 | 16 | 8 | 4 | 2 | 1)
-					c = c >> 6;
-					char_bytes++;
-				}
-
-				result._data[b] = (UTF8_LEAD_MASK[char_bytes]) | c;
-				b += char_bytes;
-			}
-		}
-		break;
-
-	case UtfEncoding::UTF16_LE:
-
-		break;
-
-	case UtfEncoding::UTF16_BE:
-
-		break;
-	}
-
-	return result;
 }
 
 FeString FeString::dateTime(const wchar_t* format, FerrousAllocator* allocator) {
@@ -174,6 +111,19 @@ FeString::FeString(const wchar_t* c_data, FerrousAllocator* allocator) {
 	_length = wcslen(c_data);
 	_data = _allocator->allocType<wchar_t>(_length + 1ULL);
 	memcpy(_data, c_data, _length * sizeof(wchar_t));
+	_data[_length] = L'\0';
+}
+
+FeString::FeString(const char32_t* c_data, FerrousAllocator* allocator) {
+	_allocator = allocator;
+
+	while (c_data[_length] != '\0')
+		_length++;
+
+	_data = _allocator->allocType<wchar_t>(_length + 1ULL);
+	for (size_t i = 0; i < _length; i++) 
+		_data[i] = c_data[i] > WCHAR_MAX ? '?' : c_data[i];
+
 	_data[_length] = L'\0';
 }
 
@@ -581,6 +531,16 @@ FeString operator "" _fe(const wchar_t* a, size_t len) {
 
 	wchar_t* p = allocator->allocType<wchar_t>(len + 1ULL);
 	Memory::get()->copyType<wchar_t>(p, a, len);
+
+	return FeString(p, len, allocator);
+}
+
+FeString operator "" _fe(const char32_t* a, size_t len) {
+	FerrousAllocator* allocator = Memory::get();
+
+	wchar_t* p = allocator->allocType<wchar_t>(len + 1ULL);
+	for (size_t i = 0; i < len; i++)
+		p[i] = a[i] > WCHAR_MAX ? '?' : a[i];
 
 	return FeString(p, len, allocator);
 }

@@ -67,7 +67,7 @@ void File::open(
 	}
 
 	void* mem = Memory::get()->allocType<File>();
-	file = new (mem) File(path, access, mode);
+	file = new (mem) File(path, access, mode, encoding);
 }
 
 void File::create(const wchar_t* path) {
@@ -88,6 +88,7 @@ File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, 
 
 	_access = access;
 	_mode = mode;
+	_encoding = encoding;
 	_isOpen = true;
 
 	int modeFlags = 0;
@@ -102,11 +103,21 @@ File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, 
 
 	if ((mode & ModeFlags::Append) == ModeFlags::Append)
 		modeFlags |= ios::app;
-
-	if ((mode & ModeFlags::Truncate) == ModeFlags::Truncate)
+	else
 		modeFlags |= ios::trunc;
 
 	_stream = fstream(path, modeFlags);
+
+	// Do we need to write a UTF byte order mark (BOM)?
+	if (canWrite()) {
+		if ((mode & ModeFlags::Append) != ModeFlags::Append) {
+			if ((mode & ModeFlags::Binary) != ModeFlags::Binary) {
+				const char* bom = UtfString::UTF_BOM[(uint8_t)encoding];
+				if (bom[0] > 0)
+					_stream.write(bom + 1, bom[0]);
+			}
+		}
+	}
 }
 
 File::~File() {
@@ -249,7 +260,7 @@ size_t File::readString(FeString* dest, uint32_t count) {
 	if (!_isOpen)
 		throw NotOpenError();
 
-	if (!canWrite())
+	if (!canRead())
 		throw WriteAccessError(this);
 
 	//wchar_t* mem = // How to allocate memory
@@ -258,6 +269,16 @@ size_t File::readString(FeString* dest, uint32_t count) {
 }
 
 void File::writeString(const FeString* val, uint32_t count) {
+	if (!_isOpen)
+		throw NotOpenError();
 
+	if (!canWrite())
+		throw WriteAccessError(this);
+
+	for (uint32_t i = 0; i < count; i++) {
+		UtfString utf = UtfString::encode(val, _encoding);
+		writeBytes(utf.getData(), utf.byteLen());
+	}
+	
 }
 #pragma endregion
