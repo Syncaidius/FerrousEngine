@@ -25,7 +25,7 @@ const uint8_t UtfString::UTF8_LEAD_CAPACITY[] = {
 	0b00000111, // 4-byte char        - 11110xxx
 };
 
-UtfString::UtfString(uint32_t len, UtfEncoding encoding, FerrousAllocator* allocator) {
+UtfString::UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocator) {
 	_length = len;
 	_allocator = allocator;
 	_num_bytes = 0;
@@ -60,7 +60,6 @@ UtfString::UtfString(const UtfString& copy) {
 	_allocator->ref(_mem);
 	_length = copy._length;
 	_num_bytes = copy._num_bytes;
-
 }
 
 UtfString::~UtfString() {
@@ -71,7 +70,6 @@ UtfString UtfString::encode(const FeString* string, UtfEncoding encoding, Ferrou
 	UtfString result = UtfString(string->len(), encoding, allocator);
 	size_t pos = string->len() + 1; // Start with the null terminator
 	const wchar_t* data = string->c_str();
-
 	char* r_end = result._data;
 
 	switch (encoding) {
@@ -112,4 +110,75 @@ UtfString UtfString::encode(const FeString* string, UtfEncoding encoding, Ferrou
 	}
 
 	return result;
+}
+
+FeString UtfString::decode(FerrousAllocator* allocator) const {
+	wchar_t* mem = allocator->allocType<wchar_t>(_length + 1);
+	size_t pos = 0;
+	const char* temp = _data;
+
+	switch (_encoding) {
+	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
+	case UtfEncoding::UTF8_WithBOM:
+		while (pos <= _length) {
+			if (*temp & 128) { // Is the last bit set? If false, it's ASCII
+				mem[pos] = *temp;
+				temp++;
+			}
+			else {
+				uint8_t b = *temp;
+				char32_t c = 0;
+				uint8_t num_bytes = 0;
+				bool first_byte = true; // Encoding bit?
+
+				while (b) {					
+					uint8_t f = 128;
+
+					if (first_byte) {
+						while (f) {
+							if (b & f)
+								num_bytes++;
+							else
+								first_byte = false;
+
+							f >>= 1;
+						}
+					}
+					else {
+						// All bytes after the first byte should have a bit pattern of 10xxxxxx
+						if ((b & 192) == 128)
+							f >>= 2;
+						else
+							break;
+					}
+
+					// Now read char bit data from the remainder of the current byte.
+					while (f) {
+						c = (c << 1) | (b & f);
+						f >>= 1;
+					}
+
+					temp++;
+					num_bytes--;
+					if (num_bytes == 0)
+						break;
+				}
+
+				mem[pos] = c > WCHAR_MAX ? L'?' : c;
+			}
+
+			pos++;
+		}
+		break;
+
+	case UtfEncoding::UTF16_LE:
+
+		break;
+
+	case UtfEncoding::UTF16_BE:
+
+		break;
+	}
+
+	return FeString(mem, _length, allocator);
 }

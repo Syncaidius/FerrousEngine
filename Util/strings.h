@@ -49,7 +49,11 @@ public:
 	FeString(const FeString& copy);
 	FeString(const char* c_data, FerrousAllocator* allocator);
 	FeString(const wchar_t* c_data, FerrousAllocator* allocator);
-	FeString(const char32_t* c_data, FerrousAllocator* allocator);
+	FeString(const char32_t* c_data, FerrousAllocator* allocator);	
+	
+	/* Takes a pointer to known-length character data and stores it without copying. */
+	FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator);
+
 	inline FeString(const char* c_data) : FeString(c_data, Memory::get()) {}
 	inline FeString(const wchar_t* c_data) : FeString(c_data, Memory::get()) {}
 	inline FeString(const char32_t* c_data) : FeString(c_data, Memory::get()) {}
@@ -105,9 +109,6 @@ public:
 	/*Returns a pointer to the raw underlying character data.*/
 	const inline wchar_t* c_str() const { return _data; }
 private:
-	/* Takes a pointer to character data and stores it, instead of allocating a separate copy of it. */
-	FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator);
-
 	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
 	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
 	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint16_t& v);
@@ -139,7 +140,7 @@ public:
 	const static char* UTF_BOM[];
 
 	UtfString(const UtfString& copy);
-	UtfString(uint32_t len, UtfEncoding encoding, FerrousAllocator* allocator);
+	UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocator);
 	~UtfString();
 
 	/* Re-encodes the current string to the specified encoding and returns the result as a byte array. */
@@ -150,10 +151,12 @@ public:
 
 	/* Decodes a byte array of UTF data into a usable FeString and returns it.*/
 	FeString decode(FerrousAllocator* allocator) const;
-	FeString decode() const;
+	inline FeString decode() const {
+		return decode(_allocator);
+	}
 
 	inline const size_t byteLen() { return _num_bytes; }
-	inline const uint32_t len() { return _length; }
+	inline const size_t len() { return _length; }
 	inline const char* getData() { return _data; }
 
 private:
@@ -161,12 +164,11 @@ private:
 	const static uint8_t UTF8_LEAD_CAPACITY[];
 	const static uint8_t UTF8_TRAIL_MASK;
 
-	friend FERROUS_UTIL_API class FeString;
 	char* _data;
 	char* _mem;
 	FerrousAllocator* _allocator;
 	size_t _num_bytes;
-	uint32_t _length;
+	size_t _length;
 	UtfEncoding _encoding;
 };
 

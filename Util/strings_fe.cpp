@@ -74,11 +74,7 @@ FeString::FeString(FerrousAllocator* allocator) {
 	_data = _allocator->allocType<wchar_t>();
 	_length = 0;
 }
-FeString::FeString() : FeString(Memory::get()){
-	_allocator = Memory::get();
-	_data = _allocator->allocType<wchar_t>();
-	_length = 0;
-}
+FeString::FeString() : FeString(Memory::get()) {}
 
 FeString::FeString(const FeString& copy) {
 	_allocator = copy._allocator;
@@ -87,7 +83,6 @@ FeString::FeString(const FeString& copy) {
 	_length = copy._length;
 }
 
-/* Private constructor.*/
 FeString::FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator) {
 	_allocator = allocator;
 	_length = length;

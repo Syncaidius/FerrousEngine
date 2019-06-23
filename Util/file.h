@@ -68,21 +68,6 @@ public:
 		deleteDirectory(path->c_str(), recursive);
 	}
 
-	static void open(
-		const wchar_t* path, 
-		File*& file, 
-		const AccessFlags access, 
-		const ModeFlags mode,
-		const UtfEncoding encoding = UtfEncoding::UTF8);
-	inline static void open(
-		const FeString* path, 
-		File*& file, 
-		const AccessFlags access, 
-		const ModeFlags mode,
-		const UtfEncoding encoding = UtfEncoding::UTF8) {
-		return open(path->c_str(), file, access, mode, encoding);
-	}
-
 	static void create(const wchar_t* path);
 	inline static void create(const FeString* path) {
 		return create(path->c_str());
@@ -97,6 +82,19 @@ public:
 
 	void readBytes(char* dest, size_t num_bytes);
 	void writeBytes(const char* bytes, size_t num_bytes);
+
+	~File();
+	File(const FeString path,
+		const AccessFlags access,
+		const ModeFlags mode,
+		FerrousAllocator* allocator, 
+		const UtfEncoding encoding = UtfEncoding::UTF8,
+		size_t bufferSize = 1024);
+	inline File(const FeString path,
+		const AccessFlags access,
+		const ModeFlags mode,
+		const UtfEncoding encoding = UtfEncoding::UTF8,
+		size_t bufferSize = 1024) : File(path, access, mode, Memory::get(), encoding, bufferSize) {}
 
 #pragma region Read Helpers
 	inline void readU8(uint8_t* dest, uint32_t count = 1) { read(dest, count); }
@@ -133,8 +131,6 @@ public:
 
 	/* Gets the underlying file stream.*/
 	inline std::fstream& getStream() { return _stream; }
-	
-	~File();
 
 private:
 #define DEFINE_FILE_ERROR(ClassName, Message) \
@@ -165,11 +161,6 @@ private:
 
 	static GlobalInfo* _info;
 
-	File(const wchar_t* path, 
-		const AccessFlags access,
-		const ModeFlags mode, 
-		const UtfEncoding encoding);
-
 	template<typename T>
 	inline void read(T* dest, uint32_t count) {
 		readBytes(reinterpret_cast<char*>(dest), sizeof(T) * count);
@@ -180,12 +171,14 @@ private:
 		writeBytes(reinterpret_cast<const char*>(value), sizeof(T) * count);
 	}
 
+	char* _buffer;
 	AccessFlags _access;
 	ModeFlags _mode;
 	UtfEncoding _encoding;
 	bool _isOpen;
 	const FeString _path;
 	std::fstream _stream;
+	FerrousAllocator* _allocator;
 };
 
 #pragma region Enum Operators

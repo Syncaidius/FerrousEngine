@@ -52,24 +52,6 @@ void File::deleteDirectory(const wchar_t* path, bool recursive) {
 	}
 }
 
-void File::open(
-	const wchar_t* path,
-	File*& file,
-	const AccessFlags access,
-	const ModeFlags mode,
-	const UtfEncoding encoding) {
-
-	if (!fs::exists(path)) {
-		if ((mode & ModeFlags::Create) != ModeFlags::Create)
-			throw NotFoundError();
-		else
-			create(path);
-	}
-
-	void* mem = Memory::get()->allocType<File>();
-	file = new (mem) File(path, access, mode, encoding);
-}
-
 void File::create(const wchar_t* path) {
 	if (fs::exists(path))
 		throw AlreadyExistsError();
@@ -82,10 +64,19 @@ void File::create(const wchar_t* path) {
 
 #pragma region Instanced
 
-File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, const UtfEncoding encoding) {
-	if (_isOpen)
-		close();
+File::File(const FeString path, const AccessFlags access, const ModeFlags mode, FerrousAllocator* allocator, const UtfEncoding encoding, size_t bufferSize) {
+	if (!fs::exists(path.c_str())) {
+		if ((mode & ModeFlags::Create) != ModeFlags::Create)
+			throw NotFoundError();
+		else
+			create(path.c_str());
+	}
+	else {
+		if (_isOpen)
+			close();
+	}
 
+	_allocator = allocator;
 	_access = access;
 	_mode = mode;
 	_encoding = encoding;
@@ -106,7 +97,7 @@ File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, 
 	else
 		modeFlags |= ios::trunc;
 
-	_stream = fstream(path, modeFlags);
+	_stream = fstream(path.c_str(), modeFlags);
 
 	// Do we need to write a UTF byte order mark (BOM)?
 	if (canWrite()) {
@@ -118,11 +109,13 @@ File::File(const wchar_t* path, const AccessFlags access, const ModeFlags mode, 
 			}
 		}
 	}
+
+	_buffer = static_cast<char*>(_allocator->alloc(bufferSize));
 }
 
 File::~File() {
 	_stream.close();
-	Memory::get()->dealloc(this);
+	_allocator->dealloc(_buffer);
 }
 
 void File::getPos(File::AccessFlags access, size_t& pos) {
@@ -263,8 +256,9 @@ size_t File::readString(FeString* dest, uint32_t count) {
 	if (!canRead())
 		throw WriteAccessError(this);
 
-	//wchar_t* mem = // How to allocate memory
-	//size_t len = readString()
+	for (uint32_t i = 0; i < count; i++) {
+		
+	}
 	return 0;
 }
 

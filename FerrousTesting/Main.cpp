@@ -246,15 +246,25 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	bool fExists = File::exists(L"FerrousTesting.exe");
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
-	File* testFile;
-	File::open(L"test_file.txt", testFile, File::AccessFlags::Write, File::ModeFlags::Create, UtfEncoding::UTF8);
+	File testFileOut = File("test_file.txt"_fe, File::AccessFlags::Write, File::ModeFlags::Create);
 	log.writeLineF("File created successfully!");
-	testFile->writeString(&U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
+	testFileOut.writeString(&U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
 
 	size_t fSize = 0;
-	testFile->getSize(fSize);
+	testFileOut.getSize(fSize);
 	log.writeLineF("Written %d bytes to file", fSize);
-	testFile->close();
+	testFileOut.close();
+	log.writeLine("File closed");
+
+	// Now open to read
+	File testFileIn = File("test_file.txt"_fe, File::AccessFlags::Read, File::ModeFlags::None);
+	testFileIn.getSize(fSize);
+	FeString stringFromFile = L"\0";
+	log.writeLineF("Open file with size: %d bytes", fSize);
+	testFileIn.readString(&stringFromFile);
+	testFileIn.close();
+	log.writeLine("File closed");
+	log.writeLineF("String read from file: %s", stringFromFile);
 
 
 	//GameTime test = GameTime(false, 60);
