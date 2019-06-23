@@ -160,12 +160,12 @@ public:
 
 	static inline Memory* get() { return _allocator; }
 
-	static inline void Zero(void* p, uint8_t val, size_t num_bytes) {
+	static inline void Zero(void* p, uint8_t val, size_t num_bytes = 1) {
 		memset(p, val, num_bytes);
 	}
 
 	template<typename T> 
-	static inline void ZeroType(T* dest, const size_t num_elements) {
+	static inline void ZeroType(T* dest, const size_t num_elements = 1) {
 		memset(dest, 0, sizeof(T) * num_elements);
 	}
 

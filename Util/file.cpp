@@ -71,10 +71,6 @@ File::File(const FeString path, const AccessFlags access, const ModeFlags mode, 
 		else
 			create(path.c_str());
 	}
-	else {
-		if (_isOpen)
-			close();
-	}
 
 	_allocator = allocator;
 	_access = access;
@@ -86,16 +82,17 @@ File::File(const FeString path, const AccessFlags access, const ModeFlags mode, 
 	if ((access & AccessFlags::Read) == AccessFlags::Read) 
 		modeFlags |= ios::in;
 
-	if ((access & AccessFlags::Write) == AccessFlags::Write) 
+	if ((access & AccessFlags::Write) == AccessFlags::Write) {
 		modeFlags |= ios::out;
+
+		if ((mode & ModeFlags::Append) == ModeFlags::Append)
+			modeFlags |= ios::app;
+		else
+			modeFlags |= ios::trunc;
+	}
 
 	if ((mode & ModeFlags::Binary) == ModeFlags::Binary)
 		modeFlags |= ios::binary;
-
-	if ((mode & ModeFlags::Append) == ModeFlags::Append)
-		modeFlags |= ios::app;
-	else
-		modeFlags |= ios::trunc;
 
 	_stream = fstream(path.c_str(), modeFlags);
 
