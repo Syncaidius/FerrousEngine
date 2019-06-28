@@ -65,11 +65,11 @@ void File::create(const wchar_t* path) {
 #pragma region Instanced
 
 File::File(const FeString path, const AccessFlags access, const ModeFlags mode, FerrousAllocator* allocator, const UtfEncoding encoding, size_t bufferSize) {
-	if (!fs::exists(path.c_str())) {
+	if (!fs::exists(path.getData())) {
 		if ((mode & ModeFlags::Create) != ModeFlags::Create)
 			throw NotFoundError();
 		else
-			create(path.c_str());
+			create(path.getData());
 	}
 
 	_allocator = allocator;
@@ -94,7 +94,7 @@ File::File(const FeString path, const AccessFlags access, const ModeFlags mode, 
 	if ((mode & ModeFlags::Binary) == ModeFlags::Binary)
 		modeFlags |= ios::binary;
 
-	_stream = fstream(path.c_str(), modeFlags);
+	_stream = fstream(path.getData(), modeFlags);
 
 	// Do we need to write a UTF byte order mark (BOM)?
 	if (canWrite()) {
@@ -246,30 +246,34 @@ void File::writeBytes(const char* data, size_t num_bytes) {
 	_stream.write(data, num_bytes);
 }
 
-size_t File::readString(FeString* dest, uint32_t count) {
+void File::readString(FeString* dest) {
 	if (!_isOpen)
 		throw NotOpenError();
 
 	if (!canRead())
 		throw WriteAccessError(this);
 
-	for (uint32_t i = 0; i < count; i++) {
-		
+	char* c = _buffer;
+	size_t num_chars = 0;
+	_stream.read(c, 1);
+
+	while (*c != '\0') {
+		c++;
+		num_chars++;
+		_stream.read(c, 1);
 	}
-	return 0;
+
+	*dest = UtfString::decode(_buffer, num_chars, _encoding, _allocator);
 }
 
-void File::writeString(const FeString* val, uint32_t count) {
+void File::writeString(const FeString& val) {
 	if (!_isOpen)
 		throw NotOpenError();
 
 	if (!canWrite())
 		throw WriteAccessError(this);
 
-	for (uint32_t i = 0; i < count; i++) {
-		UtfString utf = UtfString::encode(val, _encoding);
-		writeBytes(utf.getData(), utf.byteLen());
-	}
-	
+	UtfString utf = UtfString::encode(val, _encoding);
+	_stream.write(utf.getData(), utf.byteLen());
 }
 #pragma endregion

@@ -21,11 +21,14 @@ enum struct UtfEncoding : uint8_t {
 class FERROUS_UTIL_API FeString {
 public:
 	/* The value returned by indexOf() if no instance was found. */
-	const static size_t INDEXOF_NONE = SIZE_MAX;
+	const static uint32_t INDEXOF_NONE;
+	const static FeString EMPTY;
 
+	static FeString format(const wchar_t* str, FerrousAllocator* allocator, ...);
 	static FeString format(const FeString& str, FerrousAllocator* allocator, ...);
 	static FeString format(const FeString& str, ...);
 
+	static FeString format(const wchar_t* str, FerrousAllocator* allocator, va_list args);
 	static FeString format(const FeString& str, FerrousAllocator* allocator, va_list args);
 	static FeString format(const FeString& str, va_list args);
 
@@ -37,30 +40,35 @@ public:
 
 	/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
 	inline static FeString dateTime(const FeString& format, FerrousAllocator* allocator) {
-		return dateTime(format.c_str(), allocator);
+		return dateTime(format.getData(), allocator);
 	}
 
 	inline static FeString dataTime(const FeString& format) {
-		return dateTime(format.c_str(), Memory::get());
+		return dateTime(format.getData(), Memory::get());
 	}
 
 	FeString();
+	FeString(const char* data, uint32_t len, FerrousAllocator* allocator);
+	FeString(const char* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+	FeString(const char* data, FerrousAllocator* allocator) : FeString(data, strlen(data), allocator) {}
+	FeString(const char* data) : FeString(data, strlen(data), Memory::get()) {}
+
+	FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isLiteral = false);
+	FeString(const wchar_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+	FeString(const wchar_t* data, FerrousAllocator* allocator) : FeString(data, wcslen(data), allocator) {}
+	FeString(const wchar_t* data) : FeString(data, wcslen(data), Memory::get()) {}
+
+	FeString(const char32_t* data, uint32_t len, FerrousAllocator* allocator);
+	FeString(const char32_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+	FeString(const char32_t* data, FerrousAllocator* allocator);
+	FeString(const char32_t* data) : FeString(data, Memory::get()) {}
 	FeString(FerrousAllocator* allocator);
 	FeString(const FeString& copy);
-	FeString(const char* c_data, FerrousAllocator* allocator);
-	FeString(const wchar_t* c_data, FerrousAllocator* allocator);
-	FeString(const char32_t* c_data, FerrousAllocator* allocator);	
-	
-	/* Takes a pointer to known-length character data and stores it without copying. */
-	FeString(wchar_t* c_data, size_t length, FerrousAllocator* allocator);
 
-	inline FeString(const char* c_data) : FeString(c_data, Memory::get()) {}
-	inline FeString(const wchar_t* c_data) : FeString(c_data, Memory::get()) {}
-	inline FeString(const char32_t* c_data) : FeString(c_data, Memory::get()) {}
 	~FeString();
 
-	FeString substr(const size_t startIndex);
-	FeString substr(const size_t startIndex, const size_t count);
+	FeString substr(const uint32_t startIndex);
+	FeString substr(const uint32_t startIndex, const uint32_t count);
 
 	FeString replace(const wchar_t c, const wchar_t replacement);
 	FeString replace(const FeString str, const FeString replacement);
@@ -75,10 +83,10 @@ public:
 	bool contains(const FeString* input);
 
 	/* Returns the index of the first instance of c. Returns SIZE_MAX if none were found.*/
-	size_t indexOf(const wchar_t c);
+	uint32_t indexOf(const wchar_t c);
 
 	/* Returns the index of the first instance of input. Returns SIZE_MAX if none were found.*/
-	size_t indexOf(const FeString* input);
+	uint32_t indexOf(const FeString* input);
 
 	/* Returns a new string with the whitespace trimmed from the start and end.*/
 	FeString trim();
@@ -104,10 +112,13 @@ public:
 	inline FerrousAllocator* getAllocator() const { return _allocator; }
 
 	/* Gets the length of the string.*/
-	const inline size_t len() const { return _length; }
+	const inline uint32_t len() const { return _length; }
 
 	/*Returns a pointer to the raw underlying character data.*/
-	const inline wchar_t* c_str() const { return _data; }
+	const inline wchar_t* getData() const { return _data; }
+
+	/* Coppy assignment operator*/
+	FeString& operator=(const FeString& other);
 private:
 	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
 	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
@@ -126,9 +137,10 @@ private:
 	friend FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* c_data, size_t len);
 	friend FeString FERROUS_UTIL_API operator "" _fe(const char32_t* a, size_t len);
 
-	wchar_t* _data;
-	size_t _length;
-	FerrousAllocator* _allocator;
+	const wchar_t* _data;			/* The raw, unencoded character data. */
+	FerrousAllocator* _allocator;	/* The allocator from which _data was allocated. */
+	uint32_t _length;			/* Number of characters held in the string, excluding the null-terminator. */
+	const bool _isLiteral;			/* String was created from a literal and therefore should never dealloc its data. */
 };
 
 class FERROUS_UTIL_API UtfString {
@@ -140,19 +152,28 @@ public:
 	const static char* UTF_BOM[];
 
 	UtfString(const UtfString& copy);
+
+	/* Allocates an empty UtfString ready to be filled with encoded character data with the specified encoding. */
 	UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocator);
 	~UtfString();
 
 	/* Re-encodes the current string to the specified encoding and returns the result as a byte array. */
-	static UtfString encode(const FeString* string, UtfEncoding encoding, FerrousAllocator* allocator);
-	inline static UtfString encode(const FeString* string, UtfEncoding encoding) {
-		return encode(string, encoding, string->getAllocator());
+	static UtfString encode(const FeString& string, UtfEncoding encoding, FerrousAllocator* allocator);
+	inline static UtfString encode(const FeString& string, UtfEncoding encoding) {
+		return encode(string, encoding, string.getAllocator());
 	}
 
-	/* Decodes a byte array of UTF data into a usable FeString and returns it.*/
-	FeString decode(FerrousAllocator* allocator) const;
+	/* Decodes a byte array of UTF data into an FeString and returns it.*/
+	static FeString decode(const char* data, size_t num_chars, UtfEncoding data_encoding, FerrousAllocator* allocator);
+
+	/* Decodes the current UtfString into an FeString and returns it.*/
+	inline FeString decode(FerrousAllocator* allocator) const {
+		return decode(_data, _length, _encoding, allocator);
+	}
+
+	/* Decodes the current UtfString into an FeString and returns it.*/
 	inline FeString decode() const {
-		return decode(_allocator);
+		return decode(_data, _length, _encoding, _allocator);
 	}
 
 	inline const size_t byteLen() { return _num_bytes; }

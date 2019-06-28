@@ -30,12 +30,14 @@ UtfString::UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocat
 	_allocator = allocator;
 	_num_bytes = 0;
 	_encoding = encoding;
+	size_t required_bytes = 0;
 
 	switch (encoding) {
 	case UtfEncoding::UTF8:
 	case UtfEncoding::UTF8_WithBOM:
-		_mem = static_cast<char*>(allocator->alloc(((size_t)len + 1) * 4)); // Alloc for worst case scenario of 4-bytes per char.
-		_data = (_mem + _num_bytes) - 1;
+		required_bytes = (sizeof(char32_t) * len) + 1; // One extra byte for the null-terminator '\0'.
+		_mem = static_cast<char*>(allocator->alloc(required_bytes)); // Alloc for worst case scenario of 4-bytes per char.
+		_data = (_mem + required_bytes) - 1;
 		break;
 
 	case UtfEncoding::UTF16_LE:
@@ -66,10 +68,10 @@ UtfString::~UtfString() {
 	_allocator->deref(_mem);
 }
 
-UtfString UtfString::encode(const FeString* string, UtfEncoding encoding, FerrousAllocator* allocator) {
-	UtfString result = UtfString(string->len(), encoding, allocator);
-	size_t pos = string->len() + 1; // Start with the null terminator
-	const wchar_t* data = string->c_str();
+UtfString UtfString::encode(const FeString& string, UtfEncoding encoding, FerrousAllocator* allocator) {
+	UtfString result = UtfString(string.len(), encoding, allocator);
+	uint32_t pos = string.len() + 1; // Start with the null terminator
+	const wchar_t* data = string.getData();
 	char* r_end = result._data;
 
 	switch (encoding) {
@@ -112,16 +114,16 @@ UtfString UtfString::encode(const FeString* string, UtfEncoding encoding, Ferrou
 	return result;
 }
 
-FeString UtfString::decode(FerrousAllocator* allocator) const {
-	wchar_t* mem = allocator->allocType<wchar_t>(_length + 1);
+FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_encoding, FerrousAllocator* allocator) {
+	wchar_t* mem = allocator->allocType<wchar_t>(num_chars);
 	size_t pos = 0;
-	const char* temp = _data;
+	const char* temp = data;
 
-	switch (_encoding) {
+	switch (data_encoding) {
 	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
 	case UtfEncoding::UTF8_WithBOM:
-		while (pos <= _length) {
-			if (*temp & 128) { // Is the last bit set? If false, it's ASCII
+		while (pos <= num_chars) {
+			if (!(*temp & 128)) { // Is the last bit set? If false, it's ASCII
 				mem[pos] = *temp;
 				temp++;
 			}
@@ -131,25 +133,29 @@ FeString UtfString::decode(FerrousAllocator* allocator) const {
 				uint8_t num_bytes = 0;
 				bool first_byte = true; // Encoding bit?
 
-				while (b) {					
+				while (b) {
 					uint8_t f = 128;
 
-					if (first_byte) {
-						while (f) {
-							if (b & f)
+					while (f) {
+						if (first_byte) {
+							if (b & f) {
 								num_bytes++;
-							else
+								f >>= 1;
+							}
+							else {
 								first_byte = false;
+								f >>= 1;
+								break;
+							}
 
-							f >>= 1;
 						}
-					}
-					else {
-						// All bytes after the first byte should have a bit pattern of 10xxxxxx
-						if ((b & 192) == 128)
-							f >>= 2;
-						else
-							break;
+						else {
+							// All bytes after the first byte should have a bit pattern of 10xxxxxx
+							if ((b & 192) == 128)
+								f >>= 2;
+							else
+								break;
+						}
 					}
 
 					// Now read char bit data from the remainder of the current byte.
@@ -159,6 +165,7 @@ FeString UtfString::decode(FerrousAllocator* allocator) const {
 					}
 
 					temp++;
+					b = *temp;
 					num_bytes--;
 					if (num_bytes == 0)
 						break;
@@ -180,5 +187,5 @@ FeString UtfString::decode(FerrousAllocator* allocator) const {
 		break;
 	}
 
-	return FeString(mem, _length, allocator);
+	return FeString(mem, num_chars - 1, allocator);
 }

@@ -173,7 +173,7 @@ void* Memory::alloc(const size_t size_bytes) {
 	return nullptr;
 }
 
-void Memory::ref(void* p) {
+void Memory::ref(const void* p) {
 	Block* b = getHeader(p);
 	b->_ref_count++;
 }
@@ -349,7 +349,7 @@ void Memory::frontBackSplit(Block * source, Block * *frontRef, Block * *backRef)
 	slow->_next = nullptr;
 }
 
-Memory::Block* Memory::getHeader(void* p) {
+Memory::Block* Memory::getHeader(const void* p) {
 	// Header is located behind the pointer's address.
 	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _adjustment);
 	uint8_t* _adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);

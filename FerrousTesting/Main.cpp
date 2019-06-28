@@ -127,30 +127,30 @@ void RunStringTest(Logger* log) {
 	bool endsWith = toSearch.endsWith(&"searched."_fe);
 	bool endsWithFail = toSearch.endsWith(&"searching!"_fe);
 
-	log->writeLineF("A string: %s", aString.c_str());
-	log->writeLineF("B string:  %s", bString.c_str());
-	log->writeLineF("C string:  %s", cString.c_str());
-	log->writeLineF("Formatted:  %s", formattedString.c_str());
-	log->writeLineF("Result:  %s", result.c_str());
+	log->writeLineF("A string: %s", aString.getData());
+	log->writeLineF("B string:  %s", bString.getData());
+	log->writeLineF("C string:  %s", cString.getData());
+	log->writeLineF("Formatted:  %s", formattedString.getData());
+	log->writeLineF("Result:  %s", result.getData());
 	log->writeLine(" ");
 
-	log->writeLineF("Lower-case: %s", resultLower.c_str());
-	log->writeLineF("Upper-case: %s",resultUpper.c_str());
-	log->writeLineF("Capitalized (all): %s",resultCapsAll.c_str());
-	log->writeLineF("Capitalized (1st): %s",resultCapsFirst.c_str());
+	log->writeLineF("Lower-case: %s", resultLower.getData());
+	log->writeLineF("Upper-case: %s",resultUpper.getData());
+	log->writeLineF("Capitalized (all): %s",resultCapsAll.getData());
+	log->writeLineF("Capitalized (1st): %s",resultCapsFirst.getData());
 	log->writeLine(" ");
 
-	log->writeLineF("Trimmed: {%s}",resultTrimmed.c_str());
-	log->writeLineF("Trimmed (start): {%s}",resultTrimStart.c_str());
-	log->writeLineF("Trimmed (end): {%s}",resultTrimEnd.c_str());
+	log->writeLineF("Trimmed: {%s}",resultTrimmed.getData());
+	log->writeLineF("Trimmed (start): {%s}",resultTrimStart.getData());
+	log->writeLineF("Trimmed (end): {%s}",resultTrimEnd.getData());
 	log->writeLine(" ");
 
-	log->writeLineF("Replacement Target: %s",toReplace.c_str());
-	log->writeLineF("Replace \"replace\" with \"start\": {%s}",resultReplaced.c_str());
-	log->writeLineF("Substr 0 to 10: {%s}",resultSubStr.c_str());
+	log->writeLineF("Replacement Target: %s",toReplace.getData());
+	log->writeLineF("Replace \"replace\" with \"start\": {%s}",resultReplaced.getData());
+	log->writeLineF("Substr 0 to 10: {%s}",resultSubStr.getData());
 	log->writeLine(" ");
 
-	log->writeLineF("Target: %s",toSearch.c_str());
+	log->writeLineF("Target: %s",toSearch.getData());
 	log->writeLineF("indexOf(\"string\"): %d",indexOfString);
 	log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
 
@@ -239,7 +239,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	//RunEngineTest(&log);
 	FeString workingDir = File::getWorkingDirectory();
-	log.writeLineF("Current Path: %s", workingDir.c_str());
+	log.writeLineF("Current Path: %s", workingDir.getData());
 	log.writeLineF("   Is directory: %d", File::isDirectory(&workingDir));
 	log.writeLineF("   Is file: %d", File::isFile(&workingDir));
 
@@ -248,7 +248,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	File testFileOut = File("test_file.txt"_fe, File::AccessFlags::Write, File::ModeFlags::Create);
 	log.writeLineF("File created successfully!");
-	testFileOut.writeString(&U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
+	testFileOut.writeString(U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
 
 	size_t fSize = 0;
 	testFileOut.getSize(fSize);
@@ -256,7 +256,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	testFileOut.close();
 	log.writeLine("File closed");
 
-	// Now open to read
+	//// Now open to read
 	File testFileIn = File("test_file.txt"_fe, File::AccessFlags::Read, File::ModeFlags::None);
 	testFileIn.getSize(fSize);
 	FeString stringFromFile = L"\0";

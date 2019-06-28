@@ -47,7 +47,7 @@ void StackAllocator::dealloc(void* p) {
 	// Do nothing. Stack allocator relies solely on reset() or revertTo() for reusing memory.
 }
 
-void StackAllocator::ref(void* p) {
+void StackAllocator::ref(const void* p) {
 	// Do nothing. Stack allocator does not reference-count.
 }
 

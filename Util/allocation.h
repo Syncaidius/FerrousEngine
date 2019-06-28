@@ -34,7 +34,7 @@ public:
 	virtual size_t getCapacity() = 0;
 
 	/* Increases reference counter of allocated memory.*/
-	virtual void ref(void* p) = 0;
+	virtual void ref(const void* p) = 0;
 
 	virtual void deref(void* p) = 0;
 
@@ -109,7 +109,7 @@ public:
 	void* alloc(const size_t size_bytes);
 
 	/* Increments the reference count of a block of memory. If the reference count hits 0, it will automatically be deallocated. */
-	void ref(void* p);
+	void ref(const void* p);
 
 	/* Dereferences a block of memory. If the reference count hits 0, it will automatically be deallocated. */
 	void deref(void* p);
@@ -188,7 +188,7 @@ private:
 	Block* sortedMerge(Block* a, Block* b);
 	void frontBackSplit(Block* source, Block** frontRef, Block** backRef);
 
-	inline Block* getHeader(void* p);
+	inline Block* getHeader(const void* p);
 	Page* newPage(void);
 	void resetPage(Page* p);
 };
@@ -210,7 +210,7 @@ public:
 	/* Resets the stack back to it's starting address.*/
 	void reset(void);
 
-	void ref(void* p);
+	void ref(const void* p);
 
 	void deref(void* p);
 

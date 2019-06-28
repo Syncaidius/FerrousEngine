@@ -38,18 +38,18 @@ public:
 
 	static bool exists(const wchar_t* path);
 	inline static bool exists(const FeString* path) {
-		return exists(path->c_str());
+		return exists(path->getData());
 	}
 
 	static bool isDirectory(const wchar_t* path);
 	inline static bool isDirectory(const FeString* path) {
-		return isDirectory(path->c_str());
+		return isDirectory(path->getData());
 	}
 
 	static bool isFile(const wchar_t* path);
 
 	inline static bool isFile(const FeString* path) {
-		return isFile(path->c_str());
+		return isFile(path->getData());
 	}
 
 	static FeString getWorkingDirectory() {
@@ -59,18 +59,18 @@ public:
 	/* Deletes a file if it exists.*/
 	static void deleteFile(const wchar_t* path);
 	inline static void deleteFile(const FeString* path) {
-		deleteFile(path->c_str());
+		deleteFile(path->getData());
 	}
 
 	/* Deletes a directory. If recursive is false, the folder must be empty before it can be deleted.*/
 	static void deleteDirectory(const wchar_t* path, bool recursive);
 	inline static void deleteDirectory(const FeString* path, bool recursive) {
-		deleteDirectory(path->c_str(), recursive);
+		deleteDirectory(path->getData(), recursive);
 	}
 
 	static void create(const wchar_t* path);
 	inline static void create(const FeString* path) {
-		return create(path->c_str());
+		return create(path->getData());
 	}
 
 	void seek(AccessFlags flags, SeekOrigin origin, int32_t num_bytes);
@@ -107,7 +107,7 @@ public:
 	inline void readI64(int64_t* dest, uint32_t count = 1) { read(dest, count); }
 	inline void readFloat(float* dest, uint32_t count = 1) { read(dest, count); }
 	inline void readDouble(double* dest, uint32_t count = 1) { read(dest, count); }
-	size_t readString(FeString* dest, uint32_t count = 1);
+	void readString(FeString* dest);
 #pragma endregion
 
 #pragma region Write Helpers
@@ -121,7 +121,7 @@ public:
 	inline void writeI64(const int64_t* val, uint32_t count = 1) { write(val, count); }
 	inline void writeFloat(const float* val, uint32_t count = 1) { write(val, count); }
 	inline void writeDouble(const double* val, uint32_t count = 1) { write(val, count); }
-	void writeString(const FeString* val, uint32_t count = 1);
+	void writeString(const FeString& val);
 #pragma endregion
 
 	void close();

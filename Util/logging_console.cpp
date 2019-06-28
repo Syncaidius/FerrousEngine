@@ -12,11 +12,11 @@ LogConsoleOutput::~LogConsoleOutput() {
 }
 
 void LogConsoleOutput::write(const FeString& msg) {
-	std::wcout << msg.c_str();
+	std::wcout << msg.getData();
 }
 
 void LogConsoleOutput::writeLine(const FeString& msg) {
-	std::wcout << msg.c_str() << std::endl;
+	std::wcout << msg.getData() << std::endl;
 }
 
 void LogConsoleOutput::clear() {
