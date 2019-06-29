@@ -107,12 +107,54 @@ File::File(const FeString path, const AccessFlags access, const ModeFlags mode, 
 		}
 	}
 
+	if (canRead()) {
+		// Read the BOM anyway, even if we're overriding it with an explicit encoding.
+		// This ensures the BOM (if present) cannot get in the way when reading file data.
+		UtfEncoding detectedEncoding = detectEncoding();
+		if (encoding == UtfEncoding::Auto)
+			_encoding = detectedEncoding;
+	}
+
 	_buffer = static_cast<char*>(_allocator->alloc(bufferSize));
 }
 
 File::~File() {
 	_stream.close();
 	_allocator->dealloc(_buffer);
+}
+
+UtfEncoding File::detectEncoding() {
+	int bom_failed[UtfString::UTF_BOM_COUNT] = { 0 };
+
+	size_t prevPos = _stream.tellg();
+
+	// The biggest supported BOM is 3-bytes.
+	for (int b = 1; b < 4; b++) {
+		char bom_byte = 0;
+		_stream.read(&bom_byte, 1);
+
+		for (int i = 1; i < UtfString::UTF_BOM_COUNT; i++) {
+			if (bom_failed[i])
+				continue;
+
+			if (i > UtfString::UTF_BOM[i][0]) {
+				bom_failed[i] = true;
+				continue;
+			}
+
+			if (UtfString::UTF_BOM[i][b] == bom_byte) {
+				if (b == UtfString::UTF_BOM[i][0])
+					return (UtfEncoding)i;
+			}
+			else {
+				bom_failed[i];
+			}
+		}
+	}
+
+	// No supported BOM was found. Revert the stream back to it's last known position.
+	_stream.seekg(prevPos, ios_base::beg);
+	return UtfEncoding::UTF8;
 }
 
 void File::getPos(File::AccessFlags access, size_t& pos) {

@@ -88,12 +88,12 @@ public:
 		const AccessFlags access,
 		const ModeFlags mode,
 		FerrousAllocator* allocator, 
-		const UtfEncoding encoding = UtfEncoding::UTF8,
+		const UtfEncoding encoding = UtfEncoding::Auto,
 		size_t bufferSize = 1024);
 	inline File(const FeString path,
 		const AccessFlags access,
 		const ModeFlags mode,
-		const UtfEncoding encoding = UtfEncoding::UTF8,
+		const UtfEncoding encoding = UtfEncoding::Auto,
 		size_t bufferSize = 1024) : File(path, access, mode, Memory::get(), encoding, bufferSize) {}
 
 #pragma region Read Helpers
@@ -170,6 +170,8 @@ private:
 	inline void write(const T* value, uint32_t count) {
 		writeBytes(reinterpret_cast<const char*>(value), sizeof(T) * count);
 	}
+
+	UtfEncoding detectEncoding();
 
 	char* _buffer;
 	AccessFlags _access;

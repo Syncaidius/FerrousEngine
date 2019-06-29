@@ -5,17 +5,20 @@
 #include <cstdarg>
 
 enum struct UtfEncoding : uint8_t {
+	/* Auto-detect or select the encoding, where possible. */
+	Auto = 0,
+
 	/* UTF-8, no BOM */
-	UTF8 = 0,
+	UTF8 = 1,
 
 	/* UTF-8, with BOM */
-	UTF8_WithBOM = 1,
+	UTF8_WithBOM = 2,
 
 	/* UTF-16 Big Endian (BE) */
-	UTF16_BE = 2,
+	UTF16_BE = 3,
 
 	/* UTF-16 Little Endian (LE).*/
-	UTF16_LE = 3,
+	UTF16_LE = 4,
 };
 
 class FERROUS_UTIL_API FeString {
@@ -150,6 +153,7 @@ public:
 	const static char UTF_BOM_16_BE[];
 	const static char UTF_BOM_16_LE[];
 	const static char* UTF_BOM[];
+	static constexpr size_t UTF_BOM_COUNT = 5;
 
 	UtfString(const UtfString& copy);
 

@@ -1,5 +1,5 @@
 # Ferrous Engine
-Since the project has just been started, there is a shortage of details right now. However, I can list a few things I need/want in this engine:  
+Since the project has just been started, there is a shortage of details right now. However, here are a few things I would like to see in this engine:  
  * Fast and consistent memory allocation via custom allocators
  * DirectX 12 from the ground up (and Vulkan later down the line)  - SPIR-V for shared shader code between APIs
  * XAudio2 and/or [OpenAL](https://www.openal.org/) audio, with abstraction to switch between them or another audio system (e.g. [FMOD](https://www.fmod.com/))  

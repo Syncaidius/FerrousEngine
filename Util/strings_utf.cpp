@@ -6,7 +6,7 @@ const char UtfString::UTF_BOM_8_NON[] = { 0 };
 const char UtfString::UTF_BOM_8[] = { 3, 0xEF, 0xBB, 0xBF };
 const char UtfString::UTF_BOM_16_BE[] = { 2, 0xFE, 0xFF };
 const char UtfString::UTF_BOM_16_LE[] = { 2, 0xFF, 0xFE };
-const char* UtfString::UTF_BOM[] = { UtfString::UTF_BOM_8_NON, UtfString::UTF_BOM_8, UtfString::UTF_BOM_16_BE, UtfString::UTF_BOM_16_LE };
+const char* UtfString::UTF_BOM[] = { UtfString::UTF_BOM_8_NON, UtfString::UTF_BOM_8_NON, UtfString::UTF_BOM_8, UtfString::UTF_BOM_16_BE, UtfString::UTF_BOM_16_LE };
 
 const uint8_t UtfString::UTF8_TRAIL_MASK = 0b10000000;
 const uint8_t UtfString::UTF8_LEAD_MASK[] = {
@@ -33,6 +33,7 @@ UtfString::UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocat
 	size_t required_bytes = 0;
 
 	switch (encoding) {
+	case UtfEncoding::Auto:
 	case UtfEncoding::UTF8:
 	case UtfEncoding::UTF8_WithBOM:
 		required_bytes = (sizeof(char32_t) * len) + 1; // One extra byte for the null-terminator '\0'.
@@ -75,6 +76,7 @@ UtfString UtfString::encode(const FeString& string, UtfEncoding encoding, Ferrou
 	char* r_end = result._data;
 
 	switch (encoding) {
+	case UtfEncoding::Auto:
 	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
 	case UtfEncoding::UTF8_WithBOM:
 		while (pos > 0) {
@@ -120,6 +122,7 @@ FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_
 	const char* temp = data;
 
 	switch (data_encoding) {
+	case UtfEncoding::Auto:
 	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
 	case UtfEncoding::UTF8_WithBOM:
 		while (pos <= num_chars) {
