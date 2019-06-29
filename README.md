@@ -1,5 +1,5 @@
 # Ferrous Engine
-The project is still in it's early days, but here are a few things I would like to see in this engine:  
+The project is still in its early days, but here are a few things I would like to see in this engine:  
  * Fast and consistent memory allocation via custom allocators
  * DirectX 12 and Vulkan from the ground up - SPIR-V for shared shader code between APIs
  * [OpenAL Soft](https://github.com/kcat/openal-soft) for audio. An open-source implementation of OpenAL.  
