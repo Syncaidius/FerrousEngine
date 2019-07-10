@@ -5,6 +5,9 @@
 #include <Util/localization.h>
 #include <Util/game_time.h>
 #include <Util/file.h>
+#include <Util/stream_file.h>
+#include <Util/text_stream_writer.h>
+#include <Util/text_stream_reader.h>
 #include <map>
 #include <Windows.h>
 using namespace std;
@@ -240,29 +243,34 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	//RunEngineTest(&log);
 	FeString workingDir = File::getWorkingDirectory();
 	log.writeLineF("Current Path: %s", workingDir.getData());
-	log.writeLineF("   Is directory: %d", File::isDirectory(&workingDir));
+	log.writeLineF("   Is directory: %d", File::isDirectory(workingDir));
 	log.writeLineF("   Is file: %d", File::isFile(&workingDir));
 
 	bool fExists = File::exists(L"FerrousTesting.exe");
 	log.writeLineF("File \"FerrousTesting.exe\" found: %d", fExists);
 
-	File testFileOut = File("test_file.txt"_fe, File::AccessFlags::Write, File::ModeFlags::Create);
+	FileStream testFileOut = FileStream("test_file.txt"_fe, FileStreamFlags::Create, false, true);
+	TextStreamWriter testWriter = TextStreamWriter(&testFileOut, Memory::get());
 	log.writeLineF("File created successfully!");
-	testFileOut.writeString(U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe); // Note: Apologies if anything insulting appeared here, I used Google translate. Do let me know!
+	testWriter.writeLine(U"This is a test file! 这是一个测试文件! Это тестовый файл! これはテストファイルです!"_fe);
 
-	size_t fSize = 0;
-	testFileOut.getSize(fSize);
-	log.writeLineF("Written %d bytes to file", fSize);
+	size_t fSize = testFileOut.getSize();
 	testFileOut.close();
+
+	log.writeLineF("Written %d bytes to file", fSize);
 	log.writeLine("File closed");
 
 	//// Now open to read
-	File testFileIn = File("test_file.txt"_fe, File::AccessFlags::Read, File::ModeFlags::None);
-	testFileIn.getSize(fSize);
+	FileStream testFileIn = FileStream("test_file.txt"_fe, FileStreamFlags::None, true, false);
+	TextStreamReader testReader = TextStreamReader(&testFileIn, Memory::get());
+
 	FeString stringFromFile = L"\0";
+	fSize = testFileIn.getSize();
+
 	log.writeLineF("Open file with size: %d bytes", fSize);
-	testFileIn.readString(&stringFromFile);
+	testReader.readLine(&stringFromFile);
 	testFileIn.close();
+
 	log.writeLine("File closed");
 	log.writeLineF("String read from file: %s", stringFromFile);
 

@@ -24,6 +24,7 @@ FeString FeString::format(const wchar_t* str, FerrousAllocator* allocator, va_li
 
 	wchar_t* mem = allocator->allocType<wchar_t>(len_v + 1ULL);
 	memcpy(mem, buf, len_v * sizeof(wchar_t));
+	mem[len_v] = L'\0';
 	return FeString(mem, len_v, allocator, false);
 }
 
@@ -78,27 +79,28 @@ FeString FeString::dateTime(const wchar_t* format, FerrousAllocator* allocator) 
 
 	wchar_t* mem = allocator->allocType<wchar_t>(len + 1ULL);
 	memcpy(mem, buf, len * sizeof(wchar_t));
+	mem[len] = L'\0';
 	return FeString(mem, len, allocator, false);
 }
 #pragma endregion
 
 #pragma region INSTANCED
-FeString::FeString() : _isLiteral(true) {
+FeString::FeString() : _isHeap(false) {
 	_allocator = Memory::get();
 	_data = FeString::EMPTY.getData();
 	_length = 0;
 }
 
-FeString::FeString(const FeString& copy) : _isLiteral(copy._isLiteral) {
+FeString::FeString(const FeString& copy) : _isHeap(copy._isHeap) {
 	_allocator = copy._allocator;
 	_data = copy._data;
 	_length = copy._length;
 
-	if(!_isLiteral)
+	if(!_isHeap)
 		_allocator->ref(_data);
 }
 
-FeString::FeString(const char* data, uint32_t len, FerrousAllocator* allocator) : _isLiteral(false) {
+FeString::FeString(const char* data, uint32_t len, FerrousAllocator* allocator) : _isHeap(true) {
 	_length = len;
 	_allocator = allocator;
 
@@ -110,22 +112,15 @@ FeString::FeString(const char* data, uint32_t len, FerrousAllocator* allocator) 
 	_data = mem;
 }
 
-FeString::FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isLiteral) : _isLiteral(isLiteral) {
+FeString::FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isHeap) : _isHeap(isHeap) {
 	_length = len;
 	_allocator = allocator;
-
-	if (isLiteral) {
-		_data = data;
-	}
-	else {
-		wchar_t* mem = _allocator->allocType<wchar_t>(_length + 1ULL);
-		memcpy(mem, data, _length * sizeof(wchar_t));
-		mem[_length] = L'\0';
-		_data = mem;
-	}
+	_data = data;
+	if (_data[_length] != L'\0')
+		throw std::exception("wide-character string is not null-terminated.");
 }
 
-FeString::FeString(const char32_t* c_data, uint32_t len, FerrousAllocator * allocator) : _isLiteral(false) {
+FeString::FeString(const char32_t* c_data, uint32_t len, FerrousAllocator * allocator) : _isHeap(true) {
 	_length = len;
 	_allocator = allocator;
 
@@ -133,11 +128,11 @@ FeString::FeString(const char32_t* c_data, uint32_t len, FerrousAllocator * allo
 	for (uint32_t i = 0; i < len; i++)
 		mem[i] = c_data[i] > WCHAR_MAX ? '?' : c_data[i];
 
-	mem[len] = U'\0';
+	mem[len] = L'\0';
 	_data = mem;
 }
 
-FeString::FeString(const char32_t* c_data, FerrousAllocator * allocator) : _isLiteral(false) {
+FeString::FeString(const char32_t* c_data, FerrousAllocator * allocator) : _isHeap(true) {
 	_allocator = allocator;
 	while (c_data[_length] != U'\0')
 		_length++;
@@ -151,8 +146,19 @@ FeString::FeString(const char32_t* c_data, FerrousAllocator * allocator) : _isLi
 
 }
 
+FeString::FeString(const char* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+FeString::FeString(const char* data, FerrousAllocator* allocator) : FeString(data, strlen(data), allocator) {}
+FeString::FeString(const char* data) : FeString(data, strlen(data), Memory::get()) {}
+
+FeString::FeString(const wchar_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+FeString::FeString(const wchar_t* data, FerrousAllocator* allocator) : FeString(data, wcslen(data), allocator) {}
+FeString::FeString(const wchar_t* data) : FeString(data, wcslen(data), Memory::get()) {}
+
+FeString::FeString(const char32_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+FeString::FeString(const char32_t* data) : FeString(data, Memory::get()) {}
+
 FeString::~FeString() {
-	if(!_isLiteral)
+	if(!_isHeap)
 		_allocator->deref((void*)_data);
 
 	_allocator = nullptr;
@@ -168,6 +174,7 @@ FeString FeString::toLower() {
 	for (uint32_t i = 0; i < _length; i++)
 		new_data[i] = std::tolower(_data[i], loc);
 
+	new_data[_length] = L'\0';
 	return FeString(new_data, _length, _allocator);
 }
 
@@ -181,6 +188,7 @@ FeString FeString::toUpper() {
 	for (uint32_t i = 0; i < _length; i++)
 		new_data[i] = std::toupper(_data[i], loc);
 
+	new_data[_length] = L'\0';
 	return FeString(new_data, _length, _allocator);
 }
 
@@ -208,6 +216,7 @@ FeString FeString::capitalize() {
 		}
 	}
 
+	new_data[_length] = L'\0';
 	return FeString(new_data, _length, _allocator);
 }
 
@@ -235,6 +244,7 @@ FeString FeString::capitalizeFirst() {
 		}
 	}
 
+	new_data[_length] = L'\0';
 	return FeString(new_data, _length, _allocator);
 }
 
@@ -269,6 +279,7 @@ FeString FeString::trim() {
 	const wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
 
+	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len, _allocator);
 }
 
@@ -291,6 +302,8 @@ FeString FeString::trimStart() {
 	wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
 	const wchar_t* p_start = _data + start;
 	memcpy(new_data, p_start, new_len * sizeof(wchar_t));
+
+	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len, _allocator);
 }
 
@@ -316,6 +329,8 @@ FeString FeString::trimEnd() {
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
 	memcpy(new_data, _data, new_len * sizeof(wchar_t));
+
+	new_data[new_len] = L'\0';
 	return FeString(new_data, new_len, _allocator);
 }
 
@@ -360,6 +375,8 @@ FeString FeString::substr(const uint32_t startIndex) {
 	wchar_t* mem = _allocator->allocType<wchar_t>(count + 1ULL);
 	const wchar_t* src_pos = _data + startIndex;
 	memcpy(mem, src_pos, count * sizeof(wchar_t));
+
+	mem[count] = L'\0';
 	return FeString(mem, count, _allocator);
 }
 
@@ -369,6 +386,8 @@ FeString FeString::substr(const uint32_t startIndex, const uint32_t count) {
 	wchar_t* mem = _allocator->allocType<wchar_t>(count + 1ULL);
 	const wchar_t* src_pos = _data + startIndex;
 	Memory::copy(mem, src_pos, count * sizeof(wchar_t));
+
+	mem[count] = L'\0';
 	return FeString(mem, count, _allocator);
 }
 
@@ -381,6 +400,7 @@ FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
 			mem[i] = replacement;
 	}
 
+	mem[_length] = L'\0';
 	return FeString(mem, _length, _allocator);
 }
 
@@ -449,6 +469,7 @@ FeString FeString::replace(const FeString input, const FeString replacement) {
 		memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
 	}
 
+	mem[new_len] = L'\0';
 	return FeString(mem, new_len, _allocator);
 }
 
@@ -536,6 +557,7 @@ FeString operator +(const FeString& a, const FeString& b) {
 	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
 	p_data += a._length;
 	memcpy(p_data, b._data, b._length * sizeof(wchar_t));
+	mem[len] = '\0';
 
 	return FeString(mem, len, a._allocator);
 }

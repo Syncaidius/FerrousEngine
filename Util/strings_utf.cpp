@@ -25,29 +25,33 @@ const uint8_t UtfString::UTF8_LEAD_CAPACITY[] = {
 	0b00000111, // 4-byte char        - 11110xxx
 };
 
-UtfString::UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocator) {
-	_length = len;
+UtfString::UtfString() : _isHeap(false) {
+	_length = 0;
+	_allocator = Memory::get();
+	_num_bytes = 0;
+	_encoding = UtfEncoding::Auto;
+	_mem = nullptr;
+	_data = _mem;
+}
+
+UtfString::UtfString(const FeString& string, UtfEncoding encoding, FerrousAllocator* allocator, bool isHeap) : _isHeap(isHeap) {
+	_length = string.len();
 	_allocator = allocator;
 	_num_bytes = 0;
 	_encoding = encoding;
-	size_t required_bytes = 0;
+	size_t required_bytes = (sizeof(char32_t) * _length);
+	_mem = static_cast<char*>(_allocator->alloc(required_bytes)); // Alloc for worst case scenario of 4-bytes per char.
+	_data = _mem;
 
 	switch (encoding) {
 	case UtfEncoding::Auto:
-	case UtfEncoding::UTF8:
+	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
 	case UtfEncoding::UTF8_WithBOM:
-		required_bytes = (sizeof(char32_t) * len) + 1; // One extra byte for the null-terminator '\0'.
-		_mem = static_cast<char*>(allocator->alloc(required_bytes)); // Alloc for worst case scenario of 4-bytes per char.
-		_data = (_mem + required_bytes) - 1;
+		encode_utf8(string, required_bytes);
 		break;
 
-	case UtfEncoding::UTF16_LE:
-
-		break;
-
-	case UtfEncoding::UTF16_BE:
-
-		break;
+	case UtfEncoding::UTF16_LE: encode_utf16_le(string, required_bytes); break;
+	case UtfEncoding::UTF16_BE: encode_utf16_be(string, required_bytes); break;
 
 	default:
 		// TODO throw exception for invalid encoding
@@ -55,7 +59,47 @@ UtfString::UtfString(size_t len, UtfEncoding encoding, FerrousAllocator* allocat
 	}
 }
 
-UtfString::UtfString(const UtfString& copy) {
+UtfString::UtfString(const FeString& string, UtfEncoding encoding, bool isHeap) : UtfString(string, encoding, string.getAllocator(), isHeap) {}
+
+UtfString::UtfString(char* utfData, size_t numBytes, UtfEncoding encoding, FerrousAllocator* allocator, bool isHeap) : _isHeap(isHeap) {
+	_encoding = encoding;
+	_num_bytes = numBytes;
+	_allocator = allocator;
+	_mem = utfData;
+	_data = _mem;
+	_length = getNumChars(utfData, numBytes, encoding);
+}
+
+uint32_t UtfString::getNumChars(const char* data, size_t numBytes, UtfEncoding encoding) {
+	uint32_t len = 0;
+
+	switch (encoding) {
+	case UtfEncoding::Auto:
+	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
+	case UtfEncoding::UTF8_WithBOM:
+		for (size_t i = 0; i < numBytes; i++) {
+			if (!(data[i] & 128) || ((data[i] & 192) == 192)) {// ASCII or UTF8-lead bit
+				len++;
+			}
+		}
+		break;
+
+	case UtfEncoding::UTF16_LE:
+		throw "Not implemented";
+		break;
+	case UtfEncoding::UTF16_BE:
+		throw "Not implemented";
+		break;
+
+	default:
+		// TODO throw exception for invalid encoding
+		break;
+	}
+
+	return len;
+}
+
+UtfString::UtfString(const UtfString& copy) : _isHeap(copy._isHeap) {
 	_allocator = copy._allocator;
 	_encoding = copy._encoding;
 	_mem = copy._mem;
@@ -66,58 +110,87 @@ UtfString::UtfString(const UtfString& copy) {
 }
 
 UtfString::~UtfString() {
-	_allocator->deref(_mem);
+	if(_isHeap)
+		_allocator->deref(_mem);
 }
 
-UtfString UtfString::encode(const FeString& string, UtfEncoding encoding, FerrousAllocator* allocator) {
-	UtfString result = UtfString(string.len(), encoding, allocator);
+UtfString& UtfString::operator = (const UtfString& other) {
+	return *this;
+}
+
+void UtfString::encode_utf8(const FeString& string, size_t max_bytes) {
+	_data += max_bytes - 1;
+
+	char* r_end = _data;
+	const wchar_t* src = string.getData();
 	uint32_t pos = string.len() + 1; // Start with the null terminator
-	const wchar_t* data = string.getData();
-	char* r_end = result._data;
 
-	switch (encoding) {
-	case UtfEncoding::Auto:
-	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
-	case UtfEncoding::UTF8_WithBOM:
-		while (pos > 0) {
-			pos--;
+	while (pos > 0) {
+		pos--;
 
-			if (data[pos] < 128) {
-				result._data[0] = (char)data[pos];
-				result._data--;
-			}
-			else {
-				uint8_t char_bytes = 1;
-				wchar_t c = data[pos];
-				while (c > UTF8_LEAD_CAPACITY[char_bytes]) {
-					result._data[0] = UTF8_TRAIL_MASK | (c & 63); // first 6 bits = c & (32 | 16 | 8 | 4 | 2 | 1)
-					c = c >> 6;
-					char_bytes++;
-					result._data--;
-				}
-
-				result._data[0] = (UTF8_LEAD_MASK[char_bytes]) | c;
-				result._data--;
-			}
+		if (src[pos] < 128) {
+			*_data = (char)src[pos];
 		}
-		result._data++;
-		result._num_bytes = r_end - result._data;
-		break;
+		else {
+			uint8_t char_bytes = 1;
+			wchar_t c = src[pos];
+			while (c > UTF8_LEAD_CAPACITY[char_bytes]) {
+				*_data = UTF8_TRAIL_MASK | (c & 63); // first 6 bits = c & (32 | 16 | 8 | 4 | 2 | 1)
+				c = c >> 6;
+				char_bytes++;
+				_data--;
+			}
 
-	case UtfEncoding::UTF16_LE:
+			*_data = (UTF8_LEAD_MASK[char_bytes]) | c;
+		}
 
-		break;
-
-	case UtfEncoding::UTF16_BE:
-
-		break;
+		_data--;
 	}
 
-	return result;
+	_data++;
+	_num_bytes = r_end - _data;
 }
 
-FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_encoding, FerrousAllocator* allocator) {
-	wchar_t* mem = allocator->allocType<wchar_t>(num_chars);
+void UtfString::encode_utf16_le(const FeString& string, size_t max_bytes) {
+	char16_t* utfData = reinterpret_cast<char16_t*>(_data);
+
+	const wchar_t* src = string.getData();
+	uint32_t pos = 0;
+
+	// TODO separate each encoding into its own function. UTF-16 does not need to work backwards.
+	while (pos < _length) {
+		wchar_t c = src[pos];
+		if ((c >= 0x0000 && c <= 0xD7FF) ||		// Reserved codepoint?
+			(c >= 0xE000 && c <= 0xFFFF)) {		// Surrogate pair?
+			*utfData = c;
+		}
+		else if (c >= 0xD800 && c <= 0xDFFF) {		// Reserved codepoint
+			*utfData = 0xFFFD; // Unicode replacement character
+		}
+		else {	// Surrogate pair
+			c -= 0x10000;
+			*utfData = ((c >> 10) / 0x400) + 0xD800; // high byte
+			utfData++;
+			*utfData = (c & 1023) + 0xDC00; // low byte
+		}
+
+		pos++;
+		utfData++;
+	}
+
+	_num_bytes = (utfData - reinterpret_cast<char16_t*>(_data)) * sizeof(char16_t);
+}
+
+void UtfString::encode_utf16_be(const FeString& string, size_t max_bytes) {
+	throw "Not implemented";
+}
+FeString UtfString::decode(const char* data, UtfEncoding dataEncoding, size_t numBytes, FerrousAllocator* allocator) {
+	uint32_t len = getNumChars(data, numBytes, dataEncoding);
+	return decode(data, len, dataEncoding, allocator);
+}
+
+FeString UtfString::decode(const char* data, uint32_t numChars, UtfEncoding data_encoding, FerrousAllocator* allocator) {
+	wchar_t* mem = allocator->allocType<wchar_t>(numChars + 1U); // 1 extra for the null-terminator.
 	size_t pos = 0;
 	const char* temp = data;
 
@@ -125,7 +198,7 @@ FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_
 	case UtfEncoding::Auto:
 	case UtfEncoding::UTF8: // https://en.wikipedia.org/wiki/UTF-8
 	case UtfEncoding::UTF8_WithBOM:
-		while (pos <= num_chars) {
+		while (pos <= numChars) {
 			if (!(*temp & 128)) { // Is the last bit set? If false, it's ASCII
 				mem[pos] = *temp;
 				temp++;
@@ -134,37 +207,36 @@ FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_
 				uint8_t b = *temp;
 				char32_t c = 0;
 				uint8_t num_bytes = 0;
-				bool first_byte = true; // Encoding bit?
+				bool first_byte = true; // First byte tells us how many UTF-8 bytes a character is made up of.
 
 				while (b) {
-					uint8_t f = 128;
+					uint8_t bit = 128;
 
-					while (f) {
+					while (bit) {
 						if (first_byte) {
-							if (b & f) {
+							if (b & bit) {
 								num_bytes++;
-								f >>= 1;
+								bit >>= 1;
 							}
 							else {
 								first_byte = false;
-								f >>= 1;
+								bit >>= 1;
 								break;
 							}
-
 						}
 						else {
 							// All bytes after the first byte should have a bit pattern of 10xxxxxx
 							if ((b & 192) == 128)
-								f >>= 2;
-							else
-								break;
+								bit >>= 2;
+
+							break;
 						}
 					}
 
 					// Now read char bit data from the remainder of the current byte.
-					while (f) {
-						c = (c << 1) | (b & f);
-						f >>= 1;
+					while (bit) {
+						c = (c << 1) | ((b & bit) ? 1 : 0);
+						bit >>= 1;
 					}
 
 					temp++;
@@ -176,9 +248,10 @@ FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_
 
 				mem[pos] = c > WCHAR_MAX ? L'?' : c;
 			}
-
 			pos++;
 		}
+
+		mem[--pos] = L'\0';
 		break;
 
 	case UtfEncoding::UTF16_LE:
@@ -190,5 +263,5 @@ FeString UtfString::decode(const char* data, size_t num_chars, UtfEncoding data_
 		break;
 	}
 
-	return FeString(mem, num_chars - 1, allocator);
+	return FeString(mem, numChars, allocator);
 }

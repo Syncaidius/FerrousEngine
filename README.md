@@ -16,4 +16,4 @@ The main reason is that I'm very familiar with the DirectX 11 API. Much of the D
 Three words: Cross-platform support. While DirectX is an awesome API, it only works on Microsoft platforms.  
 
 ### Licensing
-[MIT](https://github.com/Syncaidius/MoltenEngine/blob/master/LICENSE)
+[MIT](https://github.com/Syncaidius/FerrousEngine/blob/master/LICENSE)
