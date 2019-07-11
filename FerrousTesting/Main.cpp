@@ -260,7 +260,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	log.writeLineF("Written %d bytes to file", fSize);
 	log.writeLine("File closed");
 
-	//// Now open to read
+	// Now open to read
 	FileStream testFileIn = FileStream("test_file.txt"_fe, FileStreamFlags::None, true, false);
 	TextStreamReader testReader = TextStreamReader(&testFileIn, Memory::get());
 

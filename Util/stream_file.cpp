@@ -7,7 +7,7 @@ FileStream::FileStream(const FeString& path,
 	bool canRead,
 	bool canWrite,
 	const UtfEncoding encoding) : 
-	Stream(canRead, canWrite){
+	Stream(canRead, canWrite), _path(path){
 
 	if (!File::exists(path)) {
 		if ((flags & FileStreamFlags::Create) != FileStreamFlags::Create)
@@ -105,7 +105,7 @@ void FileStream::close() {
 
 	_isOpen = false;
 	_stream.close();
-	_stream.~basic_fstream();
+	//_stream.~basic_fstream();
 }
 
 size_t FileStream::getSize() {
