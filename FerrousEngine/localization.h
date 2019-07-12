@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <locale>
 
-class FERROUS_UTIL_API Localization {
+class Localization {
 public:
 	static Localization* get() { return _localization; }
 

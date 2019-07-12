@@ -39,13 +39,13 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -92,8 +92,9 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>DEBUG;FERROUS_EXPORTS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DEBUG;FERROUS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NO_VA_START_VALIDATION;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,8 +123,9 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <PreprocessorDefinitions>FERROUS_EXPORTS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FERROUS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NO_VA_START_VALIDATION;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeader>Use</PrecompiledHeader>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,19 +134,47 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="allocation.cpp" />
+    <ClCompile Include="allocation_memory.cpp" />
+    <ClCompile Include="allocation_stack.cpp" />
+    <ClCompile Include="binary_stream_reader.cpp" />
+    <ClCompile Include="binary_stream_writer.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="ferrous.cpp" />
+    <ClCompile Include="file.cpp" />
+    <ClCompile Include="file_global_info.cpp" />
+    <ClCompile Include="game_time.cpp" />
+    <ClCompile Include="localization.cpp" />
+    <ClCompile Include="logging.cpp" />
+    <ClCompile Include="logging_console.cpp" />
+    <ClCompile Include="stream.cpp" />
+    <ClCompile Include="stream_file.cpp" />
+    <ClCompile Include="stream_reader.cpp" />
+    <ClCompile Include="stream_writer.cpp" />
+    <ClCompile Include="strings_fe.cpp" />
+    <ClCompile Include="strings_utf.cpp" />
+    <ClCompile Include="text_stream_reader.cpp" />
+    <ClCompile Include="text_stream_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="allocation.h" />
+    <ClInclude Include="binary_stream_reader.h" />
+    <ClInclude Include="binary_stream_writer.h" />
+    <ClInclude Include="file.h" />
+    <ClInclude Include="game_time.h" />
+    <ClInclude Include="localization.h" />
+    <ClInclude Include="logging.h" />
+    <ClInclude Include="macros.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ferrous.h" />
-    <ClInclude Include="ferrous_head.h" />
     <ClInclude Include="stdafx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Util\Util.vcxproj">
-      <Project>{09641bad-4b4f-4291-affe-45344e642d1a}</Project>
-    </ProjectReference>
+    <ClInclude Include="stream.h" />
+    <ClInclude Include="stream_file.h" />
+    <ClInclude Include="stream_reader.h" />
+    <ClInclude Include="stream_writer.h" />
+    <ClInclude Include="strings.h" />
+    <ClInclude Include="text_stream_reader.h" />
+    <ClInclude Include="text_stream_writer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

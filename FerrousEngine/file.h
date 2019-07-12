@@ -1,5 +1,4 @@
 #pragma once
-#include "util.h"
 #include "strings.h"
 #include <filesystem>
 
@@ -22,7 +21,7 @@ DEFINE_FILE_ERROR(DirectoryNotEmptyError, "Attempt to delete directory failed. N
 DEFINE_FILE_ERROR(DirectoryRemovalError, " An unknown error occurred while attempting to remove a directory.");
 DEFINE_FILE_ERROR(DirectoryNotFoundError, "Directory not found.");
 
-class FERROUS_UTIL_API File {
+class File {
 private:
 
 

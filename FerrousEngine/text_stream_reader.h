@@ -1,7 +1,7 @@
 #pragma once
 #include "stream_reader.h"
 
-class FERROUS_UTIL_API TextStreamReader : StreamReader {
+class TextStreamReader : StreamReader {
 public:
 	TextStreamReader(Stream* stream, FerrousAllocator* allocator, size_t bufferSize = 1024);
 	TextStreamReader(Stream* stream, size_t bufferSize = 1024);

@@ -1,12 +1,11 @@
 #pragma once
-#include "ferrous_head.h"
 #include "settings.h"
-#include <Util/allocation.h>
-#include <Util/game_time.h>
-#include <Util/logging.h>
+#include "allocation.h"
+#include "game_time.h"
+#include "logging.h"
 
 /* A base class on which your build an application, to interact with Ferrous Engine.*/
-class FERROUS_API FerrousInstance {
+class FerrousInstance {
 public:
 	FerrousInstance();
 	~FerrousInstance();

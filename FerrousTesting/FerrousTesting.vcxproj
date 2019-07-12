@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>..\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\C++\FerrousEngine\FerrousEngine;..\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>..\;$(IncludePath)</IncludePath>
@@ -124,6 +124,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)FerrousEngine</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -135,12 +136,12 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Util\Util.vcxproj">
-      <Project>{09641bad-4b4f-4291-affe-45344e642d1a}</Project>
-    </ProjectReference>
+    <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
+    <ProjectReference Include="..\FerrousEngine\FerrousEngine.vcxproj">
+      <Project>{49fe14af-d0f7-4325-a128-958d79e20fa5}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

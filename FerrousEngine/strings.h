@@ -21,7 +21,7 @@ enum struct UtfEncoding : uint8_t {
 	UTF16_LE = 4,
 };
 
-class FERROUS_UTIL_API FeString {
+class FeString {
 public:
 	/* The value returned by indexOf() if no instance was found. */
 	const static uint32_t INDEXOF_NONE;
@@ -123,22 +123,22 @@ public:
 	/* Copy assignment operator*/
 	FeString& operator=(const FeString& other);
 private:
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint16_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint32_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const uint64_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const int8_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const int16_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const int32_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const int64_t& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const double& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const long double& v);
-	friend FeString FERROUS_UTIL_API operator +(const FeString& a, const float& v);
+	friend FeString operator +(const FeString& a, const FeString& b);
+	friend FeString operator +(const FeString& a, const uint8_t& v);
+	friend FeString operator +(const FeString& a, const uint16_t& v);
+	friend FeString operator +(const FeString& a, const uint32_t& v);
+	friend FeString operator +(const FeString& a, const uint64_t& v);
+	friend FeString operator +(const FeString& a, const int8_t& v);
+	friend FeString operator +(const FeString& a, const int16_t& v);
+	friend FeString operator +(const FeString& a, const int32_t& v);
+	friend FeString operator +(const FeString& a, const int64_t& v);
+	friend FeString operator +(const FeString& a, const double& v);
+	friend FeString operator +(const FeString& a, const long double& v);
+	friend FeString operator +(const FeString& a, const float& v);
 
-	friend FeString FERROUS_UTIL_API operator "" _fe(const char* c_data, size_t len);
-	friend FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* c_data, size_t len);
-	friend FeString FERROUS_UTIL_API operator "" _fe(const char32_t* a, size_t len);
+	friend FeString operator "" _fe(const char* c_data, size_t len);
+	friend FeString operator "" _fe(const wchar_t* c_data, size_t len);
+	friend FeString operator "" _fe(const char32_t* a, size_t len);
 
 	const wchar_t* _data;			/* The raw, unencoded character data. */
 	FerrousAllocator* _allocator;	/* The allocator from which _data was allocated. */
@@ -146,7 +146,7 @@ private:
 	const bool _isHeap;			/* String was created from a literal and therefore should never dealloc its data. */
 };
 
-class FERROUS_UTIL_API UtfString {
+class UtfString {
 public:
 	const static char UTF_BOM_8_NON[];
 	const static char UTF_BOM_8[];
@@ -207,20 +207,20 @@ private:
 };
 
 #pragma region OPERATORS
-FeString FERROUS_UTIL_API operator +(const FeString& a, const FeString& b);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const uint8_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const uint16_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const uint32_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const uint64_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const int8_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const int16_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const int32_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const int64_t& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const double& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const long double& v);
-FeString FERROUS_UTIL_API operator +(const FeString& a, const float& v);
+FeString operator +(const FeString& a, const FeString& b);
+FeString operator +(const FeString& a, const uint8_t& v);
+FeString operator +(const FeString& a, const uint16_t& v);
+FeString operator +(const FeString& a, const uint32_t& v);
+FeString operator +(const FeString& a, const uint64_t& v);
+FeString operator +(const FeString& a, const int8_t& v);
+FeString operator +(const FeString& a, const int16_t& v);
+FeString operator +(const FeString& a, const int32_t& v);
+FeString operator +(const FeString& a, const int64_t& v);
+FeString operator +(const FeString& a, const double& v);
+FeString operator +(const FeString& a, const long double& v);
+FeString operator +(const FeString& a, const float& v);
 
-FeString FERROUS_UTIL_API operator "" _fe(const char* a, size_t len);
-FeString FERROUS_UTIL_API operator "" _fe(const wchar_t* a, size_t len);
-FeString FERROUS_UTIL_API operator "" _fe(const char32_t* a, size_t len);
+FeString operator "" _fe(const char* a, size_t len);
+FeString operator "" _fe(const wchar_t* a, size_t len);
+FeString operator "" _fe(const char32_t* a, size_t len);
 #pragma endregion

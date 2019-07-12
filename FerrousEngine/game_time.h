@@ -1,9 +1,8 @@
 #pragma once
-#include "util.h"
+#include "stdafx.h"
 #include <stdint.h>
 #include <chrono>
-
-class FERROUS_UTIL_API GameTime{
+class GameTime{
 public:
 	GameTime(bool fixedTimestep = true, uint32_t targetFps = 60);
 	~GameTime();

@@ -1,13 +1,12 @@
-﻿#include "stdafx.h";
-#include <Util/util.h>;
-#include <Util/logging.h>
-#include <Util/strings.h>
-#include <Util/localization.h>
-#include <Util/game_time.h>
-#include <Util/file.h>
-#include <Util/stream_file.h>
-#include <Util/text_stream_writer.h>
-#include <Util/text_stream_reader.h>
+﻿#include "stdafx.h"
+#include "logging.h"
+#include "strings.h"
+#include "localization.h"
+#include "game_time.h"
+#include "file.h"
+#include "stream_file.h"
+#include "text_stream_writer.h"
+#include "text_stream_reader.h"
 #include <map>
 #include <Windows.h>
 using namespace std;
@@ -272,8 +271,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	testFileIn.close();
 
 	log.writeLine("File closed");
-	log.writeLineF("String read from file: %s", stringFromFile);
-
+	log.writeLineF("String read from file: %s", stringFromFile.getData());
 
 	//GameTime test = GameTime(false, 60);
 	//double timeStart = test.getTotalTime();

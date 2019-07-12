@@ -1,7 +1,7 @@
 #pragma once
 #include "stream_writer.h"
 
-class FERROUS_UTIL_API BinaryStreamWriter : StreamWriter {
+class BinaryStreamWriter : StreamWriter {
 public:
 	BinaryStreamWriter(Stream* stream);
 	virtual ~BinaryStreamWriter();

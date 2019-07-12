@@ -1,7 +1,7 @@
 #pragma once
 #include "stream.h";
 
-class FERROUS_UTIL_API StreamWriter {
+class StreamWriter {
 public:
 
 	StreamWriter(Stream* stream);

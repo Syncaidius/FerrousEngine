@@ -18,7 +18,7 @@ enum class FileStreamFlags : uint8_t {
 
 GEN_ENUM_CLASS_OPERATORS(FileStreamFlags);
 
-class FERROUS_UTIL_API FileStream : public Stream {
+class FileStream : public Stream {
 public:
 	FileStream(const FeString& path,
 		const FileStreamFlags flags,

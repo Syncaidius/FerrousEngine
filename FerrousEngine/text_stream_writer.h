@@ -1,7 +1,7 @@
 #pragma once
 #include "stream_writer.h"
 
-class FERROUS_UTIL_API TextStreamWriter : StreamWriter {
+class TextStreamWriter : StreamWriter {
 public:
 	TextStreamWriter(Stream* stream, FerrousAllocator* allocator);
 	virtual ~TextStreamWriter();

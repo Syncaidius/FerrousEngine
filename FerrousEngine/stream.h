@@ -1,5 +1,4 @@
 #pragma once
-#include "util.h"
 #include "allocation.h"
 #include <iostream>
 #include "strings.h"
@@ -15,7 +14,7 @@ enum class StreamSeek : uint8_t {
 	End = 2,
 };
 
-class FERROUS_UTIL_API Stream {
+class Stream {
 public:
 	Stream(bool canRead, bool canWrite);
 	~Stream();

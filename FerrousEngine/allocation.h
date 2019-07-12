@@ -1,9 +1,8 @@
 #pragma once
 #include "stdafx.h"
-#include "util.h";
-class FERROUS_UTIL_API StackAllocator;
+class StackAllocator;
 
-class FERROUS_UTIL_API FerrousAllocator {
+class FerrousAllocator {
 public:
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
 	virtual void* alloc(const size_t size_bytes) = 0;
@@ -42,7 +41,7 @@ protected:
 	uint8_t align(void*& p, uint8_t alignment, size_t offset);
 };
 
-class FERROUS_UTIL_API Memory : public FerrousAllocator {
+class Memory : public FerrousAllocator {
 public:
 	struct Page;
 
@@ -193,7 +192,7 @@ private:
 	void resetPage(Page* p);
 };
 
-class FERROUS_UTIL_API StackAllocator : public FerrousAllocator {
+class StackAllocator : public FerrousAllocator {
 public:
 	~StackAllocator();
 

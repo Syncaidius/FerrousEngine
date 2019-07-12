@@ -3,7 +3,7 @@
 #include "allocation.h"
 #include "strings.h"
 
-class FERROUS_UTIL_API LogOutputBase {
+class LogOutputBase {
 public:
 	virtual void write(const FeString& msg) = 0;
 	virtual void writeLine(const FeString& msg) = 0;
@@ -11,7 +11,7 @@ public:
 	virtual void close() = 0;
 };
 
-class FERROUS_UTIL_API LogConsoleOutput : public LogOutputBase {
+class LogConsoleOutput : public LogOutputBase {
 public:
 	LogConsoleOutput();
 	~LogConsoleOutput();
@@ -28,7 +28,7 @@ private:
 	void* _console_handle;
 };
 
-class FERROUS_UTIL_API Logger {
+class Logger {
 public:
 	struct LogOutputHandle {
 		LogOutputBase* output;
