@@ -10,9 +10,6 @@ The project is still in its early days, but here are a few things that have been
  * [RapidJSON](http://rapidjson.org/) for serialization
  * [FreeType](https://www.freetype.org/) for font processing. Repo located [here](https://git.savannah.gnu.org/cgit/freetype/)
 
-### Why DirectX 12? 
-The main reason is that I'm very familiar with the DirectX 11 API. Much of the DX12 API is very similar to DX11, which means I can hit the ground running sooner than if I start out with OpenGL or Vulkan. It will also provide a chance to figure out what (and how much) abstraction will be needed to allow more than one graphics API within the engine.
-
 ### Why Vulkan?
 Three words: Cross-platform support. While DirectX is an awesome API, it only works on Microsoft platforms.  
 
