@@ -175,6 +175,7 @@
     <ClInclude Include="strings.h" />
     <ClInclude Include="text_stream_reader.h" />
     <ClInclude Include="text_stream_writer.h" />
+    <ClInclude Include="thirdparty\glm\glm.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,9 +1,10 @@
 # Ferrous Engine
-The project is still in its early days, but here are a few things I would like to see in this engine:  
+The project is still in its early days, but here are a few things that have been decided on:  
  * Fast and consistent memory allocation via custom allocators
- * DirectX 12 and Vulkan from the ground up - SPIR-V for shared shader code between APIs
+ * [Vulkan](https://www.khronos.org/vulkan/) from the ground up
+ * [GLM](https://github.com/g-truc/glm) - GL Mathematics to provide most of the common math types
  * [OpenAL Soft](https://github.com/kcat/openal-soft) for audio. An open-source implementation of OpenAL.  
- * [PhysX 4.x](https://github.com/NVIDIAGameWorks/PhysX) for physics - Surprise, it's open source!
+ * [PhysX 4.x](https://github.com/NVIDIAGameWorks/PhysX) for physics - open-source, finally!
  * [AssImp](http://www.assimp.org/) for model loading
  * [Lua](https://www.lua.org/) for scripting
  * [RapidJSON](http://rapidjson.org/) for serialization
