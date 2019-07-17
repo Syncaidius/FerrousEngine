@@ -95,6 +95,7 @@
       <PreprocessorDefinitions>DEBUG;FERROUS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NO_VA_START_VALIDATION;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\glm\</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -126,6 +127,7 @@
       <PreprocessorDefinitions>FERROUS_EXPORTS;_CRT_SECURE_NO_WARNINGS;_CRT_NO_VA_START_VALIDATION;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\glm</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +141,7 @@
     <ClCompile Include="allocation_stack.cpp" />
     <ClCompile Include="binary_stream_reader.cpp" />
     <ClCompile Include="binary_stream_writer.cpp" />
+    <ClCompile Include="color.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="ferrous.cpp" />
     <ClCompile Include="file.cpp" />
@@ -160,6 +163,7 @@
     <ClInclude Include="allocation.h" />
     <ClInclude Include="binary_stream_reader.h" />
     <ClInclude Include="binary_stream_writer.h" />
+    <ClInclude Include="color.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="game_time.h" />
     <ClInclude Include="localization.h" />
@@ -175,7 +179,6 @@
     <ClInclude Include="strings.h" />
     <ClInclude Include="text_stream_reader.h" />
     <ClInclude Include="text_stream_writer.h" />
-    <ClInclude Include="thirdparty\glm\glm.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

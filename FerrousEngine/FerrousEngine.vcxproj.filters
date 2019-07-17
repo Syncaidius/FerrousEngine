@@ -37,12 +37,6 @@
     <Filter Include="Source Files\core\logging">
       <UniqueIdentifier>{c69bdd01-ca28-499a-a9f6-710fb596126c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\thirdparty">
-      <UniqueIdentifier>{e5666d2e-8a6e-4803-8a74-ce4c6242478a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Header Files\thirdparty">
-      <UniqueIdentifier>{fdc4ee25-107c-4083-b5ca-b15f8588114e}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -99,8 +93,8 @@
     <ClInclude Include="macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="thirdparty\glm\glm.hpp">
-      <Filter>Header Files\thirdparty</Filter>
+    <ClInclude Include="color.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +159,9 @@
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="file_global_info.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="color.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>

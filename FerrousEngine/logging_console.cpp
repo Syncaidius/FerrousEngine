@@ -2,37 +2,7 @@
 #include <Windows.h>
 #include <iostream>
 
-LogConsoleOutput::LogConsoleOutput() {
-	redirectToConsole();
-	_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-}
-
-LogConsoleOutput::~LogConsoleOutput() {
-	FreeConsole();
-}
-
-void LogConsoleOutput::write(const FeString& msg) {
-	std::wcout << msg.getData();
-}
-
-void LogConsoleOutput::writeLine(const FeString& msg) {
-	std::wcout << msg.getData() << std::endl;
-}
-
-void LogConsoleOutput::clear() {
-
-}
-
-void LogConsoleOutput::close() {
-
-}
-
-void LogConsoleOutput::redirectToConsole() {
-	int hConHandle;
-	long lStdHandle;
-	CONSOLE_SCREEN_BUFFER_INFO coninfo;
-	FILE* fp;
-
+ConsoleLogOutput::ConsoleLogOutput() {
 	FILE* pNewStdout = nullptr;
 	FILE* pNewStderr = nullptr;
 	FILE* pNewStdin = nullptr;
@@ -54,4 +24,53 @@ void LogConsoleOutput::redirectToConsole() {
 	std::wcout.clear();
 	std::wcerr.clear();
 	std::wcin.clear();
+	_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+}
+
+ConsoleLogOutput::~ConsoleLogOutput() {
+	FreeConsole();
+}
+
+WORD ConsoleLogOutput::getColorFlags(const Color& color) {
+	int colFlags = 0;
+	if (color.r > 0)
+	{
+		colFlags |= FOREGROUND_RED;
+		if (color.r > 127)
+			colFlags |= FOREGROUND_INTENSITY;
+	}
+
+	if (color.g > 0)
+	{
+		colFlags |= FOREGROUND_GREEN;
+		if (color.g > 127)
+			colFlags |= FOREGROUND_INTENSITY;
+	}
+
+	if (color.b > 0)
+	{
+		colFlags |= FOREGROUND_BLUE;
+		if (color.b > 127)
+			colFlags |= FOREGROUND_INTENSITY;
+	}
+
+	return colFlags;
+}
+
+void ConsoleLogOutput::write(const FeString& msg, const Color& color) {
+	SetConsoleTextAttribute(_console_handle, getColorFlags(color));
+	std::wcout << msg.getData();
+}
+
+void ConsoleLogOutput::writeLine(const FeString& msg, const Color& color) {
+	SetConsoleTextAttribute(_console_handle, getColorFlags(color));
+	std::wcout << msg.getData() << std::endl;
+}
+
+void ConsoleLogOutput::clear() {
+
+}
+
+void ConsoleLogOutput::close() {
+
 }

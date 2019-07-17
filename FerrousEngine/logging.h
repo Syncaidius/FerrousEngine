@@ -2,29 +2,30 @@
 #include "stdafx.h"
 #include "allocation.h"
 #include "strings.h"
+#include "color.h"
 
 class LogOutputBase {
 public:
-	virtual void write(const FeString& msg) = 0;
-	virtual void writeLine(const FeString& msg) = 0;
+	virtual void write(const FeString& msg, const Color& color) = 0;
+	virtual void writeLine(const FeString& msg, const Color& color) = 0;
 	virtual void clear() = 0;
 	virtual void close() = 0;
 };
 
-class LogConsoleOutput : public LogOutputBase {
+class ConsoleLogOutput : public LogOutputBase {
 public:
-	LogConsoleOutput();
-	~LogConsoleOutput();
+	ConsoleLogOutput();
+	~ConsoleLogOutput();
 
 protected:
 	friend class Logger;
 
-	void write(const FeString& msg);
-	void writeLine(const FeString& msg);
-	void clear();
-	void close();
+	void write(const FeString& msg, const Color& color) override;
+	void writeLine(const FeString& msg, const Color& color) override;
+	void clear() override;
+	void close() override;
 private:
-	void redirectToConsole(void);
+	WORD getColorFlags(const Color& color);
 	void* _console_handle;
 };
 
@@ -38,9 +39,15 @@ public:
 
 	void addOutput(LogOutputBase* output);
 
-	void writeLine(const FeString& msg);
+	void writeLine(const FeString& msg, const Color& color = Color::white);
 
-	void write(const FeString& msg);
+	void write(const FeString& msg, const Color& color = Color::white);
+
+	/* A formattable version of write() */
+	void writeF(const FeString& str, const Color& color, ...);
+
+	/* A formattable version of writeLine()*/
+	void writeLineF(const FeString& str, const Color& color, ...);
 
 	/* A formattable version of write() */
 	void writeF(const FeString& str, ...);

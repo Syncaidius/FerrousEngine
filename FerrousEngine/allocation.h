@@ -105,13 +105,13 @@ public:
 	const static size_t PAGE_FREE_SIZE = PAGE_SIZE - PAGE_MIN_OVERHEAD;
 
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
-	void* alloc(const size_t size_bytes);
+	void* alloc(const size_t size_bytes) override;
 
 	/* Increments the reference count of a block of memory. If the reference count hits 0, it will automatically be deallocated. */
-	void ref(const void* p);
+	void ref(const void* p) override;
 
 	/* Dereferences a block of memory. If the reference count hits 0, it will automatically be deallocated. */
-	void deref(void* p);
+	void deref(void* p) override;
 
 	void realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes);
 
@@ -130,9 +130,9 @@ public:
 	}
 
 	/* Allocates a block of aligned memory.*/
-	void* allocAligned(const size_t size_bytes, uint8_t alignment);
+	void* allocAligned(const size_t size_bytes, uint8_t alignment) override;
 
-	void dealloc(void* p);
+	void dealloc(void* p) override;
 
 	void reset(bool release_pages);
 
@@ -197,25 +197,25 @@ public:
 	~StackAllocator();
 
 	/* Allocates the specified amount of memory.*/
-	void* alloc(size_t num_bytes);
+	void* alloc(size_t num_bytes) override;
 
-	void* allocAligned(const size_t size_bytes, const uint8_t alignment);
+	void* allocAligned(const size_t size_bytes, const uint8_t alignment) override;
 
 	/* De-allocate all allocated memory in the stack to the specified pointer.*/
 	void revertTo(void* p);
 
-	void dealloc(void* p);
+	void dealloc(void* p) override;
 
 	/* Resets the stack back to it's starting address.*/
 	void reset(void);
 
-	void ref(const void* p);
+	void ref(const void* p) override;
 
-	void deref(void* p);
+	void deref(void* p) override;
 
-	size_t getUsed();
+	size_t getUsed() override;
 
-	size_t getCapacity();
+	size_t getCapacity() override;
 private:
 	friend class FerrousAllocator;
 	StackAllocator(FerrousAllocator* parent, void* mem, size_t num_bytes);

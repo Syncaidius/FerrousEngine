@@ -20,7 +20,6 @@ using namespace std;
 
 void OutputFreeList() {
 	//NOTE: we use cout here to avoid interfering with memory allocation statistics.
-
 	Memory* mem = Memory::get();
 
 	// Track reported stats
@@ -178,7 +177,7 @@ const int NUM_ALLOCATIONS = 100;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Logger log(1);
-	LogConsoleOutput* consoleOutput = new LogConsoleOutput();
+	ConsoleLogOutput* consoleOutput = new ConsoleLogOutput();
 	log.addOutput(consoleOutput);
 
 	log.writeLine(L"Memory allocator test");
@@ -192,7 +191,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	void* markers[NUM_ALLOCATIONS] = {};
 	srand(14);
 
-	//SetConsoleTextAttribute(console, FOREGROUND_BLUE | FOREGROUND_RED | FOREGROUND_GREEN);
 	log.writeLineF("Performing %d random allocations...", NUM_ALLOCATIONS);
 	for (int i = 0; i < NUM_ALLOCATIONS; i++) {
 		uint64_t alloc_size = ((uint64_t)rand() % 64) + 1;
@@ -257,7 +255,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	testFileOut.close();
 
 	log.writeLineF("Written %d bytes to file", fSize);
-	log.writeLine("File closed");
+	log.writeLine("File closed", Color::green);
 
 	// Now open to read
 	FileStream testFileIn = FileStream("test_file.txt"_fe, FileStreamFlags::None, true, false);
@@ -266,12 +264,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	FeString stringFromFile = L"\0";
 	fSize = testFileIn.getSize();
 
-	log.writeLineF("Open file with size: %d bytes", fSize);
+	log.writeLineF("Open file with size: %d bytes", Color::limeGreen, fSize);
 	testReader.readLine(&stringFromFile);
 	testFileIn.close();
 
-	log.writeLine("File closed");
-	log.writeLineF("String read from file: %s", stringFromFile.getData());
+	log.writeLine("File closed", Color::red);
+	log.writeLineF("String read from file: %s", Color::darkRed, stringFromFile.getData());
 
 	//GameTime test = GameTime(false, 60);
 	//double timeStart = test.getTotalTime();

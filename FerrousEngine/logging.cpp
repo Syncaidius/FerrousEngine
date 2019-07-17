@@ -50,23 +50,31 @@ void Logger::clear() {
 	}
 }
 
-void Logger::write(const FeString& msg) {
+void Logger::write(const FeString& msg, const Color& color) {
 	LogOutputHandle* end = _outputs;
 	end += _output_slot_count;
 	for (LogOutputHandle* i = _outputs; i != end; i++) {
 		if (i != nullptr)
-			i->output->write(msg);
+			i->output->write(msg, color);
 	}
 }
 
-void Logger::writeLine(const FeString& msg) {
-	FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg;
+void Logger::writeLine(const FeString& msg, const Color& color) {
+	FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg; // TODO do we need a proper FeString-builder/stream for situations like this?
 	LogOutputHandle* end = _outputs;
 	end += _output_slot_count;
 	for (LogOutputHandle* i = _outputs; i != end; i++) {
 		if (i != nullptr)
-			i->output->writeLine(result);
+			i->output->writeLine(result, color);
 	}
+}
+
+void Logger::writeF(const FeString& str, const Color& color, ...) {
+	va_list args;
+	va_start(args, color);
+	FeString result = FeString::format(str, args);
+	va_end(args);
+	write(result, color);
 }
 
 void Logger::writeF(const FeString& str, ...) {
@@ -74,7 +82,15 @@ void Logger::writeF(const FeString& str, ...) {
 	va_start(args, str);
 	FeString result = FeString::format(str, args);
 	va_end(args);
-	write(result);
+	write(result, Color::white);
+}
+
+void Logger::writeLineF(const FeString& str, const Color& color, ...) {
+	va_list args;
+	va_start(args, color);
+	FeString result = FeString::format(str, args);
+	va_end(args);
+	writeLine(result, color);
 }
 
 void Logger::writeLineF(const FeString& str, ...) {
@@ -82,5 +98,5 @@ void Logger::writeLineF(const FeString& str, ...) {
 	va_start(args, str);
 	FeString result = FeString::format(str, args);
 	va_end(args);
-	writeLine(result);
+	writeLine(result, Color::white);
 }
