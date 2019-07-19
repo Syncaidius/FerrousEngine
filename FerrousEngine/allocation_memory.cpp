@@ -49,10 +49,8 @@ void Memory::resetPage(Page* p) {
 
 	p->_blocks = reinterpret_cast<Block*>(data_start);
 	p->_blocks->_size = PAGE_FREE_SIZE;
-	p->_blocks->_ref_count = 0;
 	p->_blocks->_next = nullptr;
 	p->_blocks->_page = p;
-	p->_blocks->_adjustment = 0;
 }
 
 void Memory::reset(bool release_pages) {
@@ -105,7 +103,6 @@ void* Memory::alloc(const size_t size_bytes) {
 				continue;
 			}
 
-			block->_adjustment = 0;
 			p = (void*)((char*)block + BLOCK_HEADER_SIZE);
 			uint64_t remaining = block->_size - size_bytes;
 
@@ -153,7 +150,8 @@ void* Memory::alloc(const size_t size_bytes) {
 
 			// Update stats
 			block->_page = page;
-			block->_ref_count = 1;
+			block->_info._adjustment = 0;
+			block->_info._ref_count = 1;
 
 			page->_blocks_allocated++;
 
@@ -175,13 +173,13 @@ void* Memory::alloc(const size_t size_bytes) {
 
 void Memory::ref(const void* p) {
 	Block* b = getHeader(p);
-	b->_ref_count++;
+	b->_info._ref_count++;
 }
 
 void Memory::deref(void* p) {
 	Block* b = getHeader(p);
-	b->_ref_count--;
-	if (b->_ref_count == 0)
+	b->_info._ref_count--;
+	if (b->_info._ref_count == 0)
 		dealloc(p);
 }
 
@@ -203,7 +201,7 @@ void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
 	void* p = alloc(expanded_bytes);
 
 	Block* block = reinterpret_cast<Block*>((char*)p - BLOCK_HEADER_SIZE);
-	block->_adjustment = align(p, alignment, 0);
+	block->_info._adjustment = align(p, alignment, 0);
 	return p;
 }
 
@@ -351,9 +349,9 @@ void Memory::frontBackSplit(Block * source, Block * *frontRef, Block * *backRef)
 
 Memory::Block* Memory::getHeader(const void* p) {
 	// Header is located behind the pointer's address.
-	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _adjustment);
-	uint8_t* _adjustment = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
-	return reinterpret_cast<Block*>((char*)p - *_adjustment - BLOCK_HEADER_SIZE);
+	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _info._adjustment);
+	uint8_t* adjust = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
+	return reinterpret_cast<Block*>((char*)p - *adjust - BLOCK_HEADER_SIZE);
 }
 
 size_t Memory::getUsed() {

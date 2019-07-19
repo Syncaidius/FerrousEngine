@@ -47,14 +47,19 @@ public:
 	public:
 		inline size_t getSize() { return _size; }
 		inline Block* getNext() { return _next; }
-		inline uint16_t getRefCount() { return _ref_count; }
+		inline uint16_t getRefCount() { return _info._ref_count; }
 	private:
 		friend class Memory;
-		size_t _size;
-		Block* _next;
 		Page* _page; // TODO store page ID instead. We can cut 4 bytes off here.
-		uint16_t _ref_count;
-		uint8_t _adjustment;
+
+		size_t _size;
+		union {
+			Block* _next;
+			struct Info {
+				uint16_t _ref_count;
+				uint8_t _adjustment;
+			} _info;
+		};
 
 		/* Block data follows the last member of Block. */
 	};
