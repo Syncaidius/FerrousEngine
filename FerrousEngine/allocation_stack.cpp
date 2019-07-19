@@ -1,15 +1,16 @@
-#include "allocation.h";
+#include "allocation_stack.h";
 
-StackAllocator::StackAllocator(FerrousAllocator* parent, void* mem, size_t num_bytes) {
+StackAllocator::StackAllocator(FerrousAllocator* parent, size_t numBytes) {
 	_parent = parent;
+	_mem = _parent->alloc(numBytes);
+	void* pAligned = _mem;
 
-	_mem = mem;
 	_pos = _mem;
-	_capacity = num_bytes;
+	_capacity = numBytes;
 }
 
 StackAllocator::~StackAllocator(void) {
-	_parent->dealloc(this);
+	_parent->dealloc(_mem);
 	_parent = nullptr;
 }
 
@@ -20,8 +21,8 @@ void* StackAllocator::alloc(size_t num_bytes) {
 	return _pos;
 }
 
-void* StackAllocator::allocAligned(const size_t size_bytes, const uint8_t alignment) {
-	size_t expanded_bytes = size_bytes + alignment;
+void* StackAllocator::allocAligned(const size_t sizeBytes, const uint8_t alignment) {
+	size_t expanded_bytes = sizeBytes + alignment;
 	void* p = alloc(expanded_bytes);
 	size_t adjustment = align(p, alignment, 0);
 	return p;

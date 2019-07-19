@@ -171,6 +171,7 @@
     <ClInclude Include="macros.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ferrous.h" />
+    <ClInclude Include="allocation_stack.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="stream_file.h" />

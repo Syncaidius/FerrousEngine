@@ -96,6 +96,9 @@
     <ClInclude Include="color.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
+    <ClInclude Include="allocation_stack.h">
+      <Filter>Header Files\core\allocation</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -140,9 +143,6 @@
     <ClCompile Include="allocation_memory.cpp">
       <Filter>Source Files\core\allocation</Filter>
     </ClCompile>
-    <ClCompile Include="allocation_stack.cpp">
-      <Filter>Source Files\core\allocation</Filter>
-    </ClCompile>
     <ClCompile Include="game_time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -163,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="color.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="allocation_stack.cpp">
+      <Filter>Source Files\core\allocation</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -13,8 +13,6 @@ public:
 		return reinterpret_cast<T*>(mem);
 	}
 
-	StackAllocator* allocStack(const size_t size_bytes, const uint8_t alignment = 1);
-
 	virtual void* allocAligned(const size_t size_bytes, const uint8_t alignment) = 0;
 
 	virtual void dealloc(void* p) = 0;
@@ -190,38 +188,4 @@ private:
 	inline Block* getHeader(const void* p);
 	Page* newPage(void);
 	void resetPage(Page* p);
-};
-
-class StackAllocator : public FerrousAllocator {
-public:
-	~StackAllocator();
-
-	/* Allocates the specified amount of memory.*/
-	void* alloc(size_t num_bytes) override;
-
-	void* allocAligned(const size_t size_bytes, const uint8_t alignment) override;
-
-	/* De-allocate all allocated memory in the stack to the specified pointer.*/
-	void revertTo(void* p);
-
-	void dealloc(void* p) override;
-
-	/* Resets the stack back to it's starting address.*/
-	void reset(void);
-
-	void ref(const void* p) override;
-
-	void deref(void* p) override;
-
-	size_t getUsed() override;
-
-	size_t getCapacity() override;
-private:
-	friend class FerrousAllocator;
-	StackAllocator(FerrousAllocator* parent, void* mem, size_t num_bytes);
-
-	FerrousAllocator* _parent;
-	void* _mem;
-	void* _pos;
-	size_t _capacity;
 };
