@@ -85,54 +85,37 @@ void Memory::reset(bool release_pages) {
 }
 
 void* Memory::alloc(const size_t size_bytes) {
-	assert(size_bytes < PAGE_FREE_SIZE);
+	assert(size_bytes < PAGE_FREE_SIZE); // Page size not large enough.
 
-	Page* page = _pages;
+	Page* page = _pages;		
 	while (page != nullptr) {
-		// Find a free block which is big enough. If it's too big, downsize it accordingly.
-		// This is not as fast as a specialized allocator (e.g. stack).
 		Block* block = page->_blocks;
 		Block* prev = nullptr;
-		void* p = nullptr;
 
 		while (block != nullptr) {
 			if (block->_size < size_bytes) {
 				prev = block;
 				block = block->_next;
-				//assert(block != block->next);
+				//assert(block != block->_next);
 				continue;
 			}
 
-			p = (void*)((char*)block + BLOCK_HEADER_SIZE);
-			uint64_t remaining = block->_size - size_bytes;
+			size_t new_block_bytes = size_bytes + BLOCK_HEADER_SIZE; // Total bytes needed to form a new block.
+			Block* result = block;
 
-			// Throw leftover memory into a new block if the current block was larger than needed.
-			if (remaining > BLOCK_HEADER_SIZE) {
-				Block* remainBlock = (Block*)((char*)block + BLOCK_HEADER_SIZE + size_bytes);
-				remainBlock->_size = remaining - BLOCK_HEADER_SIZE;
-				remainBlock->_next = block->_next;
+			if (block->_size > new_block_bytes) { // Split off what we need from the current block.
+				block->_size -= new_block_bytes;
+				result = (Block*)((char*)block + BLOCK_HEADER_SIZE + block->_size);
+				result->_size = size_bytes;
 
-				if (block == page->_blocks) {
-					page->_blocks = remainBlock;
-				}
-				else {
-					if (prev != nullptr)
-						prev->_next = remainBlock;
-				}
-				// Update size of allocated block
-				block->_size = size_bytes;
-
-				// We've just allocated a new header and the requested # of bytes.
-				page->_allocated += size_bytes + BLOCK_HEADER_SIZE;
+				// Account for the new block's total size.
+				page->_allocated += new_block_bytes;
 				page->_overhead += BLOCK_HEADER_SIZE;
 
-				_total_alloc += size_bytes + BLOCK_HEADER_SIZE;
+				_total_alloc += new_block_bytes;
 				_total_overhead += BLOCK_HEADER_SIZE;
 			}
-			else {
-				// TODO if the remaining size is > 0 (but less-than-or-equal-to HEADER_SIZE) throw it into an physically-adjacent block (if free).
-
-				// Take the whole block, including the leftover/extra bytes.
+			else { // Take the whole block.
 				page->_allocated += block->_size;
 				_total_alloc += block->_size;
 
@@ -149,14 +132,13 @@ void* Memory::alloc(const size_t size_bytes) {
 			}
 
 			// Update stats
-			block->_page = page;
-			block->_info._adjustment = 0;
-			block->_info._ref_count = 1;
+			result->_page = page;
+			result->_info._adjustment = 0;
+			result->_info._ref_count = 1;
 
 			page->_blocks_allocated++;
-
 			_total_alloc_blocks++;
-			return p;
+			return (char*)result + BLOCK_HEADER_SIZE;
 		}
 
 		/* Out of allocated memory, or lack of adequate-sized blocks? Allocate a new page. */
@@ -177,9 +159,9 @@ void Memory::ref(const void* p) {
 }
 
 void Memory::deref(void* p) {
-	Block* b = getHeader(p);
-	b->_info._ref_count--;
-	if (b->_info._ref_count == 0)
+	Block* blk = getHeader(p);
+	blk->_info._ref_count--;
+	if (blk->_info._ref_count == 0)
 		dealloc(p);
 }
 

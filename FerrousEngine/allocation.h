@@ -51,7 +51,6 @@ public:
 	private:
 		friend class Memory;
 		Page* _page; // TODO store page ID instead. We can cut 4 bytes off here.
-
 		size_t _size;
 		union {
 			Block* _next;
