@@ -40,7 +40,7 @@ UtfString::UtfString(const FeString& string, UtfEncoding encoding, FerrousAlloca
 	_num_bytes = 0;
 	_encoding = encoding;
 	size_t required_bytes = (sizeof(char32_t) * _length);
-	_mem = static_cast<char*>(_allocator->alloc(required_bytes)); // Alloc for worst case scenario of 4-bytes per char.
+	_mem = _allocator->allocType<char>(required_bytes); // Alloc for worst case scenario of 4-bytes per char.
 	_data = _mem;
 
 	switch (encoding) {

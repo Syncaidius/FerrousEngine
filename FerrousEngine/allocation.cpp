@@ -1,20 +1,19 @@
 #include "stdafx.h";
 #include "allocation.h";
 
-uint8_t FerrousAllocator::align(void*& p, uint8_t alignment, size_t start_offset) {
+uint8_t FerrousAllocator::alignForwardAdjustment(const void* p, uint8_t alignment) {
 	assert(alignment >= 1);
 	assert(alignment <= 128);
 	assert((alignment & (alignment - 1)) == 0);;
 
-	/* Calc adjustment by masking off the lower bits of address, to determine how "misaligned" it is.*/
-	size_t mask = (alignment - 1); // TODO Can we allocate after this and save 1 byte of memory per align-alloc?
 
-	uintptr_t raw_start = reinterpret_cast<uintptr_t>(p) + start_offset;
-	size_t misalignment = (raw_start & mask);
+	uint8_t adjustment = alignment - (reinterpret_cast<uintptr_t>(p) & static_cast<uintptr_t>(alignment - 1));
+	if (adjustment == alignment)
+		return 0;
 
-	uint8_t adjustment = alignment - misalignment;
-	uintptr_t alignedAddr = raw_start + adjustment;
-
-	p = reinterpret_cast<void*>(alignedAddr);
 	return adjustment;
+}
+
+void* FerrousAllocator::alignForward(const void* p, uint8_t alignment) {
+	return reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(p)) + ((alignment - 1) & (~(alignment - 1))));
 }

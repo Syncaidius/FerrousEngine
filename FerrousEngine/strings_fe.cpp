@@ -4,7 +4,7 @@
 
 #pragma region STATIC
 const uint32_t FeString::INDEXOF_NONE = UINT32_MAX;
-const FeString FeString::EMPTY(L"");
+const FeString FeString::EMPTY = L""_fe;
 
 FeString FeString::format(const wchar_t* str, FerrousAllocator* allocator, va_list args) {
 	static size_t buf_size = 80;
@@ -13,9 +13,8 @@ FeString FeString::format(const wchar_t* str, FerrousAllocator* allocator, va_li
 
 	/* Buffer too small? */
 	while (len_v < 0) {
-		size_t old_size = buf_size;
-		buf_size = (buf_size * 2) + len_v; // Double size and ensure it will be enough for the current value too.
-		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
+		buf_size *= 2;
+		Memory::get()->reallocType<wchar_t>(buf, buf_size);
 
 		// Try again. Should work this time.
 		len_v = vswprintf(buf, buf_size, str, args);
@@ -69,34 +68,28 @@ FeString FeString::dateTime(const wchar_t* format, FerrousAllocator* allocator) 
 	localtime_s(&tstruct, &now);
 	size_t len = wcsftime(buf, buf_size, format, &tstruct);
 	if (len == 0) { // buffer was not big enough
-		size_t old_size = buf_size;
 		buf_size *= 2;
-
-		Memory::get()->reallocType<wchar_t>(buf, old_size, buf_size);
+		Memory::get()->reallocType<wchar_t>(buf, buf_size);
 		return dateTime(format, allocator);
 	}
 
 	wchar_t* mem = allocator->allocType<wchar_t>(len + 1ULL);
 	memcpy(mem, buf, len * sizeof(wchar_t));
 	mem[len] = L'\0';
-	return FeString(mem, len, allocator, false);
+	return FeString(mem, len, allocator);
 }
 #pragma endregion
 
 #pragma region INSTANCED
-FeString::FeString() : _isHeap(false) {
-	_allocator = Memory::get();
-	_data = FeString::EMPTY.getData();
-	_length = 0;
-}
+FeString::FeString() : FeString(EMPTY) {}
 
 FeString::FeString(const FeString& copy) : _isHeap(copy._isHeap) {
 	_allocator = copy._allocator;
 	_data = copy._data;
 	_length = copy._length;
 
-	if(!_isHeap)
-		_allocator->ref(_data);
+	if(_isHeap)
+		_allocator->ref(const_cast<wchar_t*>(_data));
 }
 
 FeString::FeString(const char* data, uint32_t len, FerrousAllocator* allocator) : _isHeap(true) {
@@ -157,7 +150,7 @@ FeString::FeString(const char32_t* data, uint32_t len) : FeString(data, len, Mem
 FeString::FeString(const char32_t* data) : FeString(data, Memory::get()) {}
 
 FeString::~FeString() {
-	if(!_isHeap)
+	if(_isHeap)
 		_allocator->deref((void*)_data);
 
 	_allocator = nullptr;
@@ -193,7 +186,7 @@ FeString FeString::toUpper() {
 
 FeString FeString::capitalize() {
 	if (_length == 0)
-		return FeString();
+		return EMPTY;
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
@@ -221,7 +214,7 @@ FeString FeString::capitalize() {
 
 FeString FeString::capitalizeFirst() {
 	if (_length == 0)
-		return FeString();
+		return EMPTY;
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
 	std::locale loc = *Localization::get()->getCurrentLocale();
@@ -249,7 +242,7 @@ FeString FeString::capitalizeFirst() {
 
 FeString FeString::trim() {
 	if (_length == 0)
-		return FeString();
+		return EMPTY;
 
 	std::locale loc = *Localization::get()->getCurrentLocale();
 	size_t start = 0;
@@ -272,7 +265,7 @@ FeString FeString::trim() {
 
 	size_t new_len = end - start;
 	if (new_len == 0)
-		return FeString();
+		return EMPTY;
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
 	const wchar_t* p_start = _data + start;
@@ -296,7 +289,7 @@ FeString FeString::trimStart() {
 
 	size_t new_len = _length - start;
 	if (new_len == 0)
-		return FeString();
+		return EMPTY;
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
 	const wchar_t* p_start = _data + start;
@@ -308,7 +301,7 @@ FeString FeString::trimStart() {
 
 FeString FeString::trimEnd() {
 	if (_length == 0)
-		return FeString();
+		return EMPTY;
 
 	std::locale loc = *Localization::get()->getCurrentLocale();
 	size_t new_len = 0;
@@ -322,9 +315,8 @@ FeString FeString::trimEnd() {
 		}
 	}
 #pragma warning(pop)
-
 	if (new_len == 0)
-		return FeString();
+		return EMPTY;
 
 	wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
 	memcpy(new_data, _data, new_len * sizeof(wchar_t));
@@ -392,7 +384,7 @@ FeString FeString::substr(const uint32_t startIndex, const uint32_t count) {
 
 FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
 	wchar_t* mem = _allocator->allocType<wchar_t>(_length + 1ULL);
-	memcpy(mem, _data, (_length + 1ULL) * sizeof(wchar_t));
+	Memory::copy(mem, _data, _length * sizeof(wchar_t));
 
 	for (uint32_t i = 0; i < _length; i++) {
 		if (mem[i] == c)
@@ -537,40 +529,44 @@ bool FeString::startsWith(const FeString* input) {
 #pragma endregion
 
 #pragma region OPERATORS
+/* Copy assignment operator. */
 FeString& FeString::operator=(const FeString& other) {
 	if (this != &other) {
 		_length = other._length;
+
+		if (this->_isHeap)
+			_allocator->deref(const_cast<wchar_t*>(_data));
+
 		_data = other._data;
 		_allocator = other._allocator;
-		_allocator->ref(_data);
+
+		if(other._isHeap)
+			_allocator->ref(const_cast<wchar_t*>(_data));
 	}
 	return *this;
 }
 
+/* Addition/concatenate operator. */
 FeString operator +(const FeString& a, const FeString& b) {
 	uint32_t len = a._length + b._length;
 
 	wchar_t* mem = a._allocator->allocType<wchar_t>(len + 1ULL);
-	wchar_t* p_data = mem;
-
-	memcpy(p_data, a._data, a._length * sizeof(wchar_t));
-	p_data += a._length;
-	memcpy(p_data, b._data, b._length * sizeof(wchar_t));
+	memcpy(mem, a._data, a._length * sizeof(wchar_t));
+	memcpy(&mem[a._length], b._data, b._length * sizeof(wchar_t));
 	mem[len] = '\0';
-
 	return FeString(mem, len, a._allocator);
 }
 
-FeString operator +(const FeString& a, const uint8_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const uint16_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const uint32_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const uint64_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const int8_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const int16_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const int32_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const int64_t& v) { return FeString::format(L"%d", a._allocator, v); }
-FeString operator +(const FeString& a, const double& v) { return FeString::format(L"%f", a._allocator, v); }
-FeString operator +(const FeString& a, const long double& v) { return FeString::format(L"%f", a._allocator, v); }
+//FeString operator +(const FeString& a, const uint8_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const uint16_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const uint32_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const uint64_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const int8_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const int16_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const int32_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const int64_t& v) { return FeString::format(L"%d", a._allocator, v); }
+//FeString operator +(const FeString& a, const double& v) { return FeString::format(L"%f", a._allocator, v); }
+//FeString operator +(const FeString& a, const long double& v) { return FeString::format(L"%f", a._allocator, v); }
 FeString operator +(const FeString& a, const float& v) { return FeString::format(L"%f", a._allocator, v); }
 
 FeString operator "" _fe(const char* a, size_t len) {
@@ -578,7 +574,7 @@ FeString operator "" _fe(const char* a, size_t len) {
 }
 
 FeString operator "" _fe(const wchar_t* a, size_t len) {
-	return FeString(a, len, Memory::get(), true);
+	return FeString(a, len, Memory::get(), false);
 }
 
 FeString operator "" _fe(const char32_t* a, size_t len) {

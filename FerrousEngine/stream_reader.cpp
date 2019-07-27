@@ -4,7 +4,7 @@ StreamReader::StreamReader(Stream* stream, FerrousAllocator* allocator, size_t b
 	_stream = stream;
 	_buffer_size = bufferSize;
 	_allocator = allocator;
-	_buffer = static_cast<char*>(_allocator->alloc(_buffer_size));
+	_buffer = _allocator->allocType<char>(_buffer_size);
 }
 
 StreamReader::~StreamReader() {

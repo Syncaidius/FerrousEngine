@@ -1,24 +1,19 @@
 #include "allocation.h"
+#include <iostream>
+using namespace std;
 
-// Static
 Memory* Memory::_allocator = new Memory();
 
 Memory::Memory() {
-	assert(PAGE_SIZE > PAGE_MIN_OVERHEAD);
+	assert(PAGE_SIZE > (BLOCK_HEADER_SIZE + PAGE_HEADER_SIZE)); // Page size too small.
 
-	_total_alloc = 0;
-	_total_overhead = 0;
 	_pages = nullptr;
-
-	_total_alloc_blocks = 0;
-	_total_free_blocks = 0;
-	_total_pages = 0;
-	_pages = newPage();
+	_page_count = 0;
+	_blocks = newPage();
 	_page_to_defrag = _pages;
-	reset(false);
 }
 
-Memory::~Memory(void) {
+Memory::~Memory() {
 	Page* p = _pages;
 	while (p != nullptr) {
 		Page* next = p->_next;
@@ -27,150 +22,132 @@ Memory::~Memory(void) {
 	}
 }
 
-Memory::Page* Memory::newPage(void) {
-	Page* p = reinterpret_cast<Page*>(malloc(PAGE_SIZE));
-	_total_pages++;
-	_total_overhead += PAGE_MIN_OVERHEAD;
-	_total_alloc += PAGE_MIN_OVERHEAD;
-	_total_free_blocks++;
-
-	resetPage(p);
-	return p;
+Memory::Block* Memory::makePageBlock(Page* p) {
+	char* page_data = reinterpret_cast<char*>(p) + PAGE_HEADER_SIZE;
+	Block* b = reinterpret_cast<Block*>(page_data);
+	b->_size = PAGE_SIZE - PAGE_HEADER_SIZE - BLOCK_HEADER_SIZE;
+	b->_next = nullptr;
+	return b;
 }
 
-void Memory::resetPage(Page* p) {
-	char* data_start = reinterpret_cast<char*>(p) + PAGE_HEADER_SIZE;
+Memory::Block* Memory::newPage(void) {
+	void* mem = malloc(PAGE_SIZE);
 
-	p->_overhead = PAGE_MIN_OVERHEAD;
-	p->_allocated = PAGE_MIN_OVERHEAD;
-	p->_blocks_allocated = 0;
-	p->_blocks_free = 1;
-	p->_next = nullptr;
-
-	p->_blocks = reinterpret_cast<Block*>(data_start);
-	p->_blocks->_size = PAGE_FREE_SIZE;
-	p->_blocks->_next = nullptr;
-	p->_blocks->_page = p;
+	if (mem != nullptr) {
+		Page* p = static_cast<Page*>(mem);
+		p->_next = _pages;
+		_pages = p;
+		_page_count++;
+		return makePageBlock(p);
+	}
+	else {
+		throw exception("Out of memory.");
+	}
 }
 
-void Memory::reset(bool release_pages) {
+void Memory::reset(void) {
 	Page* p = _pages;
+	_page_to_defrag = _pages;
+	_blocks = nullptr;
 
-	/* Release all but the first page. */
-	if (release_pages) {
-		p = _pages->_next;
-		Page* next = p->_next;
-		while (p != nullptr) {
-			next = p->_next;
-			free(p);
-			p = next;
+	while (p != nullptr) {
+		Block* b = makePageBlock(p);
+		if (_blocks == nullptr) {
+			_blocks = b;
+		}
+		else {
+			b->_next = _blocks;
+			_blocks = b;
 		}
 
-		_pages->_next = nullptr;
-		_total_pages = 1;
-	}
-
-	/* Reset all remaining pages */
-	p = _pages;
-	while (p != nullptr) {
-		resetPage(p);
 		p = p->_next;
 	}
-
-	_page_to_defrag = _pages;
-	_total_alloc = _total_pages * PAGE_MIN_OVERHEAD;
-	_total_overhead = _total_alloc;
-	_total_free_blocks = _total_pages;
-	_total_alloc_blocks = 0;
 }
 
-void* Memory::alloc(const size_t size_bytes) {
-	assert(size_bytes < PAGE_FREE_SIZE); // Page size not large enough.
+void* Memory::alloc(size_t num_bytes, uint8_t alignment) {
+	assert(alignment > 0);
+	num_bytes += alignment;
+	assert(num_bytes < PAGE_FREE_SIZE); // Page size not large enough.
 
-	Page* page = _pages;		
-	while (page != nullptr) {
-		Block* block = page->_blocks;
-		Block* prev = nullptr;
+	Block* b = _blocks;
+	Block* prev = nullptr;
 
-		while (block != nullptr) {
-			if (block->_size < size_bytes) {
-				prev = block;
-				block = block->_next;
-				//assert(block != block->_next);
-				continue;
-			}
+	while (b != nullptr) {
+		if (b->_size < num_bytes) {
+			prev = b;
+			if (b->_next == nullptr) // Get new page?
+				b->_next = newPage();
 
-			size_t new_block_bytes = size_bytes + BLOCK_HEADER_SIZE; // Total bytes needed to form a new block.
-			Block* result = block;
-
-			if (block->_size > new_block_bytes) { // Split off what we need from the current block.
-				block->_size -= new_block_bytes;
-				result = (Block*)((char*)block + BLOCK_HEADER_SIZE + block->_size);
-				result->_size = size_bytes;
-
-				// Account for the new block's total size.
-				page->_allocated += new_block_bytes;
-				page->_overhead += BLOCK_HEADER_SIZE;
-
-				_total_alloc += new_block_bytes;
-				_total_overhead += BLOCK_HEADER_SIZE;
-			}
-			else { // Take the whole block.
-				page->_allocated += block->_size;
-				_total_alloc += block->_size;
-
-				if (block == page->_blocks) {
-					page->_blocks = block->_next;
-				}
-				else {
-					if (prev != nullptr)
-						prev->_next = block->_next;
-				}
-
-				_total_free_blocks--;
-				page->_blocks_free--;
-			}
-
-			// Update stats
-			result->_page = page;
-			result->_info._adjustment = 0;
-			result->_info._ref_count = 1;
-
-			page->_blocks_allocated++;
-			_total_alloc_blocks++;
-			return (char*)result + BLOCK_HEADER_SIZE;
+			b = b->_next;
+			continue;
 		}
 
-		/* Out of allocated memory, or lack of adequate-sized blocks? Allocate a new page. */
-		if (page->_next == nullptr) {
-			page->_next = newPage();
+		Block* result = b;
+		size_t new_block_bytes = num_bytes + BLOCK_HEADER_SIZE;
+		if (b->_size > new_block_bytes) { // Split off num_bytes into a new block
+			b->_size -= new_block_bytes;
+			result = reinterpret_cast<Block*>(reinterpret_cast<char*>(b) + BLOCK_HEADER_SIZE + b->_size);
+			result->_size = num_bytes;
+		}
+		else { // Take the whole block
+			if (b == _blocks) {
+				_blocks = b->_next;
+				//assert(_blocks != nullptr);
+				if (_blocks == nullptr)
+					_blocks = newPage();
+			}
+			else if (prev != nullptr) {
+				prev->_next = b->_next;
+			}
 		}
 
-		page = page->_next;
+		// Update stats
+		result->_info._ref_count = 1;
+
+		// Set adjustment
+		char* p = reinterpret_cast<char*>(result) + BLOCK_HEADER_SIZE;
+		p = static_cast<char*>(alignForward(p, alignment));
+		p[-1] = alignForwardAdjustment(result, alignment); // Store the adjustment 1 byte behind the data.
+		return static_cast<void*>(p);
 	}
 
 	assert(false); // Should not have reached this point. More memory is allocated if we ran out.
 	return nullptr;
 }
 
-void Memory::ref(const void* p) {
-	Block* b = getHeader(p);
+void Memory::dealloc(void* p) {
+	char* temp = static_cast<char*>(p);
+	Block* b = reinterpret_cast<Block*>(temp - temp[-1] - BLOCK_HEADER_SIZE);
+	b->_next = _blocks;
+	_blocks = b;
+}
+
+void Memory::realloc(void*& target, const size_t num_bytes, uint8_t alignment) {
+	char* temp = static_cast<char*>(target);
+	Block* b = reinterpret_cast<Block*>(temp - temp[-1] - BLOCK_HEADER_SIZE);
+
+	void* mem = alloc(num_bytes, alignment);
+	memcpy(mem, target, b->_size);
+	deref(target);
+	target = mem;
+}
+
+void Memory::ref(void* p) {
+	char* temp = static_cast<char*>(p);
+	Block* b = reinterpret_cast<Block*>(temp - temp[-1] - BLOCK_HEADER_SIZE);
 	b->_info._ref_count++;
 }
 
 void Memory::deref(void* p) {
-	Block* blk = getHeader(p);
-	blk->_info._ref_count--;
-	if (blk->_info._ref_count == 0)
+	char* temp = static_cast<char*>(p);
+	Block* b = reinterpret_cast<Block*>(temp - temp[-1] - BLOCK_HEADER_SIZE);
+	b->_info._ref_count--;
+	if (b->_info._ref_count == 0)
 		dealloc(p);
 }
 
-void Memory::realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes) {
-	// TODO retrieve block, get old size from that.
-	void* mem = alloc(num_bytes);
-	memcpy(mem, target, old_num_bytes);
-	deref(target);
-	target = mem;
+size_t Memory::getCapacity() {
+	return Memory::PAGE_SIZE* _page_count;
 }
 
 void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
@@ -178,97 +155,43 @@ void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
 	memcpy(dest, src, num_bytes);
 }
 
-void* Memory::allocAligned(const size_t size_bytes, const uint8_t alignment) {
-	size_t expanded_bytes = size_bytes + alignment;
-	void* p = alloc(expanded_bytes);
+void Memory::defragment(size_t max_pages) {
+	assert(max_pages > 0);
+	Page* p = _page_to_defrag;
+	for (size_t i = 0; i < max_pages; i++) {
+		mergeSort(&_blocks);
 
-	Block* block = reinterpret_cast<Block*>((char*)p - BLOCK_HEADER_SIZE);
-	block->_info._adjustment = align(p, alignment, 0);
-	return p;
-}
+		Block* b = _blocks->_next;
+		Block* prev = _blocks;
 
-void Memory::dealloc(void* p) {
-	assert(p != nullptr);
-	Block * blk = getHeader(p);
-	Page * page = blk->_page;
-	assert(blk != page->_blocks);
-
-	page->_allocated -= blk->_size;
-	_total_alloc -= blk->_size;
-
-	if (!tryMerge(page, blk, page->_blocks)) {
-		blk->_next = page->_blocks;
-		page->_blocks_free++;
-		_total_free_blocks++;
-	}
-
-	page->_blocks = blk; // Free list starts at released block, regardless of if it merged or not.
-	page->_blocks_allocated--;
-	_total_alloc_blocks--;
-}
-
-void Memory::defragment(int iterations) {
-	size_t num_done = 0;
-
-	for (int i = 0; i < iterations; i++)
-	{
-		mergeSort(&_page_to_defrag->_blocks);
-		Block* prev = _page_to_defrag->_blocks;
-		Block* cur = _page_to_defrag->_blocks->_next;
-
-		while (cur != nullptr) {
-			uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + BLOCK_HEADER_SIZE + prev->_size;
-			uintptr_t start = reinterpret_cast<uintptr_t>(cur);
-
-			if (tryMerge(_page_to_defrag, prev, cur)) {
-				cur = prev;
-				_page_to_defrag->_blocks_free--;
-				_total_free_blocks--;
+		while (b != nullptr) {
+			if (canMerge(prev, b)) {
+				prev->_size += b->_size + BLOCK_HEADER_SIZE;
+				prev->_next = b->_next; // link the 'prev' block to the block after 'cur'
 			}
 			else {
-				prev = cur; // cur was not absorbed, so that becomes the previous block.
+				prev = b;
 			}
 
-			cur = cur->_next;
+			b = b->_next;
 		}
 
-		/* Ensure we don't end up cycling over the same few pages,
-		if iteration count is higher than total page count. */
-		num_done++;
-		if (num_done < _total_pages) {
-			if (_page_to_defrag->_next != nullptr) {
-				_page_to_defrag = _page_to_defrag->_next;
-			}
-			else {
-				_page_to_defrag = _pages;
-			}
-		}
-		else {
+		// Next page, or reset back to the first if we're done.
+		p = _page_to_defrag->_next;
+		if (p == nullptr) {
+			_page_to_defrag = _pages;
 			break;
 		}
 	}
 }
 
-bool Memory::tryMerge(Page * page, Block * prev, Block * cur) {
-	uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + BLOCK_HEADER_SIZE + prev->_size;
+bool Memory::canMerge(Block * prev, Block * cur) {
 	uintptr_t start = reinterpret_cast<uintptr_t>(cur);
-
-	if (start == ending) {
-		page->_overhead -= BLOCK_HEADER_SIZE;
-		page->_allocated -= BLOCK_HEADER_SIZE;
-
-		_total_overhead -= BLOCK_HEADER_SIZE;
-		_total_alloc -= BLOCK_HEADER_SIZE;
-
-		prev->_size += cur->_size + BLOCK_HEADER_SIZE; // Include header of 'other' too
-		prev->_next = cur->_next; // Detach cur
-		return true;
-	}
-
-	return false;
+	uintptr_t ending = reinterpret_cast<uintptr_t>(prev) + BLOCK_HEADER_SIZE + prev->_size;
+	return start == ending;
 }
 
-void Memory::mergeSort(Block * *headRef) {
+void Memory::mergeSort(Block** headRef) {
 	Block* head = *headRef;
 	Block* a;
 	Block* b;
@@ -286,7 +209,7 @@ void Memory::mergeSort(Block * *headRef) {
 	*headRef = sortedMerge(a, b);
 }
 
-Memory::Block * Memory::sortedMerge(Block * a, Block * b) {
+Memory::Block* Memory::sortedMerge(Block* a, Block* b) {
 	Block* result = nullptr;
 
 	/* base cases*/
@@ -308,7 +231,7 @@ Memory::Block * Memory::sortedMerge(Block * a, Block * b) {
 	return result;
 }
 
-void Memory::frontBackSplit(Block * source, Block * *frontRef, Block * *backRef) {
+void Memory::frontBackSplit(Block* source, Block** frontRef, Block** backRef) {
 	Block* fast;
 	Block* slow;
 	slow = source;
@@ -329,17 +252,23 @@ void Memory::frontBackSplit(Block * source, Block * *frontRef, Block * *backRef)
 	slow->_next = nullptr;
 }
 
-Memory::Block* Memory::getHeader(const void* p) {
-	// Header is located behind the pointer's address.
-	size_t adjustment_loc = BLOCK_HEADER_SIZE - offsetof(struct Block, _info._adjustment);
-	uint8_t* adjust = reinterpret_cast<uint8_t*>((char*)p - adjustment_loc);
-	return reinterpret_cast<Block*>((char*)p - *adjust - BLOCK_HEADER_SIZE);
-}
+void Memory::outputDebug() {
+	cout << "Memory allocator analysis" << endl;
+	cout << "=========================" << endl;
+	size_t capacity = _page_count * PAGE_SIZE;	
+	Block* b = _blocks;
+	uint32_t total_blocks = 0;
+	size_t total_free_bytes = 0;
 
-size_t Memory::getUsed() {
-	return _total_alloc;
-}
-
-size_t Memory::getCapacity() {
-	return Memory::PAGE_SIZE* _total_pages;
+	while (b != nullptr) {
+		//cout << "Block " << reinterpret_cast<uintptr_t>(b) << " -- " << b->_size << " bytes" << endl;
+		total_blocks++;
+		total_free_bytes += b->_size;
+		b = b->_next;
+	}
+	
+	cout << "Allocated system memory: " << capacity << " bytes" << endl;
+	cout << "Allocated free: " << total_free_bytes << " bytes" << endl;
+	cout << "Total pages: " << _page_count << endl;
+	cout << "Total blocks: " << total_blocks << endl;
 }

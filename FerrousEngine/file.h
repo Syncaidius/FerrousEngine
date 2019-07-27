@@ -43,7 +43,7 @@ public:
 	}
 
 	static FeString getWorkingDirectory() {
-		return FeString(_info->working_dir.c_str());
+		return FeString(_info->working_dir.c_str(), Memory::get()); // TODO cache this as an FeString
 	}
 
 	/* Deletes a file if it exists.*/

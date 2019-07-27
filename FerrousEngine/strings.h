@@ -54,17 +54,18 @@ public:
 	FeString(const char* data, uint32_t len, FerrousAllocator* allocator);
 	FeString(const char* data, uint32_t len);
 	FeString(const char* data, FerrousAllocator* allocator);
-	FeString(const char* data);
+	explicit FeString(const char* data);
 
 	FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isHeap = true);
 	FeString(const wchar_t* data, uint32_t len);
 	FeString(const wchar_t* data, FerrousAllocator* allocator);
-	FeString(const wchar_t* data);
+	explicit FeString(const wchar_t* data);
 
 	FeString(const char32_t* data, uint32_t len, FerrousAllocator* allocator);
 	FeString(const char32_t* data, uint32_t len);
 	FeString(const char32_t* data, FerrousAllocator* allocator);
-	FeString(const char32_t* data);
+	explicit FeString(const char32_t* data); 
+
 	FeString(FerrousAllocator* allocator);
 	FeString(const FeString& copy);
 
@@ -208,17 +209,17 @@ private:
 
 #pragma region OPERATORS
 FeString operator +(const FeString& a, const FeString& b);
-FeString operator +(const FeString& a, const uint8_t& v);
-FeString operator +(const FeString& a, const uint16_t& v);
-FeString operator +(const FeString& a, const uint32_t& v);
-FeString operator +(const FeString& a, const uint64_t& v);
-FeString operator +(const FeString& a, const int8_t& v);
-FeString operator +(const FeString& a, const int16_t& v);
-FeString operator +(const FeString& a, const int32_t& v);
-FeString operator +(const FeString& a, const int64_t& v);
-FeString operator +(const FeString& a, const double& v);
-FeString operator +(const FeString& a, const long double& v);
-FeString operator +(const FeString& a, const float& v);
+//FeString operator +(const FeString& a, const uint8_t& v);
+//FeString operator +(const FeString& a, const uint16_t& v);
+//FeString operator +(const FeString& a, const uint32_t& v);
+//FeString operator +(const FeString& a, const uint64_t& v);
+//FeString operator +(const FeString& a, const int8_t& v);
+//FeString operator +(const FeString& a, const int16_t& v);
+//FeString operator +(const FeString& a, const int32_t& v);
+//FeString operator +(const FeString& a, const int64_t& v);
+//FeString operator +(const FeString& a, const double& v);
+//FeString operator +(const FeString& a, const long double& v);
+//FeString operator +(const FeString& a, const float& v);
 
 FeString operator "" _fe(const char* a, size_t len);
 FeString operator "" _fe(const wchar_t* a, size_t len);

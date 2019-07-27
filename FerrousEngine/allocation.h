@@ -5,15 +5,13 @@ class StackAllocator;
 class FerrousAllocator {
 public:
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
-	virtual void* alloc(const size_t size_bytes) = 0;
+	virtual void* alloc(const size_t size_bytes, const uint8_t alignment) = 0;
 
-	/*Allocates and zeroes a new block of memory capable of fitting num_elements of type T. */
+	/*Allocates and a new block of memory capable of fitting num_elements of type T. */
 	template<typename T> T* allocType(const size_t num_elements = 1) {
-		void* mem = alloc(sizeof(T) * num_elements);
-		return reinterpret_cast<T*>(mem);
+		void* mem = alloc(sizeof(T) * num_elements, alignof(T));
+		return static_cast<T*>(mem);
 	}
-
-	virtual void* allocAligned(const size_t size_bytes, const uint8_t alignment) = 0;
 
 	virtual void dealloc(void* p) = 0;
 
@@ -24,82 +22,51 @@ public:
 		dealloc(obj_location);
 	}
 
-	/* gets the amount of allocated memory that is currently in use by the current allocator. */
-	virtual size_t getUsed() = 0;
+	virtual void reset() = 0;
 
 	/* Gets amount of memory allocated/reserved for the current allocator. */
 	virtual size_t getCapacity() = 0;
 
 	/* Increases reference counter of allocated memory.*/
-	virtual void ref(const void* p) = 0;
+	virtual void ref(void* p) = 0;
 
 	virtual void deref(void* p) = 0;
 
 protected:
-	uint8_t align(void*& p, uint8_t alignment, size_t offset);
+	uint8_t alignForwardAdjustment(const void* p, uint8_t alignment);
+	void* alignForward(const void* p, uint8_t alignment);
 };
 
 class Memory : public FerrousAllocator {
 public:
 	struct Page;
 
-	struct Block {
-	public:
-		inline size_t getSize() { return _size; }
-		inline Block* getNext() { return _next; }
-		inline uint16_t getRefCount() { return _info._ref_count; }
-	private:
+	class Block{
 		friend class Memory;
-		Page* _page; // TODO store page ID instead. We can cut 4 bytes off here.
 		size_t _size;
 		union {
 			Block* _next;
 			struct Info {
 				uint16_t _ref_count;
-				uint8_t _adjustment;
+				uint8_t _reserved1;
+				uint8_t _reserved2;
+				uint8_t _reserved3;
+				uint8_t _reserved4;
+				uint8_t _reserved5;
+				uint8_t _adjustment; /* Should always be the last member. Not always used when followed by adjusted (aligned) data.*/
 			} _info;
 		};
 
-		/* Block data follows the last member of Block. */
+		/* Block data follows. */
 	};
 
-	struct Page {
-	public:
-		Memory::Block* getFreeList() {
-			return _blocks;
-		}
-
-		inline Page* getNext() {
-			return _next;
-		}
-
-		inline size_t getAllocated() const {
-			return _allocated;
-		}
-
-		inline size_t getOverhead() const {
-			return _overhead;
-		}
-
-		inline size_t getBlocksAllocated() const {
-			return _blocks_allocated;
-		}
-
-		inline size_t getBlocksFree() const {
-			return _blocks_free;
-		}
-
-	private:
+	class Page {
 		friend class Memory;
 		Page* _next;
-		Block* _blocks;
-		size_t _allocated;
-		size_t _overhead;
-		size_t _blocks_free;
-		size_t _blocks_allocated;
+
+		/* Page blocks follows. */
 	};
 
-	const static size_t PAGE_LOOKUP_TABLE_BASE_SIZE = 1024; // In bytes.
 	const static size_t BLOCK_HEADER_SIZE = sizeof(Block);
 	const static size_t PAGE_HEADER_SIZE = sizeof(Page);
 	const static size_t PAGE_SIZE = 8192;
@@ -107,21 +74,21 @@ public:
 	const static size_t PAGE_FREE_SIZE = PAGE_SIZE - PAGE_MIN_OVERHEAD;
 
 	/*Allocates and zeroes a new block of memory capable of fitting the requested number of bytes. */
-	void* alloc(const size_t size_bytes) override;
+	void* alloc(const size_t size_bytes, uint8_t alignment) override;
 
 	/* Increments the reference count of a block of memory. If the reference count hits 0, it will automatically be deallocated. */
-	void ref(const void* p) override;
+	void ref(void* p) override;
 
 	/* Dereferences a block of memory. If the reference count hits 0, it will automatically be deallocated. */
 	void deref(void* p) override;
 
-	void realloc(void*& target, const size_t old_num_bytes, const size_t num_bytes);
+	void realloc(void*& target, const size_t num_bytes, uint8_t alignment);
 
 	/*Allocates a new block of memory capable of fitting num_elements of type T, then copies the old one to it. Once complete, the memory of the old array is released for reuse.
 	Updates the oldArray pointer to point to the newly-resized array.*/
 	template<typename T>
-	void reallocType(T*& target, const size_t old_num_elements, const size_t num_elements) {
-		realloc((void*&)target, sizeof(T) * old_num_elements, sizeof(T) * num_elements);
+	void reallocType(T*& target, const size_t num_elements) {
+		realloc((void*&)target, sizeof(T) * num_elements, alignof(T));
 	}
 
 	static void copy(void* dest, const void* src, const size_t num_bytes);
@@ -131,33 +98,20 @@ public:
 		copy(dest, src, sizeof(T) * num_elements);
 	}
 
-	/* Allocates a block of aligned memory.*/
-	void* allocAligned(const size_t size_bytes, uint8_t alignment) override;
-
 	void dealloc(void* p) override;
 
-	void reset(bool release_pages);
+	void reset() override;
 
 	/* defragments the specified number of pages. Continues from the last defragmented page.
 	If the last page is reached, it will wrap around to the first page and start over,
 	unless the total number of pages is less than the specified amount.*/
-	void defragment(int iterations);
-
-	Memory::Page* getFirstPage() { return _pages; }
-
-	/* Gets the total number of allocated bytes. */
-	size_t getUsed();
+	void defragment(size_t max_pages);
 
 	/* Gets amount of memory allocated/reserved for the current allocator. */
-	size_t getCapacity();
+	size_t getCapacity() override;
 
-	inline size_t getOverhead() const { return _total_overhead; }
-
-	inline size_t getPageCount() const { return _total_pages; }
-
-	inline size_t getAllocBlockCount() const { return _total_alloc_blocks; }
-
-	inline size_t getFreeBlockCount() const { return _total_free_blocks; }
+	/* Outputs debug information about the memory structure into stdout. */
+	void outputDebug();
 
 	static inline Memory* get() { return _allocator; }
 
@@ -177,19 +131,16 @@ private:
 	~Memory();
 
 	Page* _pages;
+	Block* _blocks;
 	Page* _page_to_defrag; /* Next page to be defragged. */
-	size_t _total_alloc;
-	size_t _total_overhead;
-	size_t _total_free_blocks;
-	size_t _total_alloc_blocks;
-	size_t _total_pages;
+	size_t _page_count;
 
-	bool tryMerge(Page* page, Block* prev, Block* cur);
+	bool canMerge(Block* prev, Block* cur);
 	void mergeSort(Block** headRef);
 	Block* sortedMerge(Block* a, Block* b);
 	void frontBackSplit(Block* source, Block** frontRef, Block** backRef);
 
-	inline Block* getHeader(const void* p);
-	Page* newPage(void);
-	void resetPage(Page* p);
+	inline Block* getBlockHeader(const void* p);
+	inline Block* makePageBlock(Page* p);
+	Block* newPage(void);
 };

@@ -56,7 +56,7 @@ void TextStreamReader::readLine(UtfString* dest) {
 	if (*c == EOF)
 		throw EndOfStreamError(_stream);
 
-	char* mem = static_cast<char*>(_allocator->alloc(num_bytes));
+	char* mem = _allocator->allocType<char>(num_bytes);
 	Memory::copy(mem, _buffer, num_bytes);
 	new (dest) UtfString(mem, num_bytes, _stream->getEncoding(), _allocator);
 }
@@ -83,7 +83,7 @@ void TextStreamReader::readToEnd(UtfString* dest) {
 
 	size_t curPos = _stream->getReadPos();
 	size_t bytes_to_read = _stream->getSize() - curPos;
-	char* mem = static_cast<char*>(_allocator->alloc(bytes_to_read));
+	char* mem = _allocator->allocType<char>(bytes_to_read);
 	_stream->readBytes(mem, bytes_to_read);
 	new (dest) UtfString(mem, bytes_to_read, _stream->getEncoding(), _allocator);
 }
