@@ -144,7 +144,7 @@ FeString::FeString(const char* data) : FeString(data, strlen(data), Memory::get(
 
 FeString::FeString(const wchar_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
 FeString::FeString(const wchar_t* data, FerrousAllocator* allocator) : FeString(data, wcslen(data), allocator) {}
-FeString::FeString(const wchar_t* data) : FeString(data, wcslen(data), Memory::get()) {}
+FeString::FeString(const wchar_t* data) : FeString(data, wcslen(data), Memory::get(), false) {}
 
 FeString::FeString(const char32_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
 FeString::FeString(const char32_t* data) : FeString(data, Memory::get()) {}

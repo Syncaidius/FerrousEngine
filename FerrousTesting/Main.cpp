@@ -39,13 +39,13 @@ void RunStringTest(Logger* log) {
 	FeString resultTrimStart = toTrim.trimStart();
 	FeString resultTrimEnd = toTrim.trimEnd();
 
-	FeString toSearch = "I am a string. I can be searched."_fe;
+	FeString toSearch = "I am a string. I can be searched.";
 	size_t indexOfString = toSearch.indexOf(&"string"_fe);
-	size_t indexOfSearched = toSearch.indexOf(&"searched"_fe);
-	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);
+	size_t indexOfSearched = toSearch.indexOf(&L"searched"_fe);
+	size_t indexOfChicken = toSearch.indexOf(&"chicken"_fe);  
 
-	FeString toReplace = "I am a replaced string full of replacements, which replaces things."_fe;
-	FeString resultReplaced = toReplace.replace("replace"_fe, "start"_fe);
+	FeString toReplace = "I am a replaced string full of replacements, which replaces things.";
+	FeString resultReplaced = toReplace.replace("replace", "start");
 	FeString resultSubStr = toReplace.substr(0, 10);
 
 	bool startsWith = toSearch.startsWith(&"I am"_fe);
@@ -53,38 +53,38 @@ void RunStringTest(Logger* log) {
 	bool endsWith = toSearch.endsWith(&"searched."_fe);
 	bool endsWithFail = toSearch.endsWith(&"searching!"_fe);
 
-	log->writeLineF("A string: %s"_fe, aString.getData());
-	log->writeLineF("B string:  %s"_fe, bString.getData());
-	log->writeLineF("C string:  %s"_fe, cString.getData());
-	log->writeLineF("Formatted:  %s"_fe, formattedString.getData());
-	//log->writeLineF("Result:  %s"_fe, result.getData());
-	log->writeLine(" "_fe);
+	log->writeLineF("A string: %s", aString.getData());
+	log->writeLineF("B string:  %s", bString.getData());
+	log->writeLineF("C string:  %s", cString.getData());
+	log->writeLineF("Formatted:  %s", formattedString.getData());
+	//log->writeLineF("Result:  %s", result.getData());
+	log->writeLine(" ");
 
-	//log->writeLineF("Lower-case: %s"_fe, resultLower.getData());
-	//log->writeLineF("Upper-case: %s"_fe,resultUpper.getData());
-	log->writeLineF("Capitalized (all): %s"_fe,resultCapsAll.getData());
-	log->writeLineF("Capitalized (1st): %s"_fe,resultCapsFirst.getData());
-	log->writeLine(" "_fe);
+	//log->writeLineF("Lower-case: %s", resultLower.getData());
+	//log->writeLineF("Upper-case: %s",resultUpper.getData());
+	log->writeLineF("Capitalized (all): %s",resultCapsAll.getData());
+	log->writeLineF("Capitalized (1st): %s",resultCapsFirst.getData());
+	log->writeLine(" ");
 
-	log->writeLineF("Trimmed: {%s}"_fe,resultTrimmed.getData());
-	log->writeLineF("Trimmed (start): {%s}"_fe,resultTrimStart.getData());
-	log->writeLineF("Trimmed (end): {%s}"_fe,resultTrimEnd.getData());
-	log->writeLine(" "_fe);
+	log->writeLineF("Trimmed: {%s}",resultTrimmed.getData());
+	log->writeLineF("Trimmed (start): {%s}",resultTrimStart.getData());
+	log->writeLineF("Trimmed (end): {%s}",resultTrimEnd.getData());
+	log->writeLine(" ");
 
-	log->writeLineF("Replacement Target: %s"_fe,toReplace.getData());
-	log->writeLineF("Replace \"replace\" with \"start\": {%s}"_fe,resultReplaced.getData());
-	log->writeLineF("Substr 0 to 10: {%s}"_fe,resultSubStr.getData());
-	log->writeLine(" "_fe);
+	log->writeLineF("Replacement Target: %s",toReplace.getData());
+	log->writeLineF("Replace \"replace\" with \"start\": {%s}",resultReplaced.getData());
+	log->writeLineF("Substr 0 to 10: {%s}",resultSubStr.getData());
+	log->writeLine(" ");
 
-	log->writeLineF("Target: %s"_fe,toSearch.getData());
-	log->writeLineF("indexOf(\"string\"): %d"_fe,indexOfString);
-	log->writeLineF("indexOf(\"searched\"): %d"_fe,indexOfSearched);
+	log->writeLineF("Target: %s",toSearch.getData());
+	log->writeLineF("indexOf(\"string\"): %d",indexOfString);
+	log->writeLineF("indexOf(\"searched\"): %d",indexOfSearched);
 
-	log->writeLineF("indexOf(\"chicken\"): %s"_fe,(indexOfChicken == FeString::INDEXOF_NONE ? L"not found" : L"found"));
-	log->writeLineF("startsWith(\"I am\"): %s"_fe,(startsWith ? L"true" : L"false"));
-	log->writeLineF("startsWith(\"I'm not\"): %s"_fe,(startsWithFail ? L"true" : L"false"));
-	log->writeLineF("endsWith(\"searched.\"): %s"_fe,(endsWith ? L"true" : L"false"));
-	log->writeLineF("endsWith(\"searching!\"): %s"_fe, endsWithFail ? L"true" : L"false");
+	log->writeLineF("indexOf(\"chicken\"): %s",(indexOfChicken == FeString::INDEXOF_NONE ? L"not found" : L"found"));
+	log->writeLineF("startsWith(\"I am\"): %s",(startsWith ? L"true" : L"false"));
+	log->writeLineF("startsWith(\"I'm not\"): %s",(startsWithFail ? L"true" : L"false"));
+	log->writeLineF("endsWith(\"searched.\"): %s",(endsWith ? L"true" : L"false"));
+	log->writeLineF("endsWith(\"searching!\"): %s", endsWithFail ? L"true" : L"false");
 }
 
 void RunEngineTest(Logger* log) {
@@ -105,9 +105,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	ConsoleLogOutput* consoleOutput = new ConsoleLogOutput();
 	log.addOutput(consoleOutput);
 
-	log.writeLine(L"Memory allocator test"_fe);
-	log.writeLine(L"====================="_fe);
-	log.writeLineF("Created allocator with page size: %d bytes"_fe, Memory::PAGE_SIZE);
+	log.writeLine(L"Memory allocator test");
+	log.writeLine(L"=====================");
+	log.writeLineF("Created allocator with page size: %d bytes", Memory::PAGE_SIZE);
 
 	Memory::get()->outputDebug();
 	cout << endl;
