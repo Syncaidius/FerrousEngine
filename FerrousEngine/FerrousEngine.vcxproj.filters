@@ -37,6 +37,24 @@
     <Filter Include="Source Files\core\logging">
       <UniqueIdentifier>{c69bdd01-ca28-499a-a9f6-710fb596126c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\renderer">
+      <UniqueIdentifier>{3e161f5c-07e3-4657-983b-6e42fd6c31d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderer">
+      <UniqueIdentifier>{fbc0a20c-1a5f-4b68-800e-7d1058112603}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderer\abstraction">
+      <UniqueIdentifier>{bb7a48b4-137c-43d0-92d0-33e194415edc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\renderer\vulkan">
+      <UniqueIdentifier>{7322f1d1-2fad-4298-b1d3-bba4bf8566d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\renderer\abstraction">
+      <UniqueIdentifier>{2a939e19-a714-4419-8c46-3502860d9963}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\renderer\vulkan">
+      <UniqueIdentifier>{7b8ac00a-6888-41cb-b812-557c459f3626}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -98,6 +116,18 @@
     </ClInclude>
     <ClInclude Include="allocation_stack.h">
       <Filter>Header Files\core\allocation</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics_device.h">
+      <Filter>Header Files\renderer\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="rect.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="display_output.h">
+      <Filter>Header Files\renderer\abstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="graphics_device.h">
+      <Filter>Header Files\renderer\abstraction</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

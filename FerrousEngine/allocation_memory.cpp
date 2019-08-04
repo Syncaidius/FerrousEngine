@@ -106,9 +106,9 @@ void* Memory::alloc(size_t num_bytes, uint8_t alignment) {
 
 		// Set adjustment
 		char* p = reinterpret_cast<char*>(result) + BLOCK_HEADER_SIZE;
-		p = static_cast<char*>(alignForward(p, alignment));
-		p[-1] = alignForwardAdjustment(result, alignment); // Store the adjustment 1 byte behind the data.
-		return static_cast<void*>(p);
+		char* adjusted = static_cast<char*>(alignForward(p, alignment));
+		adjusted[-1] = alignForwardAdjustment(p, alignment); // Store the adjustment 1 byte behind the data.
+		return static_cast<void*>(adjusted);
 	}
 
 	assert(false); // Should not have reached this point. More memory is allocated if we ran out.
@@ -124,10 +124,11 @@ void Memory::dealloc(void* p) {
 
 void Memory::realloc(void*& target, const size_t num_bytes, uint8_t alignment) {
 	char* temp = static_cast<char*>(target);
-	Block* b = reinterpret_cast<Block*>(temp - temp[-1] - BLOCK_HEADER_SIZE);
+	uint8_t adjustment = temp[-1];
+	Block* b = reinterpret_cast<Block*>(temp - adjustment - BLOCK_HEADER_SIZE);
 
 	void* mem = alloc(num_bytes, alignment);
-	memcpy(mem, target, b->_size);
+	memcpy(mem, target, b->_size - adjustment);
 	deref(target);
 	target = mem;
 }

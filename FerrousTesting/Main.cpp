@@ -7,6 +7,7 @@
 #include "stream_file.h"
 #include "text_stream_writer.h"
 #include "text_stream_reader.h"
+#include "rect.h"
 #include <map>
 #include <Windows.h>
 using namespace std;
@@ -98,6 +99,32 @@ void RunEngineTest(Logger* log) {
 	}
 }
 
+void RectangleTest(Logger* log) {
+	Rect32 r1 = Rect32(100,50, 200,150);
+	auto center1 = r1.center();
+	log->writeLineF("Rect32 -- Left: %d -- Top: %d -- Right: %d -- Bottom: %d -- Width: %d -- Height: %d -- Center: %d,%d",
+		r1.left,
+		r1.top,
+		r1.right,
+		r1.bottom,
+		r1.width(),
+		r1.height(),
+		center1.x,
+		center1.y);
+
+	RectF r2 = RectF(100.5, 25, 200, 150.1);
+	auto center2 = r2.center();
+	log->writeLineF("RectF -- Left: %f -- Top: %f -- Right: %f -- Bottom: %f -- Width: %f -- Height: %f -- Center: %f,%f",
+		r2.left,
+		r2.top,
+		r2.right,
+		r2.bottom,
+		r2.width(),
+		r2.height(),
+		center2.x,
+		center2.y);
+}
+
 const int NUM_ALLOCATIONS = 1000;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
@@ -160,6 +187,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << endl;
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	Memory::get()->outputDebug();
+
+	log.writeLine(L"Press any key to start Rectangle test.");
+	cin.get();
+	RectangleTest(&log);
 
 	log.writeLine(L"Press any key to start file I/O test."_fe);
 	cin.get();

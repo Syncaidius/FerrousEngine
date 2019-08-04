@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -164,11 +164,14 @@
     <ClInclude Include="binary_stream_reader.h" />
     <ClInclude Include="binary_stream_writer.h" />
     <ClInclude Include="color.h" />
+    <ClInclude Include="display_output.h" />
     <ClInclude Include="file.h" />
     <ClInclude Include="game_time.h" />
+    <ClInclude Include="graphics_device.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="rect.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ferrous.h" />
     <ClInclude Include="allocation_stack.h" />
