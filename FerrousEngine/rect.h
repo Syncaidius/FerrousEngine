@@ -27,12 +27,14 @@ struct Rect {
 	bool contains(T x, T y);
 	bool contains(const glm::vec<2, T, Q>& v);
 	bool contains(const Rect<T, Q>& rect);
-	bool intersects(const Rect<T, Q>& other);
+	bool intersects(const Rect<T, Q>& v);
+	Rect<T, Q> getIntersection(const Rect<T, Q>& other);
 
 	/* Creates a new rectangle that exactly contains two other rectangles. */
 	Rect<T, Q> unify(const Rect<T, Q>& a, const Rect<T, Q>& b);
 };
 
+#pragma region IMPLEMENTATION
 template<typename T, glm::qualifier Q>
 Rect<T, Q>::Rect(T left, T top, T right, T bottom) {
 	this->left = left;
@@ -94,6 +96,28 @@ inline Rect<T, Q> Rect<T, Q>::getInflated(T horizontal, T vertical) {
 		right + horizontal,
 		bottom + vertical);
 }
+
+template<typename T, glm::qualifier Q>
+inline bool Rect<T, Q>::contains(T x, T y) {
+	return (x >= left) && (x <= right) && (y >= top) && (y <= bottom);
+}
+
+template<typename T, glm::qualifier Q>
+inline bool Rect<T, Q>::contains(const glm::vec<2, T, Q>& v) {
+	return contains(v.x, v.y);
+}
+
+template<typename T, glm::qualifier Q>
+inline bool Rect<T, Q>::contains(const Rect<T, Q>& v) {
+	return (v.left >= left) && (v.right <= right) && (v.top >= top) && (v.bottom <= bottom);
+}
+
+template<typename T, glm::qualifier Q>
+inline bool Rect<T, Q>::intersects(const Rect<T, Q>& v) {
+	return (v.left < right) && (left < v.right) && (v.top < bottom) && (top < v.bottom);
+}
+
+#pragma endregion
 
 #pragma region RECTANGLE TYPES
 /*16-bit signed integer rectangle.*/
