@@ -1,5 +1,6 @@
 #pragma once
 #include <glm.hpp>
+#include <algorithm>
 
 template<typename T, glm::qualifier Q>
 struct Rect {
@@ -114,7 +115,15 @@ inline bool Rect<T, Q>::contains(const Rect<T, Q>& v) {
 
 template<typename T, glm::qualifier Q>
 inline bool Rect<T, Q>::intersects(const Rect<T, Q>& v) {
-	return (v.left < right) && (left < v.right) && (v.top < bottom) && (top < v.bottom);
+	return !((left < v.right) && (right > v.left) && (top > v.bottom) && (bottom < v.top));
+}
+
+template<typename T, glm::qualifier Q>
+inline Rect<T, Q> Rect<T, Q>::unify(const Rect<T, Q>& a, const Rect<T, Q>& b) {
+	return Rect(std::min(a.left, b.left),
+		std::min(a.top, b.top),
+		std::max(a.right, b.right),
+		std::max(a.bottom, b.bottom));
 }
 
 #pragma endregion
