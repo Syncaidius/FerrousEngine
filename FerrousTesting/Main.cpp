@@ -11,6 +11,7 @@
 #include <map>
 #include <Windows.h>
 using namespace std;
+using namespace fe;
 
 /*	=============================================
 	NOTICE: This program is currently used as a scratchpad or testing area 

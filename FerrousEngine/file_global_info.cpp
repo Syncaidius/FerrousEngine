@@ -1,7 +1,9 @@
 #include "file.h"
 
-File::GlobalInfo* File::_info = new File::GlobalInfo();
+namespace fe {
+	File::GlobalInfo* File::_info = new File::GlobalInfo();
 
-File::GlobalInfo::GlobalInfo() {
-	working_dir = std::filesystem::current_path();
+	File::GlobalInfo::GlobalInfo() {
+		working_dir = std::filesystem::current_path();
+	}
 }

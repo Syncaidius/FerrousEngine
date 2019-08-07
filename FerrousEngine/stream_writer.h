@@ -1,14 +1,16 @@
 #pragma once
 #include "stream.h";
 
-class StreamWriter {
-public:
+namespace fe {
+	class StreamWriter {
+	public:
 
-	StreamWriter(Stream* stream);
-	virtual ~StreamWriter();
+		StreamWriter(Stream* stream);
+		virtual ~StreamWriter();
 
-	inline Stream* getStream() { return _stream; }
+		inline Stream* getStream() { return _stream; }
 
-protected:
-	Stream* _stream;
-};
+	protected:
+		Stream* _stream;
+	};
+}

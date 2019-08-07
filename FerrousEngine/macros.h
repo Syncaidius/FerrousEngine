@@ -1,5 +1,6 @@
 #pragma once
-/* Generates all of the operators required to use an enum class as flags via bitwise operators. */
+namespace fe {
+	/* Generates all of the operators required to use an enum class as flags via bitwise operators. */
 #define GEN_ENUM_CLASS_OPERATORS(TypeName) \
 	inline TypeName operator | (TypeName l, TypeName r) { \
 	using T = std::underlying_type_t <TypeName>; \
@@ -25,3 +26,4 @@
 		using T = std::underlying_type_t <TypeName>; \
 		return static_cast<T>(l) > 0; \
 	}
+}

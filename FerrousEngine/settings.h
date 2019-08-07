@@ -1,5 +1,7 @@
 #pragma once
 
-class Settings {
+namespace fe {
+	class Settings {
 
-};
+	};
+}

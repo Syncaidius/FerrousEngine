@@ -1,13 +1,15 @@
 #include "binary_stream_writer.h"
 
-BinaryStreamWriter::BinaryStreamWriter(Stream* stream) : StreamWriter(stream) {
+namespace fe {
+	BinaryStreamWriter::BinaryStreamWriter(Stream* stream) : StreamWriter(stream) {
 
-}
+	}
 
-BinaryStreamWriter::~BinaryStreamWriter() {
+	BinaryStreamWriter::~BinaryStreamWriter() {
 
-}
+	}
 
-void BinaryStreamWriter::writeString(const FeString& val) {
+	void BinaryStreamWriter::writeString(const FeString& val) {
 
+	}
 }

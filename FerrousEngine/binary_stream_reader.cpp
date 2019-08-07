@@ -1,14 +1,16 @@
 #include "binary_stream_reader.h"
 
-BinaryStreamReader::BinaryStreamReader(Stream* stream, FerrousAllocator* allocator, size_t bufferSize) : 
-	StreamReader(stream, allocator, bufferSize) {
+namespace fe {
+	BinaryStreamReader::BinaryStreamReader(Stream* stream, FerrousAllocator* allocator, size_t bufferSize) :
+		StreamReader(stream, allocator, bufferSize) {
 
-}
+	}
 
-BinaryStreamReader::~BinaryStreamReader() {
+	BinaryStreamReader::~BinaryStreamReader() {
 
-}
+	}
 
-void BinaryStreamReader::readString(FeString* val) {
+	void BinaryStreamReader::readString(FeString* val) {
 
+	}
 }
