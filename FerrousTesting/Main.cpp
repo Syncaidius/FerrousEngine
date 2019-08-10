@@ -12,6 +12,7 @@
 #include <Windows.h>
 using namespace std;
 using namespace fe;
+using namespace fe::shapes;
 
 /*	=============================================
 	NOTICE: This program is currently used as a scratchpad or testing area 
@@ -102,7 +103,7 @@ void RunEngineTest(Logger* log) {
 
 void RectangleTest(Logger* log) {
 	Rect32 r1 = Rect32(100,50, 200,150);
-	auto center1 = r1.center();
+	auto center1 = r1.origin();
 	log->writeLineF("Rect32 -- Left: %d -- Top: %d -- Right: %d -- Bottom: %d -- Width: %d -- Height: %d -- Center: %d,%d",
 		r1.left,
 		r1.top,
@@ -114,7 +115,7 @@ void RectangleTest(Logger* log) {
 		center1.y);
 
 	RectF r2 = RectF(100.5, 25, 200, 150.1);
-	auto center2 = r2.center();
+	auto center2 = r2.origin();
 	log->writeLineF("RectF -- Left: %f -- Top: %f -- Right: %f -- Bottom: %f -- Width: %f -- Height: %f -- Center: %f,%f",
 		r2.left,
 		r2.top,

@@ -55,6 +55,9 @@
     <Filter Include="Header Files\renderer\vulkan">
       <UniqueIdentifier>{7b8ac00a-6888-41cb-b812-557c459f3626}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\core\shapes">
+      <UniqueIdentifier>{4cc53dd6-d6be-422b-9787-22497ec8b674}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -120,14 +123,29 @@
     <ClInclude Include="graphics_device.h">
       <Filter>Header Files\renderer\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="rect.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="display_output.h">
       <Filter>Header Files\renderer\abstraction</Filter>
     </ClInclude>
     <ClInclude Include="graphics_device.h">
       <Filter>Header Files\renderer\abstraction</Filter>
+    </ClInclude>
+    <ClInclude Include="circle.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="rect.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes_common.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes_intersection.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="shapes_containment.h">
+      <Filter>Header Files\core\shapes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

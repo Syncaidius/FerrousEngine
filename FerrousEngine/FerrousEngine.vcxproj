@@ -163,6 +163,7 @@
     <ClInclude Include="allocation.h" />
     <ClInclude Include="binary_stream_reader.h" />
     <ClInclude Include="binary_stream_writer.h" />
+    <ClInclude Include="circle.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="display_output.h" />
     <ClInclude Include="file.h" />
@@ -175,6 +176,10 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="ferrous.h" />
     <ClInclude Include="allocation_stack.h" />
+    <ClInclude Include="shapes.h" />
+    <ClInclude Include="shapes_common.h" />
+    <ClInclude Include="shapes_containment.h" />
+    <ClInclude Include="shapes_intersection.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="stream_file.h" />
