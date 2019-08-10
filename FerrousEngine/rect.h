@@ -18,7 +18,7 @@ namespace fe {
 			glm::vec<2, T, Q> topRight();
 			glm::vec<2, T, Q> bottomLeft();
 			glm::vec<2, T, Q> bottomRight();
-			glm::vec<2, T, Q> origin();
+			glm::vec<2, T, Q> center();
 
 			T width();
 			T height();
@@ -79,7 +79,7 @@ namespace fe {
 		}
 
 		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::origin() {
+		inline glm::vec<2, T, Q> Rect<T, Q>::center() {
 			return glm::vec<2, T, Q>(
 				left + (right - left) / static_cast<T>(2),
 				top + (bottom - top) / static_cast<T>(2));
