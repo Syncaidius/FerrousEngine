@@ -147,6 +147,9 @@
     <ClInclude Include="shapes_containment.h">
       <Filter>Header Files\core\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="line.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">

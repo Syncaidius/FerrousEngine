@@ -7,6 +7,9 @@ namespace fe {
 		template<typename T, glm::qualifier Q>
 		inline bool contains(const Rect<T, Q>& r, const Circle<T, Q>& c);
 
+		template<typename T, glm::qualifier Q>
+		inline bool contains(const Rect<T, Q>& r, const Line<T, Q>& c);
+
 		/* Returns true if the first rectangle (r1) contains the second rectangle (r2). */
 		template<typename T, glm::qualifier Q>
 		inline bool contains(const Rect<T, Q>& r1, const Rect<T, Q>& r2) {
@@ -27,6 +30,9 @@ namespace fe {
 #pragma region CIRCLE
 		template<typename T, glm::qualifier Q>
 		inline bool contains(const Circle<T, Q>& c, const Rect<T, Q>& r);
+
+		template<typename T, glm::qualifier Q>
+		inline bool contains(const Circle<T, Q>& c, const Line<T, Q>& r);
 
 		template<typename T, glm::qualifier Q>
 		inline bool contains(const Circle<T, Q>& c1, const Circle<T, Q>& c2);

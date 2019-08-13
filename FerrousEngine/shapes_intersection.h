@@ -8,6 +8,9 @@ namespace fe {
 		inline bool intersects(const Rect<T, Q>& r, const Circle<T, Q>& c);
 
 		template<typename T, glm::qualifier Q>
+		inline bool intersects(const Rect<T, Q>& r, const Line<T, Q>& c);
+
+		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Rect<T, Q>& r1, const Rect<T, Q>& r2) {
 			return !((r1.left < r2.right) && (r1.right > r2.left) && (r1.top > r2.bottom) && (r1.bottom < r2.top));
 		}
@@ -32,7 +35,21 @@ namespace fe {
 		inline bool intersects(const Circle<T, Q>& c, const Rect<T, Q>& r);
 
 		template<typename T, glm::qualifier Q>
+		inline bool intersects(const Circle<T, Q>& c, const Line<T, Q>& r);
+
+		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Circle<T, Q>& c1, const Circle<T, Q>& c2);
+#pragma endregion
+
+#pragma region LINE
+		template<typename T, glm::qualifier Q>
+		inline bool intersects(const Line<T, Q>& c, const Rect<T, Q>& r);
+
+		template<typename T, glm::qualifier Q>
+		inline bool intersects(const Line<T, Q>& c, const Circle<T, Q>& r);
+
+		template<typename T, glm::qualifier Q>
+		inline bool intersects(const Line<T, Q>& c1, const Line<T, Q>& c2);
 #pragma endregion
 	}
 }

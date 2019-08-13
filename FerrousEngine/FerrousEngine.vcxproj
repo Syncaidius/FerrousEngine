@@ -169,6 +169,7 @@
     <ClInclude Include="file.h" />
     <ClInclude Include="game_time.h" />
     <ClInclude Include="graphics_device.h" />
+    <ClInclude Include="line.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="macros.h" />
