@@ -13,7 +13,7 @@ namespace fe {
 		/* Returns true if the first rectangle (r1) contains the second rectangle (r2). */
 		template<typename T, glm::qualifier Q>
 		inline bool contains(const Rect<T, Q>& r1, const Rect<T, Q>& r2) {
-			return (r2.left >= r1.left) && (r2.right <= r1.right) && (r2.top >= r1.top) && (r2.bottom <= r.bottom);
+			return (r2.left >= r1.left) && (r2.right <= r1.right) && (r2.top >= r1.top) && (r2.bottom <= r1.bottom);
 		}
 
 		template<typename T, glm::qualifier Q>
@@ -43,7 +43,7 @@ namespace fe {
 		}
 
 		template<typename T, glm::qualifier Q>
-		inline bool contains(const Circle<T, Q>& r, const glm::vec<2, T, Q> v) {
+		inline bool contains(const Circle<T, Q>& c, const glm::vec<2, T, Q> v) {
 			return glm::distance(c.origin, v) <= c.radius;
 		}
 #pragma endregion

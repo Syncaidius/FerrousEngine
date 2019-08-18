@@ -1,6 +1,6 @@
 #pragma once
 #include <glm.hpp>
-#include <cmath>
+#include <gtc/constants.hpp>
 
 namespace fe {
 	namespace shapes {
@@ -37,7 +37,7 @@ namespace fe {
 
 		template<typename T, glm::qualifier Q>
 		inline double Circle<T, Q>::circumference() {
-			return 2.0* M_PI* radius;
+			return 2.0* glm::pi<T>() * radius;
 		}
 
 		template<typename T, glm::qualifier Q>
@@ -47,12 +47,12 @@ namespace fe {
 
 		template<typename T, glm::qualifier Q>
 		inline double Circle<T, Q>::area() {
-			return M_PI * (radius * radius);
+			return glm::pi<T>() * (radius * radius);
 		}
 
 		template<typename T, glm::qualifier Q>
 		inline Circle<T, Q> Circle<T, Q>::empty() {
-			return Circle(glm::vec2<2, T, Q>((T)0, (T)0, (T)0);
+			return Circle(glm::vec<2, T, Q>((T)0, (T)0, (T)0));
 		}
 
 		template<typename T, glm::qualifier Q>

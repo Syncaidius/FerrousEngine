@@ -150,6 +150,9 @@
     <ClInclude Include="line.h">
       <Filter>Header Files\core\shapes</Filter>
     </ClInclude>
+    <ClInclude Include="triangle.h">
+      <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">

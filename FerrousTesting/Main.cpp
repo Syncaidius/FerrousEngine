@@ -7,12 +7,14 @@
 #include "stream_file.h"
 #include "text_stream_writer.h"
 #include "text_stream_reader.h"
-#include "rect.h"
+#include "shapes.h"
 #include <map>
 #include <Windows.h>
 using namespace std;
 using namespace fe;
 using namespace fe::shapes;
+using namespace glm;
+
 
 /*	=============================================
 	NOTICE: This program is currently used as a scratchpad or testing area 
@@ -101,7 +103,7 @@ void RunEngineTest(Logger* log) {
 	}
 }
 
-void RectangleTest(Logger* log) {
+void ShapeTest(Logger* log) {
 	Rect32 r1 = Rect32(100,50, 200,150);
 	auto center1 = r1.center();
 	log->writeLineF("Rect32 -- Left: %d -- Top: %d -- Right: %d -- Bottom: %d -- Width: %d -- Height: %d -- Center: %d,%d",
@@ -125,9 +127,17 @@ void RectangleTest(Logger* log) {
 		r2.height(),
 		center2.x,
 		center2.y);
+
+	TriangleF t1 = TriangleF(vec2(5.0f, 5.0f), vec2(10.0f, 10.0f), vec2(15.0f, -15.0f));
+	auto area1 = t1.area();
+	log->writeLineF("TriangleF -- p1: %f,%f -- p2: %f,%f -- p3: %f,%f -- area: %f", t1.p1.x, t1.p1.y, t1.p2.x, t1.p2.y, t1.p3.x, t1.p3.y, area1);
+
+	Triangle32 t2 = Triangle32(ivec2(5, 5), ivec2(10, 10), ivec2(15, 10));
+	auto area2 = t2.area();
+	log->writeLineF("Triangle32 -- p1: %d,%d -- p2: %d,%d -- p3: %d,%d -- area: %d", t2.p1.x, t2.p1.y, t2.p2.x, t2.p2.y, t2.p3.x, t2.p3.y, area2);
 }
 
-const int NUM_ALLOCATIONS = 1000;
+const int NUM_ALLOCATIONS = 500;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Logger log(1);
@@ -175,7 +185,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	Memory::get()->outputDebug();
 	log.writeLine(L" "_fe);
 
-	log.writeLine("Press any key to run string test..."_fe);
+	log.writeLine("Press any key to run string test..."_fe, Color::yellow);
 	cin.get();
 	RunStringTest(&log);
 	log.writeLine(L" "_fe);
@@ -190,11 +200,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	Memory::get()->outputDebug();
 
-	log.writeLine(L"Press any key to start Rectangle test.");
+	log.writeLine(L"Press any key to start Rectangle test.", Color::yellow);
 	cin.get();
-	RectangleTest(&log);
+	ShapeTest(&log);
 
-	log.writeLine(L"Press any key to start file I/O test."_fe);
+	log.writeLine(L"Press any key to start file I/O test."_fe, Color::yellow);
 	cin.get();
 
 	//RunEngineTest(&log);
@@ -243,7 +253,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	//// [16:04:47] Time taken to log 10000 lines: 12701.788800 ms - std::endl
 	//double timeTaken = test.getTotalTime() - timeStart;
 	//log.writeLineF(L"Time taken to log %d lines: %f ms", iterations, timeTaken);
-	log.writeLine(L"Press any key to exit..."_fe);
+	log.writeLine(L"Press any key to exit..."_fe, Color::yellow);
 	cin.get();
 
 	return 0;

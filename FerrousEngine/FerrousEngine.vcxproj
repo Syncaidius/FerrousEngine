@@ -173,6 +173,7 @@
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
     <ClInclude Include="macros.h" />
+    <ClInclude Include="triangle.h" />
     <ClInclude Include="rect.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ferrous.h" />

@@ -55,7 +55,7 @@ namespace fe {
 
 		template<typename T, glm::qualifier Q>
 		inline glm::vec<2, T, Q> Line<T, Q>::pointOn(double distPercent) {
-			return Line<T, Q>(origin, origin + (direction * distance));
+			return glm::mix(start, end, distPercent);
 		}
 
 		template<typename T, glm::qualifier Q>

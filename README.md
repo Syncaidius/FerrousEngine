@@ -11,7 +11,7 @@ The project is still in its early days, but here are a few things that have been
  * [FreeType](https://www.freetype.org/) for font processing. Repo located [here](https://git.savannah.gnu.org/cgit/freetype/)
 
 ### Why Vulkan?
-Three words: Cross-platform support. While DirectX is an awesome API, it only works on Microsoft platforms.  
+It's simply down to cross-platform support. While DirectX is an awesome API, it only works on Microsoft platforms. DirectX can be added further down the line if it is eventually required.
 
 ### Licensing
 [MIT](https://github.com/Syncaidius/FerrousEngine/blob/master/LICENSE)
