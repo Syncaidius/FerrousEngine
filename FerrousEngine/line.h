@@ -69,6 +69,13 @@ namespace fe {
 		}
 #pragma endregion
 
+#pragma region OPERATORS
+		template<typename T, glm::qualifier Q>
+		inline bool operator ==(const Line<T, Q>& l, const Line<T, Q>& r) {
+			return l.start == r.start && l.end == r.end;
+		}
+#pragma endregion
+
 #pragma region LINE TYPES
 		/*16-bit signed integer line.*/
 		typedef Line<int16_t, glm::highp> Line16;

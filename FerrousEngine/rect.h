@@ -131,15 +131,17 @@ namespace fe {
 		}
 
 		template<typename T, glm::qualifier Q>
-		inline bool operator ==(const Rect<T, Q> & l, const Rect<T, Q> & r) {
-			return l.left == r.left && l.top == r.top && l.right == r.right && l.bottom == r.bottom;
-		}
-
-		template<typename T, glm::qualifier Q>
 		inline static Rect<T, Q> Rect<T, Q>::empty() {
 			return Rect<T, Q>();
 		}
 
+#pragma endregion
+
+#pragma region OPERATORS
+		template<typename T, glm::qualifier Q>
+		inline bool operator ==(const Rect<T, Q>& l, const Rect<T, Q>& r) {
+			return l.left == r.left && l.top == r.top && l.right == r.right && l.bottom == r.bottom;
+		}
 #pragma endregion
 
 #pragma region RECTANGLE TYPES

@@ -66,6 +66,13 @@ namespace fe {
 
 #pragma endregion
 
+#pragma region OPERATORS
+		template<typename T, glm::qualifier Q>
+		inline bool operator ==(const Triangle<T, Q>& l, const Triangle<T, Q>& r) {
+			return l.p1 == r.p1 && l.p2 == r.p2 && l.p3 == r.p3;
+		}
+#pragma endregion
+
 #pragma region LINE TYPES
 		/*16-bit signed integer triangle.*/
 		typedef Triangle<int16_t, glm::highp> Triangle16;

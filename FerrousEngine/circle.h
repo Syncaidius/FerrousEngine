@@ -67,6 +67,13 @@ namespace fe {
 
 #pragma endregion
 
+#pragma region OPERATORS
+		template<typename T, glm::qualifier Q>
+		inline bool operator ==(const Circle<T, Q>& l, const Circle<T, Q>& r) {
+			return l.origin == r.origin && l.radius == r.radius;
+		}
+#pragma endregion
+
 #pragma region CIRCLE TYPES
 		/*16-bit signed integer circle.*/
 		typedef Circle<int16_t, glm::highp> Circle16;
