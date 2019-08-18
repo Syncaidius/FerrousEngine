@@ -58,7 +58,48 @@ namespace fe {
 		inline bool intersects(const Line<T, Q>& c, const Triangle<T, Q>& t);
 
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Line<T, Q>& l1, const Line<T, Q>& l2);
+		inline bool intersects(const Line<T, Q>& l1, const Line<T, Q>& l2) {
+			// Line AB represented as a1x + b1y = c1 
+			double a1 = B.second - A.second;
+			double b1 = A.first - B.first;
+			double c1 = a1 * (A.first) + b1 * (A.second);
+
+			// Line CD represented as a2x + b2y = c2 
+			double a2 = D.second - C.second;
+			double b2 = C.first - D.first;
+			double c2 = a2 * (C.first) + b2 * (C.second);
+
+			// Calc determenant and return true if not 0.
+			return (a1 * b2 - a2 * b1) != 0;
+		}
+
+		template<typename T, glm::qualifier Q>
+		inline glm::vec<2, T, Q> getIntersectPoint(const Line<T, Q>& l1, const Line<T, Q>& l2) {
+			// Line AB represented as a1x + b1y = c1 
+			double a1 = B.second - A.second;
+			double b1 = A.first - B.first;
+			double c1 = a1 * (A.first) + b1 * (A.second);
+
+			// Line CD represented as a2x + b2y = c2 
+			double a2 = D.second - C.second;
+			double b2 = C.first - D.first;
+			double c2 = a2 * (C.first) + b2 * (C.second);
+
+			double determinant = a1 * b2 - a2 * b1;
+
+			if (determinant == 0)
+			{
+				// The lines are parallel. This is simplified 
+				// by returning a pair of FLT_MAX 
+				return glm::vec<2, T, Q>(FLT_MAX, FLT_MAX);
+			}
+			else
+			{
+				double x = (b2 * c1 - b1 * c2) / determinant;
+				double y = (a1 * c2 - a2 * c1) / determinant;
+				return glm::vec<2, T, Q>(x, y);
+			}
+		}
 #pragma endregion
 
 #pragma region TRIANGLE
