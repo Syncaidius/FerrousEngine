@@ -9,63 +9,41 @@ namespace fe {
 			T radius;
 			glm::vec<2, T, Q> origin;
 
-			Circle();
-			Circle(const glm::vec<2, T, Q>& origin, const T radius);
+			Circle() {
+				radius = (T)0;
+				origin = glm::vec<2, T, Q>((T)0, (T)0);
+			}
 
-			void inflate(const T amount);
-			Circle<T, Q> getInflated(const T amount);
+			Circle(const glm::vec<2, T, Q>& origin, const T radius) {
+				this->origin = origin;
+				this->radius = radius;
+			}
 
-			double circumference();
-			double diameter();
-			double area();
+			void inflate(const T amount) {
+				radius += amount;
+			}
 
-			static Circle<T,Q> empty();
+			Circle<T, Q> getInflated(const T amount) {
+				return Circle(origin, radius + amount);
+			}
+
+			double circumference() {
+				return 2.0* glm::pi<T>()* radius;
+			}
+
+			double diameter() {
+				return radius * 2.0;
+			}
+
+			double area() {
+				return glm::pi<T>()* (radius * radius);
+			}
+
+
+			static Circle<T,Q> empty() {
+				return Circle(glm::vec<2, T, Q>((T)0, (T)0, (T)0));
+			}
 		};
-
-#pragma region IMPLEMENTATION
-		template<typename T, glm::qualifier Q>
-		inline Circle<T, Q>::Circle() {
-			radius = (T)0;
-			origin = glm::vec<2, T, Q>((T)0, (T)0);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Circle<T, Q>::Circle(const glm::vec<2, T, Q>& origin, const T radius) {
-			this->origin = origin;
-			this->radius = radius;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline double Circle<T, Q>::circumference() {
-			return 2.0* glm::pi<T>() * radius;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline double Circle<T, Q>::diameter() {
-			return radius * 2.0;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline double Circle<T, Q>::area() {
-			return glm::pi<T>() * (radius * radius);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Circle<T, Q> Circle<T, Q>::empty() {
-			return Circle(glm::vec<2, T, Q>((T)0, (T)0, (T)0));
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline void Circle<T, Q>::inflate(const T amount) {
-			radius += amount;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Circle<T, Q> Circle<T, Q>::getInflated(const T amount) {
-			return Circle(origin, radius + amount);
-		}
-
-#pragma endregion
 
 #pragma region OPERATORS
 		template<typename T, glm::qualifier Q>

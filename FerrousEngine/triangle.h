@@ -9,62 +9,43 @@ namespace fe {
 			glm::vec<2, T, Q> p2;
 			glm::vec<2, T, Q> p3;
 
-			Triangle();
-			Triangle(glm::vec<2, T, Q> p1, glm::vec<2, T, Q> p2, glm::vec<2, T, Q> p3);
+			Triangle() {
+				p1 = glm::vec<2, T, Q>((T)0, (T)0);;
+				p2 = glm::vec<2, T, Q>((T)0, (T)0);;
+				p3 = glm::vec<2, T, Q>((T)0, (T)0);;
+			}
 
-			T perimeter();
-			T area();
+			Triangle(glm::vec<2, T, Q> p1, glm::vec<2, T, Q> p2, glm::vec<2, T, Q> p3) {
+				this->p1 = p1;
+				this->p2 = p2;
+				this->p3 = p3;
+			}
 
-			glm::vec<2, T, Q> center();
+			T perimeter() {
+				return glm::distance(p1, p2) + glm::distance(p2, p3) + glm::distance(p3, p1);
+			}
 
-			static Triangle<T, Q> empty();
+			T area() {
+				return glm::abs((p1.x * (p2.y - p3.y) +
+					p2.x * (p3.y - p1.y) +
+					p3.x * (p1.y - p2.y)) / 2);
+			}
+
+			glm::vec<2, T, Q> center() {
+				return glm::vec<2, T, Q>(
+					(p1.x + p2.x + p3.x) / (T)3,
+					(p1.y + p2.y + p3.y) / (T)3
+					);
+			}
+
+			static Triangle<T, Q> empty() {
+				return Triangle<T, Q>(
+					glm::vec<2, T, Q>((T)0, (T)0),
+					glm::vec<2, T, Q>((T)0, (T)0),
+					glm::vec<2, T, Q>((T)0, (T)0)
+					);
+			}
 		};
-
-#pragma region IMPLEMENTATION
-		template<typename T, glm::qualifier Q>
-		inline Triangle<T, Q>::Triangle() {
-			p1 = glm::vec<2, T, Q>((T)0, (T)0);;
-			p2 = glm::vec<2, T, Q>((T)0, (T)0);;
-			p3 = glm::vec<2, T, Q>((T)0, (T)0);;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Triangle<T, Q>::Triangle(glm::vec<2, T, Q> p1, glm::vec<2, T, Q> p2, glm::vec<2, T, Q> p3) {
-			this->p1 = p1;
-			this->p2 = p2;
-			this->p3 = p3;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Triangle<T, Q>::center() {
-			return glm::vec<2, T, Q>(
-				(p1.x + p2.x + p3.x) / (T)3,
-				(p1.y + p2.y + p3.y) / (T)3
-			);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Triangle<T, Q> Triangle<T, Q>::empty() {
-			return Triangle<T, Q>(
-				glm::vec<2, T, Q>((T)0, (T)0),
-				glm::vec<2, T, Q>((T)0, (T)0),
-				glm::vec<2, T, Q>((T)0, (T)0)
-			);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Triangle<T, Q>::perimeter() {
-			return glm::distance(p1, p2) + glm::distance(p2, p3) + glm::distance(p3, p1);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Triangle<T, Q>::area() {
-			return glm::abs((p1.x * (p2.y - p3.y) +
-				p2.x * (p3.y - p1.y) +
-				p3.x * (p1.y - p2.y)) / 2);
-		}
-
-#pragma endregion
 
 #pragma region OPERATORS
 		template<typename T, glm::qualifier Q>

@@ -11,131 +11,95 @@ namespace fe {
 			T right;
 			T bottom;
 
-			Rect();
-			Rect(T left, T top, T right, T bottom);
+			Rect() {
+				this->left = (T)0;
+				this->top = (T)0;
+				this->right = (T)0;
+				this->bottom = (T)0;
+			}
 
-			glm::vec<2, T, Q> topLeft();
-			glm::vec<2, T, Q> topRight();
-			glm::vec<2, T, Q> bottomLeft();
-			glm::vec<2, T, Q> bottomRight();
-			glm::vec<2, T, Q> center();
+			Rect(T left, T top, T right, T bottom) {
+				assert(right >= left);
+				assert(bottom >= top);
 
-			T width();
-			T height();
+				this->left = left;
+				this->top = top;
+				this->right = right;
+				this->bottom = bottom;
+			}
 
-			T perimeter();
-			T area();
+			glm::vec<2, T, Q> topLeft() {
+				return glm::vec<2, T, Q>(left, top);
+			}
 
-			void inflate(T horizontal, T vertical);
+			glm::vec<2, T, Q> topRight() {
+				return glm::vec<2, T, Q>(right, top);
+			}
+
+			glm::vec<2, T, Q> bottomLeft() {
+				return glm::vec<2, T, Q>(left, bottom);
+			}
+
+			glm::vec<2, T, Q> bottomRight() {
+				return glm::vec<2, T, Q>(right, bottom);
+			}
+
+			glm::vec<2, T, Q> center() {
+				return glm::vec<2, T, Q>(
+					left + (right - left) / static_cast<T>(2),
+					top + (bottom - top) / static_cast<T>(2));
+			}
+
+			T width() {
+				return right - left;
+			}
+
+			T height() {
+				return bottom - top;
+			}
+
+			T perimeter() {
+				return 2 * (width() + height());
+			}
+
+			T area() {
+				return width()* height();
+			}
+
+			void inflate(T horizontal, T vertical) {
+				left -= horizontal;
+				top -= vertical;
+				right == horizontal;
+				bottom += vertical;
+			}
+
 			inline void inflate(T amount) { inflate(amount, amount); }
-			Rect<T, Q> getInflated(T horizontal, T vertical);
-			inline Rect<T, Q> getInflated(T amount) { return getInflated(amount, amount); }
+
+			Rect<T, Q> getInflated(T horizontal, T vertical) {
+				return Rect<T, Q>(
+					left - horizontal,
+					top - vertical,
+					right + horizontal,
+					bottom + vertical);
+			}
+
+			inline Rect<T, Q> getInflated(T amount) {
+				return getInflated(amount, amount);
+			}
 
 			/* Creates a new rectangle that exactly contains the current and other rectangle. */
-			Rect<T, Q> unify(const Rect<T, Q>& other);
+			Rect<T, Q> unify(const Rect<T, Q>& other) {
+				return Rect(std::min(left, other.left),
+					std::min(top, other.top),
+					std::max(right, other.right),
+					std::max(bottom, other.bottom));
+			}
 
 			/* Returns an empty rectangle. */
-			static Rect<T, Q> empty();
+			static Rect<T, Q> empty() {
+				return Rect<T, Q>();
+			}
 		};
-
-#pragma region IMPLEMENTATION
-		template<typename T, glm::qualifier Q>
-		inline Rect<T, Q>::Rect() {
-			this->left = (T)0;
-			this->top = (T)0;
-			this->right = (T)0;
-			this->bottom = (T)0;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Rect<T, Q>::Rect(T left, T top, T right, T bottom) {
-			assert(right >= left);
-			assert(bottom >= top);
-
-			this->left = left;
-			this->top = top;
-			this->right = right;
-			this->bottom = bottom;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::topLeft() {
-			return glm::vec<2, T, Q>(left, top);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::topRight() {
-			return glm::vec<2, T, Q>(right, top);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::bottomLeft() {
-			return glm::vec<2, T, Q>(left, bottom);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::bottomRight() {
-			return glm::vec<2, T, Q>(right, bottom);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline glm::vec<2, T, Q> Rect<T, Q>::center() {
-			return glm::vec<2, T, Q>(
-				left + (right - left) / static_cast<T>(2),
-				top + (bottom - top) / static_cast<T>(2));
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Rect<T, Q>::width() {
-			return right - left;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Rect<T, Q>::height() {
-			return bottom - top;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Rect<T, Q>::perimeter() {
-			return 2 * (width() + height());
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline T Rect<T, Q>::area() {
-			return width()* height();
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline void Rect<T, Q>::inflate(T horizontal, T vertical) {
-			left -= horizontal;
-			top -= vertical;
-			right == horizontal;
-			bottom += vertical;
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Rect<T, Q> Rect<T, Q>::getInflated(T horizontal, T vertical) {
-			return Rect<T, Q>(
-				left - horizontal,
-				top - vertical,
-				right + horizontal,
-				bottom + vertical);
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline Rect<T, Q> Rect<T, Q>::unify(const Rect<T, Q> & other) {
-			return Rect(std::min(left, other.left),
-				std::min(top, other.top),
-				std::max(right, other.right),
-				std::max(bottom, other.bottom));
-		}
-
-		template<typename T, glm::qualifier Q>
-		inline static Rect<T, Q> Rect<T, Q>::empty() {
-			return Rect<T, Q>();
-		}
-
-#pragma endregion
 
 #pragma region OPERATORS
 		template<typename T, glm::qualifier Q>

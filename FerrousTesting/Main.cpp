@@ -200,7 +200,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 	cout << "AFTER DEFRAGMENTATION" << endl;
 	Memory::get()->outputDebug();
 
-	log.writeLine(L"Press any key to start Rectangle test.", Color::yellow);
+	log.writeLine(L"Press any key to start shape test.", Color::yellow);
 	cin.get();
 	ShapeTest(&log);
 
