@@ -60,14 +60,14 @@ namespace fe {
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Line<T, Q>& l1, const Line<T, Q>& l2) {
 			// Line AB represented as a1x + b1y = c1 
-			double a1 = B.second - A.second;
-			double b1 = A.first - B.first;
-			double c1 = a1 * (A.first) + b1 * (A.second);
+			double a1 = l1.end.y - l1.start.y;
+			double b1 = l1.start.x - l1.end.x;
+			double c1 = a1 * (l1.start.x) + b1 * (l1.start.y);
 
 			// Line CD represented as a2x + b2y = c2 
-			double a2 = D.second - C.second;
-			double b2 = C.first - D.first;
-			double c2 = a2 * (C.first) + b2 * (C.second);
+			double a2 = l2.t.y - l2.start.y;
+			double b2 = l2.start.x - l2.end.x;
+			double c2 = a2 * (l2.start.x) + b2 * (l2.start.y);
 
 			// Calc determenant and return true if not 0.
 			return (a1 * b2 - a2 * b1) != 0;
@@ -75,15 +75,15 @@ namespace fe {
 
 		template<typename T, glm::qualifier Q>
 		inline glm::vec<2, T, Q> getIntersectPoint(const Line<T, Q>& l1, const Line<T, Q>& l2) {
-			// Line AB represented as a1x + b1y = c1 
-			double a1 = B.second - A.second;
-			double b1 = A.first - B.first;
-			double c1 = a1 * (A.first) + b1 * (A.second);
+			// Line l1 represented as a1x + b1y = c1 
+			double a1 = l1.end.y - l1.start.y;
+			double b1 = l1.start.x - l1.end.x;
+			double c1 = a1 * (l1.start.x) + b1 * (l1.start.y);
 
-			// Line CD represented as a2x + b2y = c2 
-			double a2 = D.second - C.second;
-			double b2 = C.first - D.first;
-			double c2 = a2 * (C.first) + b2 * (C.second);
+			// Line l2 represented as a2x + b2y = c2 
+			double a2 = l2.t.y - l2.start.y;
+			double b2 = l2.start.x - l2.end.x;
+			double c2 = a2 * (l2.start.x) + b2 * (l2.start.y);
 
 			double determinant = a1 * b2 - a2 * b1;
 
@@ -91,7 +91,7 @@ namespace fe {
 			{
 				// The lines are parallel. This is simplified 
 				// by returning a pair of FLT_MAX 
-				return glm::vec<2, T, Q>(FLT_MAX, FLT_MAX);
+				return glm::vec<2, T, Q>(std::numeric_limits<T>::max(), std::numeric_limits<T>::max());
 			}
 			else
 			{
