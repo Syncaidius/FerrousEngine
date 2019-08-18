@@ -65,7 +65,7 @@ namespace fe {
 			double c1 = a1 * (l1.start.x) + b1 * (l1.start.y);
 
 			// Line CD represented as a2x + b2y = c2 
-			double a2 = l2.t.y - l2.start.y;
+			double a2 = l2.end.y - l2.start.y;
 			double b2 = l2.start.x - l2.end.x;
 			double c2 = a2 * (l2.start.x) + b2 * (l2.start.y);
 
@@ -81,7 +81,7 @@ namespace fe {
 			double c1 = a1 * (l1.start.x) + b1 * (l1.start.y);
 
 			// Line l2 represented as a2x + b2y = c2 
-			double a2 = l2.t.y - l2.start.y;
+			double a2 = l2.end.y - l2.start.y;
 			double b2 = l2.start.x - l2.end.x;
 			double c2 = a2 * (l2.start.x) + b2 * (l2.start.y);
 
