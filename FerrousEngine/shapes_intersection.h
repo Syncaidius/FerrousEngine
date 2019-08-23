@@ -27,7 +27,12 @@ namespace fe {
 		}
 
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Rect<T, Q>& r, const Line<T, Q>& l);
+		inline bool intersects(const Rect<T, Q>& r, const Line<T, Q>& l) {
+			return intersects(new Line<T, Q>(r.left, r.top, r.right, r.top), l) || // Top side
+				intersects(new Line<T, Q>(r.right, r.top, r.right, r.bottom), l) || // Right side
+				intersects(new Line<T, Q>(r.right, r.bottom, r.left, r.bottom), l) || // Bottom side
+				intersects(new Line<T, Q>(r.left, r.bottom, r.left, r.top), l); // Left side
+		}
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Rect<T, Q>& r, const Triangle<T, Q>& t);
@@ -70,7 +75,9 @@ namespace fe {
 
 #pragma region LINE
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Line<T, Q>& c, const Rect<T, Q>& r);
+		inline bool intersects(const Line<T, Q>& c, const Rect<T, Q>& r) {
+			return intersects(r, c);
+		}
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Line<T, Q>& c, const Circle<T, Q>& r);
