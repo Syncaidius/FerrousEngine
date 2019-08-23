@@ -125,7 +125,7 @@ namespace fe {
 
 #pragma region TRIANGLE
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Triangle<T, Q>& t, const Rect<T, Q>& r)
+		inline bool intersects(const Triangle<T, Q>& t, const Rect<T, Q>& r);
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Triangle<T, Q>& t, const Circle<T, Q>& r);
