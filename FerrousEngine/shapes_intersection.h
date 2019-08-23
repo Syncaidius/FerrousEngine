@@ -5,7 +5,26 @@ namespace fe {
 	namespace shapes {
 #pragma region RECT
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Rect<T, Q>& r, const Circle<T, Q>& c);
+		inline bool intersects(const Rect<T, Q>& r, const Circle<T, Q>& c) {
+			T distX = glm::abs(c.origin.x - r.left - r.width() / 2);
+			T distY = glm::abs(c.origin.y - r.top - r.height() / 2);
+
+			if (distX > (r.width() / 2 + c.radius))
+				return false;
+
+			if (distY > (r.height() / 2 + c.radius))
+				return false;
+
+			if (distX <= (r.width() / 2))
+				return true;
+
+			if (distY <= (r.height() / 2))
+				return true;
+
+			T dx = distX - r.width() / (T)2;
+			T dy = distY - r.height() / (T)2;
+			return (dx * dx + dy * dy <= (c.radius * c.radius));
+		}
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Rect<T, Q>& r, const Line<T, Q>& l);
@@ -35,7 +54,9 @@ namespace fe {
 
 #pragma region CIRCLE
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Circle<T, Q>& c, const Rect<T, Q>& r);
+		inline bool intersects(const Circle<T, Q>& c, const Rect<T, Q>& r) {
+			return intersects(r, c);
+		}
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Circle<T, Q>& c, const Line<T, Q>& l);
@@ -104,7 +125,7 @@ namespace fe {
 
 #pragma region TRIANGLE
 		template<typename T, glm::qualifier Q>
-		inline bool intersects(const Triangle<T, Q>& t, const Rect<T, Q>& r);
+		inline bool intersects(const Triangle<T, Q>& t, const Rect<T, Q>& r)
 
 		template<typename T, glm::qualifier Q>
 		inline bool intersects(const Triangle<T, Q>& t, const Circle<T, Q>& r);
