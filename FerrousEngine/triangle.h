@@ -1,5 +1,5 @@
 #pragma once
-#include <glm.hpp>
+#include "shapes_setup.h"
 
 namespace fe {
 	namespace shapes {

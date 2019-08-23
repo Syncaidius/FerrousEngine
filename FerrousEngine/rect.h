@@ -1,5 +1,5 @@
 #pragma once
-#include <glm.hpp>
+#include "shapes_setup.h"
 #include <algorithm>
 
 namespace fe {
@@ -64,6 +64,22 @@ namespace fe {
 
 			T area() {
 				return width()* height();
+			}
+
+			Line<T, Q> sideLeft() {
+				return Line<T, Q>(left, top, left, bottom);
+			}
+
+			Line<T, Q> sideTop() {
+				return Line<T, Q>(left, top, right, top);
+			}
+
+			Line<T, Q> sideRight() {
+				return Line<T, Q>(right, top, right, bottom);
+			}
+
+			Line<T, Q> sideBottom() {
+				return Line<T, Q>(left, bottom, right, bottom);
 			}
 
 			void inflate(T horizontal, T vertical) {
