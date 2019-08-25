@@ -181,8 +181,7 @@
     <ClInclude Include="allocation_stack.h" />
     <ClInclude Include="shapes.h" />
     <ClInclude Include="shapes_common.h" />
-    <ClInclude Include="shapes_containment.h" />
-    <ClInclude Include="shapes_intersection.h" />
+    <ClInclude Include="shapes_collision.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="stream.h" />
     <ClInclude Include="stream_file.h" />

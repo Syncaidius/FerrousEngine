@@ -130,11 +130,11 @@ void ShapeTest(Logger* log) {
 
 	TriangleF t1 = TriangleF(vec2(5.0f, 5.0f), vec2(10.0f, 10.0f), vec2(15.0f, -15.0f));
 	auto area1 = t1.area();
-	log->writeLineF("TriangleF -- p1: %f,%f -- p2: %f,%f -- p3: %f,%f -- area: %f", t1.p1.x, t1.p1.y, t1.p2.x, t1.p2.y, t1.p3.x, t1.p3.y, area1);
+	log->writeLineF("TriangleF -- p1: %f,%f -- b: %f,%f -- c: %f,%f -- area: %f", t1.a.x, t1.a.y, t1.b.x, t1.b.y, t1.c.x, t1.c.y, area1);
 
 	Triangle32 t2 = Triangle32(ivec2(5, 5), ivec2(10, 10), ivec2(15, 10));
 	auto area2 = t2.area();
-	log->writeLineF("Triangle32 -- p1: %d,%d -- p2: %d,%d -- p3: %d,%d -- area: %d", t2.p1.x, t2.p1.y, t2.p2.x, t2.p2.y, t2.p3.x, t2.p3.y, area2);
+	log->writeLineF("Triangle32 -- p1: %d,%d -- b: %d,%d -- c: %d,%d -- area: %d", t2.a.x, t2.a.y, t2.b.x, t2.b.y, t2.c.x, t2.c.y, area2);
 }
 
 const int NUM_ALLOCATIONS = 500;

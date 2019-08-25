@@ -58,6 +58,14 @@ namespace fe {
 				return bottom - top;
 			}
 
+			T halfWidth() {
+				return width() / (T)2;
+			}
+
+			T halfHeight() {
+				return height() / (T)2;
+			}
+
 			T perimeter() {
 				return 2 * (width() + height());
 			}

@@ -5,37 +5,54 @@ namespace fe {
 	namespace shapes {
 		template<typename T, glm::qualifier Q>
 		struct Triangle {
-			glm::vec<2, T, Q> p1;
-			glm::vec<2, T, Q> p2;
-			glm::vec<2, T, Q> p3;
+			glm::vec<2, T, Q> a;
+			glm::vec<2, T, Q> b;
+			glm::vec<2, T, Q> c;
 
 			Triangle() {
-				p1 = glm::vec<2, T, Q>((T)0, (T)0);;
-				p2 = glm::vec<2, T, Q>((T)0, (T)0);;
-				p3 = glm::vec<2, T, Q>((T)0, (T)0);;
+				a = glm::vec<2, T, Q>((T)0, (T)0);;
+				b = glm::vec<2, T, Q>((T)0, (T)0);;
+				c = glm::vec<2, T, Q>((T)0, (T)0);;
 			}
 
-			Triangle(glm::vec<2, T, Q> p1, glm::vec<2, T, Q> p2, glm::vec<2, T, Q> p3) {
-				this->p1 = p1;
-				this->p2 = p2;
-				this->p3 = p3;
+			Triangle(glm::vec<2, T, Q> a, glm::vec<2, T, Q> b, glm::vec<2, T, Q> c) {
+				this->a = a;
+				this->b = b;
+				this->c = c;
 			}
 
 			T perimeter() {
-				return glm::distance(p1, p2) + glm::distance(p2, p3) + glm::distance(p3, p1);
+				return glm::distance(a, b) + glm::distance(b, c) + glm::distance(c, a);
 			}
 
 			T area() {
-				return glm::abs((p1.x * (p2.y - p3.y) +
-					p2.x * (p3.y - p1.y) +
-					p3.x * (p1.y - p2.y)) / 2);
+				return glm::abs((a.x * (b.y - c.y) +
+					b.x * (c.y - a.y) +
+					c.x * (a.y - b.y)) / 2);
 			}
 
 			glm::vec<2, T, Q> center() {
 				return glm::vec<2, T, Q>(
-					(p1.x + p2.x + p3.x) / (T)3,
-					(p1.y + p2.y + p3.y) / (T)3
+					(a.x + b.x + c.x) / (T)3,
+					(a.y + b.y + c.y) / (T)3
 					);
+			}
+
+			// Returns the first side of the triangle, as a line from points a to b.
+			Line<T, Q> sideA() {
+				return Line(a, b);
+			}
+
+
+			// Returns the second side of the triangle, as a line from points b to c.
+			Line<T, Q> sideB() {
+				return Line(b, c);
+			}
+
+
+			// Returns the third side of the triangle, as a line from points c to a.
+			Line<T, Q> sideC() {
+				return Line(c, a);
 			}
 
 			static Triangle<T, Q> empty() {
@@ -50,7 +67,7 @@ namespace fe {
 #pragma region OPERATORS
 		template<typename T, glm::qualifier Q>
 		inline bool operator ==(const Triangle<T, Q>& l, const Triangle<T, Q>& r) {
-			return l.p1 == r.p1 && l.p2 == r.p2 && l.p3 == r.p3;
+			return l.a == r.a && l.b == r.b && l.c == r.c;
 		}
 #pragma endregion
 
