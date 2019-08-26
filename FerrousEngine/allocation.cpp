@@ -21,8 +21,5 @@ namespace fe {
 			return reinterpret_cast<void*>((uintptr_t)p + ((uintptr_t)alignment - ((uintptr_t)p & mask)));
 		else
 			return const_cast<void*>(p);
-
-		// Original
-		//return reinterpret_cast<void*>((reinterpret_cast<uintptr_t>(p)) + ((alignment - 1) & (~(alignment - 1))));
 	}
 }
