@@ -150,9 +150,6 @@
     <ClInclude Include="shapes_setup.h">
       <Filter>Header Files\core\shapes</Filter>
     </ClInclude>
-    <ClInclude Include="shapes_collision.h">
-      <Filter>Header Files\core\shapes</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">

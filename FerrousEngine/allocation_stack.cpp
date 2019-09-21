@@ -15,12 +15,12 @@ namespace fe {
 	}
 
 	void* StackAllocator::alloc(size_t num_bytes, uint8_t alignment) {
-		void* p = _pos;
+		char* p = reinterpret_cast<char*>(_pos) + 1;
 		char* adjusted = static_cast<char*>(alignForward(p, alignment));
 		adjusted[-1] = alignForwardAdjustment(p, alignment); // Store the adjustment 1 byte behind the data.
 		_pos = (void*)((char*)_pos + num_bytes + adjusted[-1]);
 
-		// TODO ensure stack cannot overflow into memory it does not own when full. Or resize?
+		// TODO ensure stack cannot overflow into memory it does not own when full. Alternative = resize?
 		return adjusted;
 	}
 

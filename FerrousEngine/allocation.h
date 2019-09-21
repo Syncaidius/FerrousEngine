@@ -141,7 +141,6 @@ namespace fe {
 		Block* sortedMerge(Block* a, Block* b);
 		void frontBackSplit(Block* source, Block** frontRef, Block** backRef);
 
-		inline Block* getBlockHeader(const void* p);
 		inline Block* makePageBlock(Page* p);
 		Block* newPage(void);
 	};
