@@ -52,10 +52,8 @@ namespace fe {
 		}
 
 		FeString();
-		FeString(const char* data, uint32_t len, FerrousAllocator* allocator);
-		FeString(const char* data, uint32_t len);
-		FeString(const char* data, FerrousAllocator* allocator);
-		FeString(const char* data);
+		FeString(const char* data, uint32_t len, FerrousAllocator* allocator = Memory::get());
+		FeString(const char* data, FerrousAllocator* allocator = Memory::get());
 
 		FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isHeap = true);
 		FeString(const wchar_t* data, uint32_t len);
@@ -64,12 +62,9 @@ namespace fe {
 		/* Treats the provided wide-char data as non-heap data. This means it will not be dereferenced once the string is deconstructed.*/
 		FeString(const wchar_t* data);
 
-		FeString(const char32_t* data, uint32_t len, FerrousAllocator* allocator);
-		FeString(const char32_t* data, uint32_t len);
-		FeString(const char32_t* data, FerrousAllocator* allocator);
-		FeString(const char32_t* data);
+		FeString(const char32_t* data, uint32_t len, FerrousAllocator* allocator = Memory::get());
+		FeString(const char32_t* data, FerrousAllocator* allocator = Memory::get());
 
-		FeString(FerrousAllocator* allocator);
 		FeString(const FeString& copy);
 
 		~FeString();

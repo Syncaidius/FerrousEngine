@@ -58,6 +58,9 @@
     <Filter Include="Header Files\core\shapes">
       <UniqueIdentifier>{4cc53dd6-d6be-422b-9787-22497ec8b674}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\collections">
+      <UniqueIdentifier>{54d33a38-1c7e-4f1b-a729-be1fce4abb2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -149,6 +152,12 @@
     </ClInclude>
     <ClInclude Include="shapes_setup.h">
       <Filter>Header Files\core\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="collection.h">
+      <Filter>Header Files\collections</Filter>
+    </ClInclude>
+    <ClInclude Include="list.h">
+      <Filter>Header Files\collections</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

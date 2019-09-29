@@ -24,6 +24,6 @@ namespace fe {
 
 		virtual FeString getName() = 0;
 		virtual Orientation getOrientation() = 0;
-		virtual Rect32 getBounds() = 0;
+		virtual shapes::Rect32 getBounds() = 0;
 	};
 }
