@@ -92,7 +92,10 @@ namespace fe {
 			realloc((void*&)target, sizeof(T) * num_elements, alignof(T));
 		}
 
-		static void copy(void* dest, const void* src, const size_t num_bytes);
+		inline static void copy(void* dest, const void* src, const size_t num_bytes) {
+			// TODO some validation?
+			memcpy(dest, src, num_bytes);
+		}
 
 		/* Copies memory from the source, to the destination. */
 		template<typename T> inline static void copyType(T* dest, const T* src, const size_t num_elements) {

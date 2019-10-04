@@ -26,6 +26,10 @@ namespace fe {
 			virtual void clear() = 0;
 			virtual bool isEmpty() = 0;
 
+			virtual bool contains(T item) = 0;
+			virtual bool add(T item) = 0;
+			virtual bool remove(T item) = 0;
+
 			inline uint32_t count() const { return _count; }
 
 		protected:

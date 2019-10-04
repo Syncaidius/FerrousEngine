@@ -152,11 +152,6 @@ namespace fe {
 		return Memory::PAGE_SIZE* _page_count;
 	}
 
-	void Memory::copy(void* dest, const void* src, const size_t num_bytes) {
-		// TODO some validation?
-		memcpy(dest, src, num_bytes);
-	}
-
 	void Memory::defragment(size_t max_pages) {
 		assert(max_pages > 0);
 		Page* p = _page_to_defrag;
