@@ -32,6 +32,43 @@ namespace fe {
 				return iterator(this, _count);
 			}
 
+			inline bool insert(T item, uint32_t index) {
+				if(index < 0 || index > _count)
+					throw IndexOutOfRangeExeption(index, _count);
+
+				// Ensure capacity.
+				// We're inserting between existing items.
+				if (index < _count) {
+					T* dest = _first;
+
+					if (_count == _capacity) {
+						_capacity *= 2;
+						dest = _allocator->allocType<T>(_capacity);
+					}
+
+					if (index == 0) {
+						Memory::copyType(&dest[1], _first, _count);
+					}
+					else {
+						// Split elements into two parts, leaving a 1-element gap, for the new item to be inserted.
+						Memory::copyType(dest, _first, index);
+						Memory::copyType(&dest[index + 1], &_first[index], _count - index);
+					}
+
+					// Deallocate old memory, if new was allocated.
+					if (_first != dest) {
+						_allocator->dealloc(_first);
+						_first = _dest;
+					}
+
+					_first[index] = item;
+					return true;
+				}
+				else { // We're appending to the end (i.e. equal to _count).
+					return add(item);
+				}
+			}
+
 			inline bool add(T item) override {
 				if (_count == _capacity) {
 					_capacity *= 2;
