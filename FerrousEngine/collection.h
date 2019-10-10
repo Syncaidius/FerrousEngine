@@ -29,7 +29,7 @@ namespace fe {
 			virtual bool add(T item) = 0;
 			virtual bool remove(T item) = 0;
 
-			virtual void copyTo(T* dest) = 0;
+			virtual void copyTo(T* dest, uint32_t startIndex, uint32_t copyCount) = 0;
 
 			inline uint32_t count() const { return _count; }
 			inline bool isEmpty() const { return _count == 0; }

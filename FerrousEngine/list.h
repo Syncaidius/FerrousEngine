@@ -69,6 +69,22 @@ namespace fe {
 				}
 			}
 
+			inline bool insertCollection(Collection<T> items, uint32_t insertIndex, uint32_t startIndex, uint32_t count) {
+				if (startIndex + count > items.count())
+					throw IndexOutOfRangeExeption(sstartIndex + count, items.count());
+
+				uint32_t capRequired = _count + count;
+				if (index < 0 || index > _count)
+					throw IndexOutOfRangeExeption(index, _count);
+
+				if (insertIndex < _count) {
+
+				}
+				else {
+					addCollection(items, startIndex, count);
+				}
+			}
+
 			inline bool add(T item) override {
 				if (_count == _capacity) {
 					_capacity *= 2;
@@ -84,7 +100,7 @@ namespace fe {
 				return true;
 			}
 
-			inline void addCollection(Collection<T>& collection) {
+			inline void addCollection(Collection<T>& collection, uint32_t startIndex, uint32_t count) {
 				int required = _count + collection.count();
 
 				if (required > _capacity) {
@@ -101,7 +117,7 @@ namespace fe {
 				}
 
 				// Copy items from collection to the end of the current list.
-				collection.copyTo(&_first[_count]);
+				collection.copyTo(&_first[_count], startIndex, count);
 			}
 
 			inline bool remove(T item) override {
@@ -126,8 +142,14 @@ namespace fe {
 				_count--;
 			}
 
-			inline void copyTo(T* dest) override {
-				Memory::copyType(dest, _first, _count);
+			inline void copyTo(T* dest, uint32_t startIndex, uint32_t copyCount) override {
+				if (startIndex >= _count || startIndex < 0)
+					throw IndexOutOfRangeExeption(startIndex, _count);
+
+				if (startIndex + count > _count)
+					throw IndexOutOfRangeExeption(startIndex + copyCount, _count);
+
+				Memory::copyType(dest, &_first[startIndex], copyCount);
 			}
 
 			inline bool contains(T item) {
