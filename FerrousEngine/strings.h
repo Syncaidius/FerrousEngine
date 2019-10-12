@@ -36,6 +36,8 @@ namespace fe {
 		static FeString format(const FeString& str, FerrousAllocator* allocator, va_list args);
 		static FeString format(const FeString& str, va_list args);
 
+		static FeString repeat(const FeString& str, uint32_t count, FerrousAllocator* allocator = Memory::get());
+
 		/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
 		static FeString dateTime(const wchar_t* format, FerrousAllocator* allocator);
 		inline static FeString dateTime(const wchar_t* format) {

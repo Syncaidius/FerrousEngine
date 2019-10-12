@@ -79,6 +79,17 @@ namespace fe {
 		mem[len] = L'\0';
 		return FeString(mem, len, allocator);
 	}
+
+	FeString FeString::repeat(const FeString& str, uint32_t count, FerrousAllocator* allocator) {
+		uint32_t len = str._length * count;
+		wchar_t* mem = allocator->allocType<wchar_t>((size_t)len + 1U);
+		for (int i = 0; i < count; i++) {
+			Memory::copyType<wchar_t>(&mem[i * str._length], str.getData(), str._length);
+		}
+
+		mem[len] = L'\0';
+		return FeString(mem, len, allocator);
+	}
 #pragma endregion
 
 #pragma region INSTANCED
