@@ -139,6 +139,7 @@
   <ItemGroup>
     <ClInclude Include="ferrous_test.hpp" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="test_engine.h" />
     <ClInclude Include="test_io.hpp" />
     <ClInclude Include="test_shapes.hpp" />
     <ClInclude Include="test_memory.hpp" />

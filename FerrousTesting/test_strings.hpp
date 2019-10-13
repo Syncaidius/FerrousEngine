@@ -1,7 +1,9 @@
 #pragma once
+#include "stdafx.h"
 #include "ferrous_test.hpp"
 #include "localization.h"
 
+using namespace std;
 class TestStrings : public FerrousTest {
 public:
 

@@ -26,6 +26,8 @@ namespace fe {
 		std::wcerr.clear();
 		std::wcin.clear();
 		_console_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+		SetConsoleCP(65001);
+		SetConsoleOutputCP(65001);
 	}
 
 	ConsoleLogOutput::~ConsoleLogOutput() {
@@ -59,13 +61,15 @@ namespace fe {
 	}
 
 	void ConsoleLogOutput::write(const FeString& msg, const Color& color) {
+		UtfString utf8 = UtfString(msg, fe::UtfEncoding::UTF8);
 		SetConsoleTextAttribute(_console_handle, getColorFlags(color));
-		std::wcout << msg.getData();
+		std::cout << utf8.getData();
 	}
 
 	void ConsoleLogOutput::writeLine(const FeString& msg, const Color& color) {
+		UtfString utf8 = UtfString(msg, fe::UtfEncoding::UTF8);
 		SetConsoleTextAttribute(_console_handle, getColorFlags(color));
-		std::wcout << msg.getData() << std::endl;
+		std::cout << utf8.getData() << std::endl;
 	}
 
 	void ConsoleLogOutput::clear() {
