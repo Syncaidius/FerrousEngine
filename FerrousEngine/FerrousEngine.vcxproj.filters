@@ -156,11 +156,14 @@
     <ClInclude Include="collection.h">
       <Filter>Header Files\collections</Filter>
     </ClInclude>
+    <ClInclude Include="exceptions.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
     <ClInclude Include="list.h">
       <Filter>Header Files\collections</Filter>
     </ClInclude>
-    <ClInclude Include="exceptions.h">
-      <Filter>Header Files\core</Filter>
+    <ClInclude Include="iterator_forward_range.h">
+      <Filter>Header Files\core\allocation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

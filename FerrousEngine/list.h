@@ -7,13 +7,11 @@ namespace fe {
 	namespace collections {
 		template<typename T>
 		class List : public Collection<T> {
+			// Pull super-class protected member in.
+			using Collection<T>::_count;
 
 		public:
-			class iterator : public BaseIterator<T> {
-				// TODO implement
-			};
-
-			inline List(uint32_t initialCapacity = 1, FerrousAllocator* allocator = Memory::get()) {
+			inline List(uint32_t initialCapacity = 1, FerrousAllocator* allocator = Memory::get()) : Collection<T>() {
 				assert(initialCapacity > 0);
 
 				_allocator = allocator;
@@ -21,15 +19,12 @@ namespace fe {
 				_first = _allocator->allocType<T>(_capacity);
 			}
 
-			List<T>& operator=(const List<T>&) = delete;
-			List<T> operator=(const List<T>&) = delete;
-
-			iterator begin() override {
-				return iterator(this, 0);
+			ForwardRangeIterator<T> begin() {
+				return ForwardRangeIterator<T>(_first, 0);
 			}
 
-			iterator end() override {
-				return iterator(this, _count);
+			ForwardRangeIterator<T> end() {
+				return ForwardRangeIterator<T>(_first, _count);
 			}
 
 			inline bool insert(T item, uint32_t index) {
@@ -58,7 +53,7 @@ namespace fe {
 					// Deallocate old memory, if new was allocated.
 					if (_first != dest) {
 						_allocator->dealloc(_first);
-						_first = _dest;
+						_first = dest;
 					}
 
 					_first[index] = item;
@@ -71,10 +66,10 @@ namespace fe {
 
 			inline bool insertCollection(Collection<T>& items, uint32_t insertIndex, uint32_t startIndex, uint32_t count) {
 				if (startIndex + count > items.count())
-					throw IndexOutOfRangeExeption(sstartIndex + count, items.count());
+					throw IndexOutOfRangeExeption(startIndex + count, items.count());
 
-				if (index < 0 || index > _count)
-					throw IndexOutOfRangeExeption(index, _count);
+				if (insertIndex < 0 || insertIndex > _count)
+					throw IndexOutOfRangeExeption(insertIndex, _count);
 
 				if (insertIndex < _count) {
 					uint32_t required = _count + count;
@@ -88,9 +83,9 @@ namespace fe {
 							_capacity += required - _capacity;
 					}
 					else {
-						uint32_t endCount = _count - index;
-						Memory::copyType(&_first[index + 1], &_first[index], index);
-						items.copyTo(&_first[index], startIndex, count);
+						uint32_t endCount = _count - insertIndex;
+						Memory::copyType<T>(&_first[insertIndex + 1], &_first[insertIndex], insertIndex);
+						items.copyTo(&_first[insertIndex], startIndex, count);
 					}
 
 					_count += count;
@@ -106,7 +101,7 @@ namespace fe {
 
 					// Copy existing elements to new location.
 					T* newMem = _allocator->allocType<T>(_capacity);
-					Memory::copyType(newMem, _first, _count);
+					Memory::copyType<T>(newMem, _first, _count);
 					_allocator->dealloc(_first);
 					_first = newMem;
 				}
@@ -126,7 +121,7 @@ namespace fe {
 						_capacity += required - _capacity;
 
 					T* newMem = _allocator->allocType<T>(_capacity);
-					Memory::copyType(newMem, _first, _count);
+					Memory::copyType<T>(newMem, _first, _count);
 					_allocator->dealloc(_first);
 					_first = newMem;
 				}
@@ -153,7 +148,7 @@ namespace fe {
 
 				// If not last element, move all elements ahead of the index, back by one element.
 				if (index < (_count - 1))
-					Memory::copyType(&_first[index], _first[index + 1], (_count - (index + 1)));
+					Memory::copyType<T>(&_first[index], &_first[index + 1], (_count - (index + 1)));
 
 				_count--;
 			}
@@ -162,13 +157,13 @@ namespace fe {
 				if (startIndex >= _count || startIndex < 0)
 					throw IndexOutOfRangeExeption(startIndex, _count);
 
-				if (startIndex + count > _count)
+				if (startIndex + copyCount > _count)
 					throw IndexOutOfRangeExeption(startIndex + copyCount, _count);
 
-				Memory::copyType(dest, &_first[startIndex], copyCount);
+				Memory::copyType<T>(dest, &_first[startIndex], copyCount);
 			}
 
-			inline bool contains(T item) {
+			inline bool contains(T item) override {
 				for (uint32_t i = 0; i < _count; i++) {
 					if (item == _first[i])
 						return true;
@@ -191,10 +186,6 @@ namespace fe {
 
 			inline void clear() override {
 				_count = 0;
-			}
-
-			inline bool isEmpty() override {
-				return _count == 0;
 			}
 
 			inline uint32_t capacity() {

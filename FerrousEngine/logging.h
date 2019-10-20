@@ -3,6 +3,9 @@
 #include "allocation.h"
 #include "strings.h"
 #include "color.h"
+#include "list.h"
+
+using namespace fe::collections;
 
 namespace fe {
 	class LogOutputBase {
@@ -32,9 +35,6 @@ namespace fe {
 
 	class Logger {
 	public:
-		struct LogOutputHandle {
-			LogOutputBase* output;
-		};
 		Logger(uint16_t initial_slot_count = 1);
 		~Logger();
 
@@ -59,7 +59,7 @@ namespace fe {
 		void clear();
 
 	private:
-		LogOutputHandle* _outputs;
+		List<LogOutputBase*> _outputs;
 		uint16_t _output_slot_count;
 	};
 }

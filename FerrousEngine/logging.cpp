@@ -5,68 +5,39 @@
 namespace fe {
 	Logger::Logger(uint16_t initial_slot_count) {
 		_output_slot_count = initial_slot_count;
-		_outputs = Memory::get()->allocType<LogOutputHandle>(_output_slot_count);
-		Memory::ZeroType<LogOutputHandle>(_outputs, _output_slot_count);
+		_outputs = List<LogOutputBase*>();
 	}
 
 	Logger::~Logger() {
-		LogOutputHandle* end = _outputs;
-		end += _output_slot_count;
-		for (LogOutputHandle* i = _outputs; i != end; i++) {
-			if (i != nullptr)
-				i->output->close();
+		for (LogOutputBase* l : _outputs) {
+			if (l != nullptr)
+				l->close();
 		}
 	}
 
 	void Logger::addOutput(LogOutputBase * output) {
-		// Try and find an existing output slot before resizing the array.
-		LogOutputHandle* end = _outputs;
-		end += _output_slot_count;
-
-		LogOutputHandle* i = nullptr;
-		for (i = _outputs; i != end; i++) {
-			if (i->output == nullptr) {
-				i->output = output;
-				return;
-			}
-		}
-
-		// If we've reached here, no slots were found. Expand!
-		// TODO use vector?
-		uint64_t _next = _output_slot_count++;
-		Memory::get()->reallocType(_outputs, _output_slot_count);
-
-		// Jump straight to the slot we just added.
-		i = _outputs;
-		i += _next;
-		*i->output = *output;
+		_outputs.add(output);
 	}
 
 	void Logger::clear() {
-		LogOutputHandle* end = _outputs;
-		end += _output_slot_count;
-		for (LogOutputHandle* i = _outputs; i != end; i++) {
-			if (i != nullptr)
-				i->output->clear();
+		for (LogOutputBase* l : _outputs) {
+			if (l != nullptr)
+				l->clear();
 		}
 	}
 
 	void Logger::write(const FeString & msg, const Color & color) {
-		LogOutputHandle* end = _outputs;
-		end += _output_slot_count;
-		for (LogOutputHandle* i = _outputs; i != end; i++) {
-			if (i != nullptr)
-				i->output->write(msg, color);
+		for (LogOutputBase* l : _outputs) {
+			if (l != nullptr)
+				l->write(msg, color);
 		}
 	}
 
 	void Logger::writeLine(const FeString & msg, const Color & color) {
 		FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg; // TODO do we need a proper FeString-builder/stream for situations like this?
-		LogOutputHandle* end = _outputs;
-		end += _output_slot_count;
-		for (LogOutputHandle* i = _outputs; i != end; i++) {
-			if (i != nullptr)
-				i->output->writeLine(result, color);
+		for (LogOutputBase* l : _outputs) {
+			if (l != nullptr)
+				l->writeLine(result, color);
 		}
 	}
 
