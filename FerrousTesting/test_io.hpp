@@ -12,6 +12,11 @@ public:
 
 protected:
 	void onRun(Logger& log) override {
+		log.writeLine("Press any key to clear log.", Color::yellow);
+		cin.get();
+
+		log.clear();
+
 		FeString workingDir = File::getWorkingDirectory();
 		log.writeLineF("Current Path: %s"_fe, workingDir.getData());
 		log.writeLineF("   Is directory: %d"_fe, File::isDirectory(workingDir));

@@ -9,10 +9,8 @@ namespace fe {
 	}
 
 	Logger::~Logger() {
-		for (LogOutputBase* l : _outputs) {
-			if (l != nullptr)
-				l->close();
-		}
+		for (LogOutputBase* l : _outputs)
+			l->close();
 	}
 
 	void Logger::addOutput(LogOutputBase * output) {
@@ -20,25 +18,19 @@ namespace fe {
 	}
 
 	void Logger::clear() {
-		for (LogOutputBase* l : _outputs) {
-			if (l != nullptr)
-				l->clear();
-		}
+		for (LogOutputBase* l : _outputs)
+			l->clear();
 	}
 
 	void Logger::write(const FeString & msg, const Color & color) {
-		for (LogOutputBase* l : _outputs) {
-			if (l != nullptr)
-				l->write(msg, color);
-		}
+		for (LogOutputBase* l : _outputs)
+			l->write(msg, color);
 	}
 
 	void Logger::writeLine(const FeString & msg, const Color & color) {
 		FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg; // TODO do we need a proper FeString-builder/stream for situations like this?
-		for (LogOutputBase* l : _outputs) {
-			if (l != nullptr)
-				l->writeLine(result, color);
-		}
+		for (LogOutputBase* l : _outputs)
+			l->writeLine(result, color);
 	}
 
 	void Logger::writeF(const FeString & str, const Color & color, ...) {

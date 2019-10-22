@@ -73,7 +73,39 @@ namespace fe {
 	}
 
 	void ConsoleLogOutput::clear() {
+		// See for other OS clear implementations: http://www.cplusplus.com/articles/4z18T05o/
 
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		DWORD                      count;
+		DWORD                      cellCount;
+		COORD                      homeCoords = { 0, 0 };
+
+		/* Get the number of cells in the current buffer */
+		if (!GetConsoleScreenBufferInfo(_console_handle, &csbi))
+			return;
+
+		cellCount = csbi.dwSize.X * csbi.dwSize.Y;
+
+		/* Fill the entire buffer with spaces */
+		if (!FillConsoleOutputCharacter(
+			_console_handle,
+			L' ',
+			cellCount,
+			homeCoords,
+			&count
+		)) return;
+
+		/* Fill the entire buffer with the current colors and attributes */
+		if (!FillConsoleOutputAttribute(
+			_console_handle,
+			csbi.wAttributes,
+			cellCount,
+			homeCoords,
+			&count
+		)) return;
+
+		/* Move the cursor home */
+		SetConsoleCursorPosition(_console_handle, homeCoords);
 	}
 
 	void ConsoleLogOutput::close() {
