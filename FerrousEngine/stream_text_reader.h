@@ -8,6 +8,9 @@ namespace fe {
 		TextStreamReader(Stream* stream, size_t bufferSize = 1024);
 		virtual ~TextStreamReader();
 
+		void read(FeString* dest, uint32_t numChars);
+		void read(UtfString* dest, uint32_t numChars);
+
 		void readLine(FeString* dest);
 		void readLine(UtfString* dest);
 		void readToEnd(FeString* dest);

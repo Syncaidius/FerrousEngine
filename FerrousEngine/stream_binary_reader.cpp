@@ -1,4 +1,4 @@
-#include "binary_stream_reader.h"
+#include "stream_binary_reader.h"
 
 namespace fe {
 	BinaryStreamReader::BinaryStreamReader(Stream* stream, FerrousAllocator* allocator, size_t bufferSize) :

@@ -1,4 +1,4 @@
-#include "binary_stream_writer.h"
+#include "stream_binary_writer.h"
 
 namespace fe {
 	BinaryStreamWriter::BinaryStreamWriter(Stream* stream) : StreamWriter(stream) {

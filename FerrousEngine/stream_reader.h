@@ -4,7 +4,7 @@
 namespace fe {
 	class StreamReader {
 	public:
-		StreamReader(Stream* stream, FerrousAllocator* allocator, size_t bufferSize = 1024);
+		StreamReader(Stream* stream, FerrousAllocator* allocator, size_t initialBufferSize = 1024);
 		virtual ~StreamReader();
 
 		inline Stream* getStream() { return _stream; }
@@ -14,5 +14,7 @@ namespace fe {
 		char* _buffer;
 		size_t _buffer_size;
 		FerrousAllocator* _allocator;
+
+		void ensureBufferCapacity(size_t capacity);
 	};
 }

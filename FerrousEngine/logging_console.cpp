@@ -1,4 +1,4 @@
-#include "logging.h";
+#include "logging_console.h";
 #include <Windows.h>
 #include <iostream>
 

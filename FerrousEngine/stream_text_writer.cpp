@@ -1,5 +1,10 @@
-#include "text_stream_writer.h"
+#include "stream_text_writer.h"
+
 namespace fe {
+	TextStreamWriter::TextStreamWriter() : StreamWriter(nullptr) {
+		_allocator = nullptr;
+	}
+
 	TextStreamWriter::TextStreamWriter(Stream* stream, FerrousAllocator* allocator) :
 		StreamWriter(stream) {
 		_allocator = allocator;

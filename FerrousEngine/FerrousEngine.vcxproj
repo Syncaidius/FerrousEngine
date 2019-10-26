@@ -139,8 +139,9 @@
     <ClCompile Include="allocation.cpp" />
     <ClCompile Include="allocation_memory.cpp" />
     <ClCompile Include="allocation_stack.cpp" />
-    <ClCompile Include="binary_stream_reader.cpp" />
-    <ClCompile Include="binary_stream_writer.cpp" />
+    <ClCompile Include="logging_file.cpp" />
+    <ClCompile Include="stream_binary_reader.cpp" />
+    <ClCompile Include="stream_binary_writer.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="ferrous.cpp" />
@@ -156,13 +157,13 @@
     <ClCompile Include="stream_writer.cpp" />
     <ClCompile Include="strings_fe.cpp" />
     <ClCompile Include="strings_utf.cpp" />
-    <ClCompile Include="text_stream_reader.cpp" />
-    <ClCompile Include="text_stream_writer.cpp" />
+    <ClCompile Include="stream_text_reader.cpp" />
+    <ClCompile Include="stream_text_writer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="allocation.h" />
-    <ClInclude Include="binary_stream_reader.h" />
-    <ClInclude Include="binary_stream_writer.h" />
+    <ClInclude Include="stream_binary_reader.h" />
+    <ClInclude Include="stream_binary_writer.h" />
     <ClInclude Include="circle.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="display_output.h" />
@@ -176,6 +177,8 @@
     <ClInclude Include="list.h" />
     <ClInclude Include="localization.h" />
     <ClInclude Include="logging.h" />
+    <ClInclude Include="logging_console.h" />
+    <ClInclude Include="logging_file.h" />
     <ClInclude Include="macros.h" />
     <ClInclude Include="shapes_setup.h" />
     <ClInclude Include="triangle.h" />
@@ -191,8 +194,8 @@
     <ClInclude Include="stream_reader.h" />
     <ClInclude Include="stream_writer.h" />
     <ClInclude Include="strings.h" />
-    <ClInclude Include="text_stream_reader.h" />
-    <ClInclude Include="text_stream_writer.h" />
+    <ClInclude Include="stream_text_reader.h" />
+    <ClInclude Include="stream_text_writer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

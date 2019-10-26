@@ -3,6 +3,10 @@
 using namespace std;
 
 namespace fe {
+	FileStream::FileStream() : Stream(false, false){
+		_isOpen = false;
+	}
+
 	FileStream::FileStream(const FeString& path,
 		const FileStreamFlags flags,
 		bool canRead,
@@ -114,6 +118,7 @@ namespace fe {
 			throw StreamClosedError(this);
 
 		// TODO Perhaps this can be retrieved faster via std::filesystem?
+		// TODO or cache the size and update it whenever read/write/setSize are called.
 
 		// Use use whichever position we have access to.
 		size_t num_bytes = 0;
@@ -138,6 +143,7 @@ namespace fe {
 			throw StreamClosedError(this);
 
 		// TODO Perhaps this can be done faster via std::filesystem?
+		// TODO or cache the size and update it whenever read/write/setSize are called.
 
 		if (!_canWrite)
 			throw StreamWriteAccessError(this);

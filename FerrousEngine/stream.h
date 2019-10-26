@@ -38,6 +38,9 @@ namespace fe {
 		virtual void setSize(size_t size) = 0;
 		virtual size_t getSize() = 0;
 
+		inline size_t getReadBytesFromEnd() { return getSize() - getReadPos(); }
+		inline size_t getWriteBytesFromEnd() { return getSize() - getWritePos(); }
+
 		virtual std::istream& getReadStream() = 0;
 		virtual std::ostream& getWriteStream() = 0;
 
@@ -63,4 +66,5 @@ namespace fe {
 	DEFINE_STREAM_ERROR(StreamReadAccessError, "The stream does not provide read access.")
 	DEFINE_STREAM_ERROR(StreamWriteAccessError, "The stream does not provide write access.");
 	DEFINE_STREAM_ERROR(EndOfStreamError, "Cannot read beyond the end of the stream.");
+	DEFINE_STREAM_ERROR(StreamBufferCapacityError, "The stream buffer is too small.");
 }

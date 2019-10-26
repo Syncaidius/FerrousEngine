@@ -81,18 +81,6 @@
     <ClInclude Include="stream_writer.h">
       <Filter>Header Files\core\streams</Filter>
     </ClInclude>
-    <ClInclude Include="text_stream_reader.h">
-      <Filter>Header Files\core\streams</Filter>
-    </ClInclude>
-    <ClInclude Include="text_stream_writer.h">
-      <Filter>Header Files\core\streams</Filter>
-    </ClInclude>
-    <ClInclude Include="binary_stream_reader.h">
-      <Filter>Header Files\core\streams</Filter>
-    </ClInclude>
-    <ClInclude Include="binary_stream_writer.h">
-      <Filter>Header Files\core\streams</Filter>
-    </ClInclude>
     <ClInclude Include="stream.h">
       <Filter>Header Files\core\streams</Filter>
     </ClInclude>
@@ -165,6 +153,24 @@
     <ClInclude Include="iterator_forward_range.h">
       <Filter>Header Files\core\allocation</Filter>
     </ClInclude>
+    <ClInclude Include="logging_console.h">
+      <Filter>Header Files\core\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="logging_file.h">
+      <Filter>Header Files\core\logging</Filter>
+    </ClInclude>
+    <ClInclude Include="stream_binary_reader.h">
+      <Filter>Header Files\core\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="stream_binary_writer.h">
+      <Filter>Header Files\core\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="stream_text_reader.h">
+      <Filter>Header Files\core\streams</Filter>
+    </ClInclude>
+    <ClInclude Include="stream_text_writer.h">
+      <Filter>Header Files\core\streams</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -189,18 +195,6 @@
       <Filter>Source Files\core\streams</Filter>
     </ClCompile>
     <ClCompile Include="stream_writer.cpp">
-      <Filter>Source Files\core\streams</Filter>
-    </ClCompile>
-    <ClCompile Include="text_stream_reader.cpp">
-      <Filter>Source Files\core\streams</Filter>
-    </ClCompile>
-    <ClCompile Include="text_stream_writer.cpp">
-      <Filter>Source Files\core\streams</Filter>
-    </ClCompile>
-    <ClCompile Include="binary_stream_reader.cpp">
-      <Filter>Source Files\core\streams</Filter>
-    </ClCompile>
-    <ClCompile Include="binary_stream_writer.cpp">
       <Filter>Source Files\core\streams</Filter>
     </ClCompile>
     <ClCompile Include="allocation.cpp">
@@ -232,6 +226,21 @@
     </ClCompile>
     <ClCompile Include="allocation_stack.cpp">
       <Filter>Source Files\core\allocation</Filter>
+    </ClCompile>
+    <ClCompile Include="stream_text_writer.cpp">
+      <Filter>Source Files\core\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="stream_text_reader.cpp">
+      <Filter>Source Files\core\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="stream_binary_writer.cpp">
+      <Filter>Source Files\core\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="stream_binary_reader.cpp">
+      <Filter>Source Files\core\streams</Filter>
+    </ClCompile>
+    <ClCompile Include="logging_file.cpp">
+      <Filter>Source Files\core\logging</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -21,6 +21,8 @@ namespace fe {
 
 	class FileStream : public Stream {
 	public:
+		FileStream();
+
 		FileStream(const FeString& path,
 			const FileStreamFlags flags,
 			bool canRead,
@@ -51,7 +53,9 @@ namespace fe {
 		void writeBytes(const char* bytes, size_t num_bytes) override;
 
 		FileStream(const FileStream&) = delete;
-		void operator =(const FileStream&) = delete;
+		inline FileStream& operator =(FileStream&& other) {
+			return other;
+		}
 	private:
 		UtfEncoding _encoding;
 		const FeString _path;

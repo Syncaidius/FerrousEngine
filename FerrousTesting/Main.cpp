@@ -11,6 +11,9 @@
 #include "test_io.hpp"
 #include "test_engine.h"
 
+#include "logging_console.h"
+#include <logging_file.h>
+
 using namespace std;
 using namespace fe;
 using namespace fe::shapes;
@@ -36,9 +39,13 @@ void createAndRunTest(Logger& log) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
-	Logger log(1);
+	Logger log = Logger();
+
 	ConsoleLogOutput* consoleOutput = new ConsoleLogOutput();
 	log.addOutput(consoleOutput);
+
+	FileLogOutput* fileOutput = new FileLogOutput("test_log_file.txt"_fe);
+	log.addOutput(fileOutput);
 
 	createAndRunTest<TestMemory>(log);
 	createAndRunTest<TestStrings>(log);

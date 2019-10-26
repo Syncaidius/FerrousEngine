@@ -2,8 +2,8 @@
 #include "ferrous_test.hpp"
 #include "file.h"
 #include "stream_file.h"
-#include "text_stream_writer.h";
-#include "text_stream_reader.h";
+#include "stream_text_reader.h";
+#include "stream_text_writer.h";
 
 class TestIO : public FerrousTest {
 public:

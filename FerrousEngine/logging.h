@@ -16,26 +16,9 @@ namespace fe {
 		virtual void close() = 0;
 	};
 
-	class ConsoleLogOutput : public LogOutputBase {
-	public:
-		ConsoleLogOutput();
-		~ConsoleLogOutput();
-
-	protected:
-		friend class Logger;
-
-		void write(const FeString& msg, const Color& color) override;
-		void writeLine(const FeString& msg, const Color& color) override;
-		void clear() override;
-		void close() override;
-	private:
-		WORD getColorFlags(const Color& color);
-		void* _console_handle;
-	};
-
 	class Logger {
 	public:
-		Logger(uint16_t initial_slot_count = 1);
+		Logger();
 		~Logger();
 
 		void addOutput(LogOutputBase* output);
@@ -60,6 +43,5 @@ namespace fe {
 
 	private:
 		List<LogOutputBase*> _outputs;
-		uint16_t _output_slot_count;
 	};
 }

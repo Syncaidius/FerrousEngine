@@ -3,8 +3,7 @@
 #include <stdlib.h>
 
 namespace fe {
-	Logger::Logger(uint16_t initial_slot_count) {
-		_output_slot_count = initial_slot_count;
+	Logger::Logger() {
 		_outputs = List<LogOutputBase*>();
 	}
 
