@@ -110,7 +110,6 @@ namespace fe {
 
 		_isOpen = false;
 		_stream.close();
-		//_stream.~basic_fstream();
 	}
 
 	size_t FileStream::getSize() {

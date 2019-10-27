@@ -53,9 +53,10 @@ namespace fe {
 		void writeBytes(const char* bytes, size_t num_bytes) override;
 
 		FileStream(const FileStream&) = delete;
-		inline FileStream& operator =(FileStream&& other) {
+		FileStream(const FileStream&&) = delete;
+		/*inline FileStream& operator =(FileStream&& other) {
 			return other;
-		}
+		}*/
 	private:
 		UtfEncoding _encoding;
 		const FeString _path;

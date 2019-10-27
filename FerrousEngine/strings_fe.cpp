@@ -7,22 +7,22 @@ namespace fe {
 	const uint32_t FeString::INDEXOF_NONE = UINT32_MAX;
 	const FeString FeString::EMPTY = L""_fe;
 
-	FeString FeString::format(const wchar_t* str, FerrousAllocator* allocator, va_list args) {
+	FeString FeString::format(const DataType* str, FerrousAllocator* allocator, va_list args) {
 		static size_t buf_size = 80;
-		static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size); // Use main allocator for the format buffer.
+		static DataType* buf = Memory::get()->allocType<DataType>(buf_size); // Use main allocator for the format buffer.
 		int len_v = vswprintf(buf, buf_size, str, args);
 
 		/* Buffer too small? */
 		while (len_v < 0) {
 			buf_size *= 2;
-			Memory::get()->reallocType<wchar_t>(buf, buf_size);
+			Memory::get()->reallocType<DataType>(buf, buf_size);
 
 			// Try again. Should work this time.
 			len_v = vswprintf(buf, buf_size, str, args);
 		}
 
-		wchar_t* mem = allocator->allocType<wchar_t>(len_v + 1ULL);
-		memcpy(mem, buf, len_v * sizeof(wchar_t));
+		DataType* mem = allocator->allocType<DataType>(len_v + 1ULL);
+		memcpy(mem, buf, len_v * sizeof(DataType));
 		mem[len_v] = L'\0';
 		return FeString(mem, len_v, allocator, false);
 	}
@@ -31,7 +31,7 @@ namespace fe {
 		return format(str.getData(), allocator, args);
 	}
 
-	FeString FeString::format(const wchar_t* str, FerrousAllocator * allocator, ...) {
+	FeString FeString::format(const DataType* str, FerrousAllocator * allocator, ...) {
 		va_list args;
 		va_start(args, str);
 		FeString result = format(str, allocator, args);
@@ -59,9 +59,9 @@ namespace fe {
 		return format(str, Memory::get(), args);
 	}
 
-	FeString FeString::dateTime(const wchar_t* format, FerrousAllocator * allocator) {
+	FeString FeString::dateTime(const DataType* format, FerrousAllocator * allocator) {
 		static size_t buf_size = 80;
-		static wchar_t* buf = Memory::get()->allocType<wchar_t>(buf_size);
+		static DataType* buf = Memory::get()->allocType<DataType>(buf_size);
 
 		assert(format != nullptr);
 		time_t now = time(nullptr);
@@ -70,21 +70,21 @@ namespace fe {
 		size_t len = wcsftime(buf, buf_size, format, &tstruct);
 		if (len == 0) { // buffer was not big enough
 			buf_size *= 2;
-			Memory::get()->reallocType<wchar_t>(buf, buf_size);
+			Memory::get()->reallocType<DataType>(buf, buf_size);
 			return dateTime(format, allocator);
 		}
 
-		wchar_t* mem = allocator->allocType<wchar_t>(len + 1ULL);
-		memcpy(mem, buf, len * sizeof(wchar_t));
+		DataType* mem = allocator->allocType<DataType>(len + 1ULL);
+		memcpy(mem, buf, len * sizeof(DataType));
 		mem[len] = L'\0';
 		return FeString(mem, len, allocator);
 	}
 
 	FeString FeString::repeat(const FeString& str, uint32_t count, FerrousAllocator* allocator) {
 		uint32_t len = str._length * count;
-		wchar_t* mem = allocator->allocType<wchar_t>((size_t)len + 1U);
+		DataType* mem = allocator->allocType<DataType>((size_t)len + 1U);
 		for (int i = 0; i < count; i++) {
-			Memory::copyType<wchar_t>(&mem[i * str._length], str.getData(), str._length);
+			Memory::copyType<DataType>(&mem[i * str._length], str.getData(), str._length);
 		}
 
 		mem[len] = L'\0';
@@ -101,14 +101,14 @@ namespace fe {
 		_length = copy._length;
 
 		if (_isHeap)
-			_allocator->ref(const_cast<wchar_t*>(_data));
+			_allocator->ref(const_cast<DataType*>(_data));
 	}
 
 	FeString::FeString(const char* data, uint32_t len, FerrousAllocator * allocator) : _isHeap(true) {
 		_length = len;
 		_allocator = allocator;
 
-		wchar_t* mem = allocator->allocType<wchar_t>(len + 1ULL);
+		DataType* mem = allocator->allocType<DataType>(len + 1ULL);
 		for (size_t i = 0; i < _length; i++)
 			mem[i] = data[i];
 
@@ -116,7 +116,7 @@ namespace fe {
 		_data = mem;
 	}
 
-	FeString::FeString(const wchar_t* data, uint32_t len, FerrousAllocator * allocator, bool isHeap) : _isHeap(isHeap) {
+	FeString::FeString(const DataType* data, uint32_t len, FerrousAllocator * allocator, bool isHeap) : _isHeap(isHeap) {
 		_length = len;
 		_allocator = allocator;
 		_data = data;
@@ -128,7 +128,7 @@ namespace fe {
 		_length = len;
 		_allocator = allocator;
 
-		wchar_t* mem = allocator->allocType<wchar_t>(len + 1ULL);
+		DataType* mem = allocator->allocType<DataType>(len + 1ULL);
 		for (uint32_t i = 0; i < len; i++)
 			mem[i] = c_data[i] > WCHAR_MAX ? '?' : c_data[i];
 
@@ -141,7 +141,7 @@ namespace fe {
 		while (c_data[_length] != U'\0')
 			_length++;
 
-		wchar_t* mem = allocator->allocType<wchar_t>(_length + 1ULL);
+		DataType* mem = allocator->allocType<DataType>(_length + 1ULL);
 		for (uint32_t i = 0; i < _length; i++)
 			mem[i] = c_data[i] > WCHAR_MAX ? '?' : c_data[i];
 
@@ -152,9 +152,9 @@ namespace fe {
 
 	FeString::FeString(const char* data, FerrousAllocator * allocator) : FeString(data, strlen(data), allocator) {}
 
-	FeString::FeString(const wchar_t* data, uint32_t len) : FeString(data, len, Memory::get()) {}
-	FeString::FeString(const wchar_t* data, FerrousAllocator * allocator) : FeString(data, wcslen(data), allocator) {}
-	FeString::FeString(const wchar_t* data) : FeString(data, wcslen(data), Memory::get(), false) {}
+	FeString::FeString(const DataType* data, uint32_t len) : FeString(data, len, Memory::get()) {}
+	FeString::FeString(const DataType* data, FerrousAllocator * allocator) : FeString(data, wcslen(data), allocator) {}
+	FeString::FeString(const DataType* data) : FeString(data, wcslen(data), Memory::get(), false) {}
 
 	FeString::~FeString() {
 		if (_isHeap)
@@ -167,7 +167,7 @@ namespace fe {
 		if (_length == 0)
 			return FeString();
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
+		DataType* new_data = _allocator->allocType<DataType>(_length + 1ULL);
 		std::locale loc = *Localization::get()->getCurrentLocale();
 
 		for (uint32_t i = 0; i < _length; i++)
@@ -181,7 +181,7 @@ namespace fe {
 		if (_length == 0)
 			return FeString();
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
+		DataType* new_data = _allocator->allocType<DataType>(_length + 1ULL);
 		std::locale loc = *Localization::get()->getCurrentLocale();
 
 		for (uint32_t i = 0; i < _length; i++)
@@ -195,7 +195,7 @@ namespace fe {
 		if (_length == 0)
 			return EMPTY;
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
+		DataType* new_data = _allocator->allocType<DataType>(_length + 1ULL);
 		std::locale loc = *Localization::get()->getCurrentLocale();
 		bool capitalize = true;
 
@@ -223,7 +223,7 @@ namespace fe {
 		if (_length == 0)
 			return EMPTY;
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(_length + 1ULL);
+		DataType* new_data = _allocator->allocType<DataType>(_length + 1ULL);
 		std::locale loc = *Localization::get()->getCurrentLocale();
 		bool capitalize = true;
 
@@ -274,9 +274,9 @@ namespace fe {
 		if (new_len == 0)
 			return EMPTY;
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
-		const wchar_t* p_start = _data + start;
-		memcpy(new_data, p_start, new_len * sizeof(wchar_t));
+		DataType* new_data = _allocator->allocType<DataType>(new_len + 1ULL);
+		const DataType* p_start = _data + start;
+		memcpy(new_data, p_start, new_len * sizeof(DataType));
 
 		new_data[new_len] = L'\0';
 		return FeString(new_data, new_len, _allocator);
@@ -298,9 +298,9 @@ namespace fe {
 		if (new_len == 0)
 			return EMPTY;
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
-		const wchar_t* p_start = _data + start;
-		memcpy(new_data, p_start, new_len * sizeof(wchar_t));
+		DataType* new_data = _allocator->allocType<DataType>(new_len + 1ULL);
+		const DataType* p_start = _data + start;
+		memcpy(new_data, p_start, new_len * sizeof(DataType));
 
 		new_data[new_len] = L'\0';
 		return FeString(new_data, new_len, _allocator);
@@ -325,14 +325,14 @@ namespace fe {
 		if (new_len == 0)
 			return EMPTY;
 
-		wchar_t* new_data = _allocator->allocType<wchar_t>(new_len + 1ULL);
-		memcpy(new_data, _data, new_len * sizeof(wchar_t));
+		DataType* new_data = _allocator->allocType<DataType>(new_len + 1ULL);
+		memcpy(new_data, _data, new_len * sizeof(DataType));
 
 		new_data[new_len] = L'\0';
 		return FeString(new_data, new_len, _allocator);
 	}
 
-	uint32_t FeString::indexOf(const wchar_t c) {
+	uint32_t FeString::indexOf(const DataType c) {
 		for (uint32_t i = 0; i < _length; i++) {
 			if (_data[i] == c)
 				return i;
@@ -370,9 +370,9 @@ namespace fe {
 		assert(startIndex < _length);
 
 		uint32_t count = _length - startIndex;
-		wchar_t* mem = _allocator->allocType<wchar_t>(count + 1ULL);
-		const wchar_t* src_pos = _data + startIndex;
-		memcpy(mem, src_pos, count * sizeof(wchar_t));
+		DataType* mem = _allocator->allocType<DataType>(count + 1ULL);
+		const DataType* src_pos = _data + startIndex;
+		memcpy(mem, src_pos, count * sizeof(DataType));
 
 		mem[count] = L'\0';
 		return FeString(mem, count, _allocator);
@@ -381,17 +381,17 @@ namespace fe {
 	FeString FeString::substr(const uint32_t startIndex, const uint32_t count) {
 		assert((startIndex + count) < _length);
 
-		wchar_t* mem = _allocator->allocType<wchar_t>(count + 1ULL);
-		const wchar_t* src_pos = _data + startIndex;
-		Memory::copy(mem, src_pos, count * sizeof(wchar_t));
+		DataType* mem = _allocator->allocType<DataType>(count + 1ULL);
+		const DataType* src_pos = _data + startIndex;
+		Memory::copy(mem, src_pos, count * sizeof(DataType));
 
 		mem[count] = L'\0';
 		return FeString(mem, count, _allocator);
 	}
 
-	FeString FeString::replace(const wchar_t c, const wchar_t replacement) {
-		wchar_t* mem = _allocator->allocType<wchar_t>(_length + 1ULL);
-		Memory::copy(mem, _data, _length * sizeof(wchar_t));
+	FeString FeString::replace(const DataType c, const DataType replacement) {
+		DataType* mem = _allocator->allocType<DataType>(_length + 1ULL);
+		Memory::copy(mem, _data, _length * sizeof(DataType));
 
 		for (uint32_t i = 0; i < _length; i++) {
 			if (mem[i] == c)
@@ -427,7 +427,7 @@ namespace fe {
 		}
 
 		// Build new string
-		size_t replacement_bytes = replacement._length * sizeof(wchar_t);
+		size_t replacement_bytes = replacement._length * sizeof(DataType);
 		size_t count = indices.size();
 		size_t new_len = _length;
 
@@ -443,15 +443,15 @@ namespace fe {
 
 		uint32_t prev_replace_end = 0; /* Ending of previous replacement.*/
 
-		wchar_t* mem = _allocator->allocType<wchar_t>(new_len + 1ULL);
-		wchar_t* mem_pos = mem;
+		DataType* mem = _allocator->allocType<DataType>(new_len + 1ULL);
+		DataType* mem_pos = mem;
 
 		for (size_t i = 0; i < count; i++) {
 			/*	Was there non-replaced data between the current and previous replacement?
 				If so, copy it. */
 			if (indices[i] != prev_replace_end) {
 				uint32_t dif = indices[i] - prev_replace_end;
-				memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
+				memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(DataType));
 				mem_pos += dif;
 			}
 
@@ -464,14 +464,14 @@ namespace fe {
 		assert(prev_replace_end <= _length);
 		if (prev_replace_end < _length) {
 			uint32_t dif = _length - prev_replace_end;
-			memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(wchar_t));
+			memcpy(mem_pos, _data + prev_replace_end, dif * sizeof(DataType));
 		}
 
 		mem[new_len] = L'\0';
 		return FeString(mem, new_len, _allocator);
 	}
 
-	bool FeString::contains(const wchar_t c) {
+	bool FeString::contains(const DataType c) {
 		for (uint32_t i = 0; i < _length; i++) {
 			if (_data[i] == c)
 				return true;
@@ -484,7 +484,7 @@ namespace fe {
 		return indexOf(input) != INDEXOF_NONE;
 	}
 
-	bool FeString::endsWith(const wchar_t c) {
+	bool FeString::endsWith(const DataType c) {
 		return _length > 0 && _data[_length - 1] == c;
 	}
 
@@ -513,7 +513,7 @@ namespace fe {
 		return false;
 	}
 
-	bool FeString::startsWith(const wchar_t c) {
+	bool FeString::startsWith(const DataType c) {
 		return _length > 0 && _data[0] == c;
 	}
 
@@ -542,13 +542,13 @@ namespace fe {
 			_length = other._length;
 
 			if (this->_isHeap)
-				_allocator->deref(const_cast<wchar_t*>(_data));
+				_allocator->deref(const_cast<DataType*>(_data));
 
 			_data = other._data;
 			_allocator = other._allocator;
 
 			if (other._isHeap)
-				_allocator->ref(const_cast<wchar_t*>(_data));
+				_allocator->ref(const_cast<DataType*>(_data));
 		}
 		return *this;
 	}
@@ -557,9 +557,9 @@ namespace fe {
 	FeString operator +(const FeString & a, const FeString & b) {
 		uint32_t len = a._length + b._length;
 
-		wchar_t* mem = a._allocator->allocType<wchar_t>(len + 1ULL);
-		memcpy(mem, a._data, a._length * sizeof(wchar_t));
-		memcpy(&mem[a._length], b._data, b._length * sizeof(wchar_t));
+		FeString::DataType* mem = a._allocator->allocType<FeString::DataType>(len + 1ULL);
+		memcpy(mem, a._data, a._length * sizeof(FeString::DataType));
+		memcpy(&mem[a._length], b._data, b._length * sizeof(FeString::DataType));
 		mem[len] = '\0';
 		return FeString(mem, len, a._allocator);
 	}

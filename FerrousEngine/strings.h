@@ -24,45 +24,42 @@ namespace fe {
 
 	class FeString {
 	public:
+		/* The underlying type of FeString data. */
+		typedef wchar_t DataType;
+
 		/* The value returned by indexOf() if no instance was found. */
 		const static uint32_t INDEXOF_NONE;
+
+		/* An empty string. */
 		const static FeString EMPTY;
 
-		static FeString format(const wchar_t* str, FerrousAllocator* allocator, ...);
+		static FeString format(const DataType* str, FerrousAllocator* allocator, ...);
 		static FeString format(const FeString& str, FerrousAllocator* allocator, ...);
 		static FeString format(const FeString& str, ...);
 
-		static FeString format(const wchar_t* str, FerrousAllocator* allocator, va_list args);
+		static FeString format(const DataType* str, FerrousAllocator* allocator, va_list args);
 		static FeString format(const FeString& str, FerrousAllocator* allocator, va_list args);
 		static FeString format(const FeString& str, va_list args);
 
 		static FeString repeat(const FeString& str, uint32_t count, FerrousAllocator* allocator = Memory::get());
 
 		/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
-		static FeString dateTime(const wchar_t* format, FerrousAllocator* allocator);
-		inline static FeString dateTime(const wchar_t* format) {
-			return dateTime(format, Memory::get());
-		}
+		static FeString dateTime(const DataType* format, FerrousAllocator* allocator = Memory::get());
 
-		/* Returns a new FeString containing the current date and/or time. Uses wcsftime formatting rules. See: https://en.cppreference.com/w/cpp/chrono/c/wcsftime */
-		inline static FeString dateTime(const FeString& format, FerrousAllocator* allocator) {
+		inline static FeString dateTime(const FeString& format, FerrousAllocator* allocator = Memory::get()) {
 			return dateTime(format.getData(), allocator);
-		}
-
-		inline static FeString dataTime(const FeString& format) {
-			return dateTime(format.getData(), Memory::get());
 		}
 
 		FeString();
 		FeString(const char* data, uint32_t len, FerrousAllocator* allocator = Memory::get());
 		FeString(const char* data, FerrousAllocator* allocator = Memory::get());
 
-		FeString(const wchar_t* data, uint32_t len, FerrousAllocator* allocator, bool isHeap = true);
-		FeString(const wchar_t* data, uint32_t len);
-		FeString(const wchar_t* data, FerrousAllocator* allocator);
+		FeString(const DataType* data, uint32_t len, FerrousAllocator* allocator, bool isHeap = true);
+		FeString(const DataType* data, uint32_t len);
+		FeString(const DataType* data, FerrousAllocator* allocator);
 
 		/* Treats the provided wide-char data as non-heap data. This means it will not be dereferenced once the string is deconstructed.*/
-		FeString(const wchar_t* data);
+		FeString(const DataType* data);
 
 		FeString(const char32_t* data, uint32_t len, FerrousAllocator* allocator = Memory::get());
 		FeString(const char32_t* data, FerrousAllocator* allocator = Memory::get());
@@ -74,20 +71,20 @@ namespace fe {
 		FeString substr(const uint32_t startIndex);
 		FeString substr(const uint32_t startIndex, const uint32_t count);
 
-		FeString replace(const wchar_t c, const wchar_t replacement);
+		FeString replace(const DataType c, const DataType replacement);
 		FeString replace(const FeString str, const FeString replacement);
 
-		bool startsWith(const wchar_t c);
+		bool startsWith(const DataType c);
 		bool startsWith(const FeString* input);
 
-		bool endsWith(const wchar_t input);
+		bool endsWith(const DataType input);
 		bool endsWith(const FeString* input);
 
-		bool contains(const wchar_t c);
+		bool contains(const DataType c);
 		bool contains(const FeString* input);
 
 		/* Returns the index of the first instance of c. Returns SIZE_MAX if none were found.*/
-		uint32_t indexOf(const wchar_t c);
+		uint32_t indexOf(const DataType c);
 
 		/* Returns the index of the first instance of input. Returns SIZE_MAX if none were found.*/
 		uint32_t indexOf(const FeString* input);
@@ -119,7 +116,7 @@ namespace fe {
 		const inline uint32_t len() const { return _length; }
 
 		/*Returns a pointer to the raw underlying character data.*/
-		const inline wchar_t* getData() const { return _data; }
+		const inline DataType* getData() const { return _data; }
 
 		/* Copy assignment operator*/
 		FeString& operator=(const FeString& other);
@@ -141,7 +138,7 @@ namespace fe {
 		friend FeString operator "" _fe(const wchar_t* c_data, size_t len);
 		friend FeString operator "" _fe(const char32_t* a, size_t len);
 
-		const wchar_t* _data;			/* The raw, unencoded character data. */
+		const DataType* _data;			/* The raw, unencoded character data. */
 		FerrousAllocator* _allocator;	/* The allocator from which _data was allocated. */
 		uint32_t _length;			/* Number of characters held in the string, excluding the null-terminator. */
 		const bool _isHeap;			/* String was created from a literal and therefore should never dealloc its data. */

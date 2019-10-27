@@ -7,11 +7,22 @@ namespace fe {
 
 	TextStreamWriter::TextStreamWriter(Stream* stream, FerrousAllocator* allocator) :
 		StreamWriter(stream) {
+		if (!stream->isOpen())
+			throw StreamClosedError(stream);
+
 		_allocator = allocator;
-		new (&_newLine) UtfString("\n"_fe, stream->getEncoding(), allocator);
+		_newLine = UtfString("\n"_fe, stream->getEncoding(), allocator);
 	}
 
 	TextStreamWriter::~TextStreamWriter() {}
+
+	void TextStreamWriter::write(const FeString& val) {
+		throw "Not implemented";
+	}
+
+	void TextStreamWriter::write(const UtfString& val) {
+		throw "Not implemented";
+	}
 
 	void TextStreamWriter::writeLine(const FeString& val) {
 		if (!_stream->isOpen())

@@ -4,7 +4,7 @@
 
 namespace fe {
 	FileLogOutput::FileLogOutput(const FeString& filename) {
-		_stream = FileStream(filename, FileStreamFlags::Create, false, true);
+		new (&_stream) FileStream(filename, FileStreamFlags::Create, false, true);
 		_writer = TextStreamWriter(&_stream, Memory::get());
 	}
 
