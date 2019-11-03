@@ -41,12 +41,14 @@ namespace fe {
 
 		char* c = _buffer;
 		size_t numBytes = 0;
+
 		_stream->readBytes(c, 1);
 
 		size_t end = _stream->getSize();
 
-		while (*c != '\n') {
-			if (_stream->getReadPos() > end)
+		while (*c != '\n' && *c != EOF) {
+			size_t readPos = _stream->getReadPos();
+			if (readPos > end)
 				throw EndOfStreamError(_stream);
 
 			c++;
@@ -92,6 +94,8 @@ namespace fe {
 
 		size_t curPos = _stream->getReadPos();
 		size_t bytesToRead = _stream->getSize() - curPos;
+		ensureBufferCapacity(bytesToRead);
+
 		_stream->readBytes(_buffer, bytesToRead);
 		*dest = UtfString::decode(_buffer, _stream->getEncoding(), bytesToRead, _allocator);
 	}

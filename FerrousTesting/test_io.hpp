@@ -49,5 +49,22 @@ protected:
 
 		log.writeLine("File closed"_fe, Color::red);
 		log.writeLineF("String read from file: %s"_fe, Color::darkRed, stringFromFile.getData());
+
+		if (File::exists("UTF-8-demo.txt")) {
+			FileStream utf8File = FileStream("UTF-8-demo.txt", FileStreamFlags::Binary, true, false);
+			TextStreamReader utf8Reader = TextStreamReader(&utf8File, Memory::get());
+
+			size_t utf8FileSize = utf8File.getSize();
+			while (utf8File.getReadPos() < utf8FileSize) {
+				FeString line;
+				utf8Reader.readLine(&line);
+				log.writeLine(line);
+			}
+
+			utf8File.close();
+		}
+		else {
+			log.writeLine("UTF-8 test file is missing.");
+		}
 	}
 };

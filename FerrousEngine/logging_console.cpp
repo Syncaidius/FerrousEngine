@@ -31,7 +31,7 @@ namespace fe {
 	}
 
 	ConsoleLogOutput::~ConsoleLogOutput() {
-		FreeConsole();
+		close();
 	}
 
 	WORD ConsoleLogOutput::getColorFlags(const Color& color) {
@@ -109,6 +109,6 @@ namespace fe {
 	}
 
 	void ConsoleLogOutput::close() {
-
+		FreeConsole();
 	}
 }

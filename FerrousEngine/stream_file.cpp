@@ -37,9 +37,7 @@ namespace fe {
 				mode |= ios::trunc;
 		}
 
-		if ((flags & FileStreamFlags::Binary) == FileStreamFlags::Binary)
-			mode |= ios::binary;
-
+		mode |= ios::binary;
 		_stream = fstream(path.getData(), mode);
 
 		// Do we need to write a UTF byte order mark (BOM)?
@@ -240,7 +238,10 @@ namespace fe {
 		if (!_canRead)
 			throw StreamWriteAccessError(this);
 
-		_stream.read(dest, num_bytes);
+		if (!_stream.read(dest, num_bytes)) {
+			// TODO properly handle stream error.
+			throw "Stream error";
+		}
 	}
 
 	void FileStream::writeBytes(const char* data, size_t num_bytes) {

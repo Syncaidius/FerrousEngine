@@ -9,7 +9,7 @@ namespace fe {
 	}
 
 	FileLogOutput::~FileLogOutput() {
-		FreeConsole();
+		_stream.close();
 	}
 
 

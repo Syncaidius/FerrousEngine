@@ -39,13 +39,12 @@ void createAndRunTest(Logger& log) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
+	ConsoleLogOutput consoleOutput = ConsoleLogOutput();
+	FileLogOutput fileOutput = FileLogOutput("test_log_file.txt"_fe);
 	Logger log = Logger();
 
-	ConsoleLogOutput* consoleOutput = new ConsoleLogOutput();
-	log.addOutput(consoleOutput);
-
-	FileLogOutput* fileOutput = new FileLogOutput("test_log_file.txt"_fe);
-	log.addOutput(fileOutput);
+	log.addOutput(&consoleOutput);
+	log.addOutput(&fileOutput);
 
 	createAndRunTest<TestMemory>(log);
 	createAndRunTest<TestStrings>(log);
