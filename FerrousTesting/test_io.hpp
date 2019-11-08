@@ -51,7 +51,7 @@ protected:
 		log.writeLineF("String read from file: %s"_fe, Color::darkRed, stringFromFile.getData());
 
 		if (File::exists("UTF-8-demo.txt")) {
-			FileStream utf8File = FileStream("UTF-8-demo.txt", FileStreamFlags::Binary, true, false);
+			FileStream utf8File = FileStream("UTF-8-demo.txt", FileStreamFlags::None, true, false);
 			TextStreamReader utf8Reader = TextStreamReader(&utf8File, Memory::get());
 
 			size_t utf8FileSize = utf8File.getSize();

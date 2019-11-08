@@ -24,7 +24,7 @@ namespace fe {
 		DataType* mem = allocator->allocType<DataType>(len_v + 1ULL);
 		memcpy(mem, buf, len_v * sizeof(DataType));
 		mem[len_v] = L'\0';
-		return FeString(mem, len_v, allocator, false);
+		return FeString(mem, len_v, allocator, true);
 	}
 
 	FeString FeString::format(const FeString & str, FerrousAllocator * allocator, va_list args) {

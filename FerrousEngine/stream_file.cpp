@@ -43,11 +43,9 @@ namespace fe {
 		// Do we need to write a UTF byte order mark (BOM)?
 		if (_canWrite) {
 			if ((flags & FileStreamFlags::Append) != FileStreamFlags::Append) {
-				if ((flags & FileStreamFlags::Binary) != FileStreamFlags::Binary) {
-					const char* bom = UtfString::UTF_BOM[(uint8_t)encoding];
-					if (bom[0] > 0)
-						_stream.write(bom + 1, bom[0]);
-				}
+				const char* bom = UtfString::UTF_BOM[(uint8_t)encoding];
+				if (bom[0] > 0)
+					_stream.write(bom + 1, bom[0]);
 			}
 		}
 
