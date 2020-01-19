@@ -40,13 +40,13 @@ namespace fe {
 			uint32_t updates_needed = _time->tick();
 
 			for (int i = 0; i < updates_needed; i++) {
-				_log->writeLineF("Frame %d -- time: %f ms -- delta: %f"_fe, _time->getFrameId(), _time->getFrameTime(), _time->getDelta());
+				_log->writeLine(FeString::format("Frame %d -- time: %f ms -- delta: %f"_fe, _time->getFrameId(), _time->getFrameTime(), _time->getDelta()));
 				onUpdate(_time);
 			}
 		}
 
 		onStopping();
-		_log->writeLineF("Finished shut down"_fe);
+		_log->writeLine("Finished shut down"_fe);
 		_stopping = false;
 	}
 

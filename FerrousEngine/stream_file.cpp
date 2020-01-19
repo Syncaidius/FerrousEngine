@@ -37,15 +37,23 @@ namespace fe {
 				mode |= ios::trunc;
 		}
 
-		mode |= ios::binary;
-		_stream = fstream(path.getData(), mode);
+		// Always open streams in binary mode so new-line characters are not automatically translated.
+		mode |= ios::binary; 
+
+		// TODO improve this.
+		char* c8Path = Memory::get()->allocType<char>(path.len() + 1U);
+		path.toChar8(c8Path);
+		_stream = fstream(c8Path, mode);
+		Memory::get()->dealloc(c8Path);
 
 		// Do we need to write a UTF byte order mark (BOM)?
 		if (_canWrite) {
 			if ((flags & FileStreamFlags::Append) != FileStreamFlags::Append) {
-				const char* bom = UtfString::UTF_BOM[(uint8_t)encoding];
-				if (bom[0] > 0)
-					_stream.write(bom + 1, bom[0]);
+				if ((flags & FileStreamFlags::Binary) != FileStreamFlags::Binary) {
+					const char* bom = UtfString::UTF_BOM[(uint8_t)encoding];
+					if (bom[0] > 0)
+						_stream.write(bom + 1, bom[0]);
+				}
 			}
 		}
 

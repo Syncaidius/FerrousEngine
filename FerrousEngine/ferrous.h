@@ -5,7 +5,7 @@
 #include "logging.h"
 
 namespace fe {
-	/* A base class on which your build an application, to interact with Ferrous Engine.*/
+	/* A base class on which to build an application, to interact with Ferrous Engine.*/
 	class FerrousInstance {
 	public:
 		FerrousInstance();

@@ -137,7 +137,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ferrous_test.hpp" />
+    <ClInclude Include="test.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="test_engine.h" />
     <ClInclude Include="test_io.hpp" />
@@ -151,7 +151,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="assets\UTF-8-demo.txt">
+    <Content Include="UTF-8-demo.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -159,6 +159,7 @@
     <CopyFileToFolders Include="UTF-8-demo.txt">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</DeploymentContent>
+      <DeploymentContent>true</DeploymentContent>
     </CopyFileToFolders>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

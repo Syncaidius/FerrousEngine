@@ -128,7 +128,7 @@ namespace fe {
 		_data += max_bytes - 1;
 
 		char* r_end = _data;
-		const FeString::DataType* src = string.getData();
+		const char32_t* src = string.getData();
 		uint32_t pos = string.len() + 1; // Start with the null terminator
 
 		while (pos > 0) {
@@ -139,7 +139,7 @@ namespace fe {
 			}
 			else {
 				uint8_t char_bytes = 1;
-				FeString::DataType c = src[pos];
+				char32_t c = src[pos];
 				while (c > UTF8_LEAD_CAPACITY[char_bytes]) {
 					*_data = UTF8_TRAIL_MASK | (c & 63); // first 6 bits = c & (32 | 16 | 8 | 4 | 2 | 1)
 					c = c >> 6;
@@ -160,12 +160,12 @@ namespace fe {
 	void UtfString::encode_utf16_le(const FeString& string, size_t max_bytes) {
 		char16_t* utfData = reinterpret_cast<char16_t*>(_data);
 
-		const FeString::DataType* src = string.getData();
+		const char32_t* src = string.getData();
 		uint32_t pos = 0;
 
 		// TODO separate each encoding into its own function. UTF-16 does not need to work backwards.
 		while (pos < _length) {
-			FeString::DataType c = src[pos];
+			char32_t c = src[pos];
 			if ((c >= 0x0000 && c <= 0xD7FF) ||		// Reserved codepoint?
 				(c >= 0xE000 && c <= 0xFFFF)) {		// Surrogate pair?
 				*utfData = c;
@@ -196,7 +196,7 @@ namespace fe {
 	}
 
 	FeString UtfString::decode(const char* data, uint32_t numChars, UtfEncoding data_encoding, FerrousAllocator * allocator) {
-		FeString::DataType* mem = allocator->allocType<FeString::DataType>((size_t)numChars + 1U); // 1 extra for the null-terminator.
+		char32_t* mem = allocator->allocType<char32_t>((size_t)numChars + 1U); // 1 extra for the null-terminator.
 		size_t pos = 0;
 		const char* temp = data;
 

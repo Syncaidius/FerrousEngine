@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "ferrous_test.hpp"
+#include "test.hpp"
 #include "game_time.h"
 
 class TestEngine : public FerrousTest {
@@ -15,7 +15,7 @@ protected:
 			uint32_t updates_needed = timer->tick();
 
 			for (int i = 0; i < updates_needed; i++) {
-				log.writeLineF("Frame %d -- time: %f ms -- delta: %f"_fe, timer->getFrameId(), timer->getFrameTime(), timer->getDelta());
+				log.writeLine(FeString::format("Frame %d -- time: %f ms -- delta: %f"_fe, timer->getFrameId(), timer->getFrameTime(), timer->getDelta()));
 			}
 		}
 	}

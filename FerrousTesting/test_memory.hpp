@@ -1,5 +1,5 @@
 #pragma once
-#include "ferrous_test.hpp"
+#include "test.hpp"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ protected:
 	const static int NUM_ALLOCATIONS = 500;
 
 	void onRun(Logger& log) override {
-		log.writeLineF("Created allocator with page size: %d bytes", Memory::PAGE_SIZE);
+		log.writeLine(FeString::format( "Created allocator with page size: %d bytes", Memory::PAGE_SIZE));
 
 		Memory::get()->outputDebug();
 		cout << endl;
@@ -44,7 +44,7 @@ protected:
 				cout << "Keeping block at " << reinterpret_cast<uintptr_t>(markers[i]) << endl;
 			}
 		}
-		log.writeLineF("Randomly deallocated %d blocks"_fe, rngDeallocations);
+		log.writeLine(FeString::format("Randomly deallocated %d blocks"_fe, rngDeallocations));
 
 		//// Output a map of allocator memory.
 		log.writeLine(L" "_fe); // TODO empty line overload.

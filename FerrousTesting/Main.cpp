@@ -4,7 +4,7 @@
 #include <map>
 #include <Windows.h>
 
-#include "ferrous_test.hpp"
+#include "test.hpp"
 #include "test_memory.hpp"
 #include "test_strings.hpp"
 #include "test_shapes.hpp"
@@ -39,6 +39,7 @@ void createAndRunTest(Logger& log) {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
+	Localization::initialize();
 	ConsoleLogOutput consoleOutput = ConsoleLogOutput();
 	FileLogOutput fileOutput = FileLogOutput("test_log_file.txt"_fe);
 	Logger log = Logger();
@@ -48,8 +49,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 	createAndRunTest<TestMemory>(log);
 	createAndRunTest<TestStrings>(log);
-	createAndRunTest<TestShapes>(log);
-	createAndRunTest<TestIO>(log);
+	//createAndRunTest<TestShapes>(log);
+	//createAndRunTest<TestIO>(log);
 
 	//createAndRunTest<TestEngine>(log);
 

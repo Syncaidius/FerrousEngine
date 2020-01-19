@@ -12,6 +12,10 @@ namespace fe {
 
 		/* Once the file is opened, move to the end of the file to write new data.*/
 		Append = 2,
+
+		/*	Open the file in binary mode. Default is text mode. 
+			Text mode will write a UTF byte-order-mark (BOM) at the start of new files, if writing is allowed.*/
+		Binary = 4,
 	};
 
 	GEN_ENUM_CLASS_OPERATORS(FileStreamFlags);

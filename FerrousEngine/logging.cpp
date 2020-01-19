@@ -27,40 +27,8 @@ namespace fe {
 	}
 
 	void Logger::writeLine(const FeString & msg, const Color & color) {
-		FeString result = "["_fe + FeString::dateTime(L"%X") + "] "_fe + msg; // TODO do we need a proper FeString-builder/stream for situations like this?
+		FeString result = "["_fe + FeString::dateTime(U"%X") + "] "_fe + msg; // TODO do we need a proper FeString-builder/stream for situations like this?
 		for (LogOutputBase* l : _outputs)
 			l->writeLine(result, color);
-	}
-
-	void Logger::writeF(const FeString & str, const Color & color, ...) {
-		va_list args;
-		va_start(args, color);
-		FeString result = FeString::format(str, args);
-		va_end(args);
-		write(result, color);
-	}
-
-	void Logger::writeF(const FeString & str, ...) {
-		va_list args;
-		va_start(args, str);
-		FeString result = FeString::format(str, args);
-		va_end(args);
-		write(result, Color::white);
-	}
-
-	void Logger::writeLineF(const FeString & str, const Color & color, ...) {
-		va_list args;
-		va_start(args, color);
-		FeString result = FeString::format(str, args);
-		va_end(args);
-		writeLine(result, color);
-	}
-
-	void Logger::writeLineF(const FeString & str, ...) {
-		va_list args;
-		va_start(args, str);
-		FeString result = FeString::format(str, args);
-		va_end(args);
-		writeLine(result, Color::white);
 	}
 }

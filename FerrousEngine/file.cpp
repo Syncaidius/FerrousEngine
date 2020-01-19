@@ -7,20 +7,42 @@ namespace fs = filesystem;
 
 namespace fe {
 #pragma region Static
-	bool File::exists(const wchar_t* path) {
-		return fs::exists(path);
+	bool File::exists(const FeString& path) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
+		bool result = fs::exists(p8);
+
+		allocator->dealloc(p8);
+		return result;
 	}
 
-	bool File::isDirectory(const wchar_t* path) {
-		return fs::is_directory(path);
+	bool File::isDirectory(const FeString& path) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
+		bool result = fs::is_directory(p8);
+
+		allocator->dealloc(p8);
+		return result;
+
 	}
 
-	bool File::isFile(const wchar_t* path) {
-		return !fs::is_directory(path);
+	bool File::isFile(const FeString& path) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
+		bool result = !fs::is_directory(p8); // return true;
+
+		allocator->dealloc(p8);
+		return result;
 	}
 
-	void File::deleteFile(const wchar_t* path) {
-		auto p = fs::path(path);
+	void File::deleteFile(const FeString& path) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
+		auto p = fs::path(p8);
 
 		if (!fs::exists(p))
 			throw FileNotFoundError(path);
@@ -30,10 +52,15 @@ namespace fe {
 
 		if (!fs::remove(p))
 			throw FileNotFoundError(path);
+
+		allocator->dealloc(p8);
 	}
 
-	void File::deleteDirectory(const wchar_t* path, bool recursive) {
-		auto p = fs::path(path);
+	void File::deleteDirectory(const FeString& path, bool recursive) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
+		auto p = fs::path(p8);
 
 		if (!fs::exists(p))
 			throw DirectoryNotFoundError(path);
@@ -54,12 +81,18 @@ namespace fe {
 		}
 	}
 
-	void File::create(const wchar_t* path) {
-		if (fs::exists(path))
-			throw FileAlreadyExistsError(path);
+	void File::create(const FeString& path) {
+		FerrousAllocator* allocator = path.getAllocator();
+		char* p8 = allocator->allocType<char>(path.len() + 1ULL);
+		path.toChar8(p8);
 
-		fstream stream = fstream(path);
+		if (fs::exists(p8))
+			throw FileAlreadyExistsError(path.getData());
+
+		fstream stream = fstream(p8);
 		stream.close();
+
+		allocator->dealloc(p8);
 	}
 
 #pragma endregion

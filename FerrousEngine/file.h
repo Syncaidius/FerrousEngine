@@ -5,12 +5,12 @@
 namespace fe {
 #define DEFINE_FILE_ERROR(ClassName, Message) \
 	class ClassName : public std::exception { \
-		const wchar_t* _path; \
+		const char32_t* _path; \
 		public: \
-		inline ClassName(const wchar_t* path, const char* msg = Message) : exception(msg) { \
-			_path = path; \
+		inline ClassName(const FeString& path, const char* msg = Message) : exception(msg) { \
+			_path = path.getData(); \
 		} \
-		inline const wchar_t* getFile() const throw() { return _path; } \
+		inline const char32_t* getFile() const throw() { return _path; } \
 	};
 
 	DEFINE_FILE_ERROR(FileAlreadyExistsError, "File already exists.");
@@ -27,46 +27,25 @@ namespace fe {
 
 
 	public:
-		static bool exists(const wchar_t* path);
-		inline static bool exists(const FeString& path) {
-			return exists(path.getData());
-		}
+		static bool exists(const FeString& path);
 
-		static bool isDirectory(const wchar_t* path);
-		inline static bool isDirectory(const FeString& path) {
-			return isDirectory(path.getData());
-		}
+		static bool isDirectory(const FeString& path);
 
-		static bool isFile(const wchar_t* path);
-
-		inline static bool isFile(const FeString* path) {
-			return isFile(path->getData());
-		}
+		static bool isFile(const FeString& path);
 
 		static FeString getWorkingDirectory() {
 			return FeString(_info->working_dir.c_str(), Memory::get()); // TODO cache this as an FeString
 		}
 
 		/* Deletes a file if it exists.*/
-		static void deleteFile(const wchar_t* path);
-		inline static void deleteFile(const FeString* path) {
-			deleteFile(path->getData());
-		}
+		static void deleteFile(const FeString& path);
 
 		/* Deletes a directory. If recursive is false, the folder must be empty before it can be deleted.*/
-		static void deleteDirectory(const wchar_t* path, bool recursive);
-		inline static void deleteDirectory(const FeString* path, bool recursive) {
-			deleteDirectory(path->getData(), recursive);
-		}
+		static void deleteDirectory(const FeString& path, bool recursive);
 
-		static void create(const wchar_t* path);
-		inline static void create(const FeString& path) {
-			return create(path.getData());
-		}
+		static void create(const FeString& path);
 
 	private:
-
-
 		struct GlobalInfo {
 			GlobalInfo();
 			std::filesystem::path working_dir;

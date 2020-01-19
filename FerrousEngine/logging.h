@@ -21,25 +21,13 @@ namespace fe {
 		Logger();
 		~Logger();
 
+		void clear();
+
 		void addOutput(LogOutputBase* output);
 
 		void writeLine(const FeString& msg, const Color& color = Color::white);
 
 		void write(const FeString& msg, const Color& color = Color::white);
-
-		/* A formattable version of write() */
-		void writeF(const FeString& str, const Color& color, ...);
-
-		/* A formattable version of writeLine()*/
-		void writeLineF(const FeString& str, const Color& color, ...);
-
-		/* A formattable version of write() */
-		void writeF(const FeString& str, ...);
-
-		/* A formattable version of writeLine()*/
-		void writeLineF(const FeString& str, ...);
-
-		void clear();
 
 	private:
 		List<LogOutputBase*> _outputs;

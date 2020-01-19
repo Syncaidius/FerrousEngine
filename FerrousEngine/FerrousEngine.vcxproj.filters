@@ -61,6 +61,12 @@
     <Filter Include="Header Files\collections">
       <UniqueIdentifier>{54d33a38-1c7e-4f1b-a729-be1fce4abb2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\core\localization">
+      <UniqueIdentifier>{c0c74ca1-338b-4238-9f85-cf4f1c860589}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\localization">
+      <UniqueIdentifier>{4fbb1d40-085c-4b06-b171-638c4b4b6ce8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -92,9 +98,6 @@
     </ClInclude>
     <ClInclude Include="game_time.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="localization.h">
-      <Filter>Header Files\core</Filter>
     </ClInclude>
     <ClInclude Include="logging.h">
       <Filter>Header Files\core\logging</Filter>
@@ -171,6 +174,18 @@
     <ClInclude Include="stream_text_writer.h">
       <Filter>Header Files\core\streams</Filter>
     </ClInclude>
+    <ClInclude Include="localization.h">
+      <Filter>Header Files\core\localization</Filter>
+    </ClInclude>
+    <ClInclude Include="culture.h">
+      <Filter>Header Files\core\localization</Filter>
+    </ClInclude>
+    <ClInclude Include="dictionary.h">
+      <Filter>Header Files\collections</Filter>
+    </ClInclude>
+    <ClInclude Include="key_value_pair.h">
+      <Filter>Header Files\collections</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp">
@@ -212,9 +227,6 @@
     <ClCompile Include="logging_console.cpp">
       <Filter>Source Files\core\logging</Filter>
     </ClCompile>
-    <ClCompile Include="localization.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="file.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
@@ -241,6 +253,12 @@
     </ClCompile>
     <ClCompile Include="logging_file.cpp">
       <Filter>Source Files\core\logging</Filter>
+    </ClCompile>
+    <ClCompile Include="localization.cpp">
+      <Filter>Source Files\core\localization</Filter>
+    </ClCompile>
+    <ClCompile Include="culture.cpp">
+      <Filter>Source Files\core\localization</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

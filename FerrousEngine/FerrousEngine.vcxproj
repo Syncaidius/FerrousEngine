@@ -139,6 +139,7 @@
     <ClCompile Include="allocation.cpp" />
     <ClCompile Include="allocation_memory.cpp" />
     <ClCompile Include="allocation_stack.cpp" />
+    <ClCompile Include="culture.cpp" />
     <ClCompile Include="logging_file.cpp" />
     <ClCompile Include="stream_binary_reader.cpp" />
     <ClCompile Include="stream_binary_writer.cpp" />
@@ -162,6 +163,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="allocation.h" />
+    <ClInclude Include="culture.h" />
+    <ClInclude Include="dictionary.h" />
+    <ClInclude Include="key_value_pair.h" />
     <ClInclude Include="stream_binary_reader.h" />
     <ClInclude Include="stream_binary_writer.h" />
     <ClInclude Include="circle.h" />
